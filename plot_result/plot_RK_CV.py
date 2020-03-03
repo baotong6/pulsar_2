@@ -15,6 +15,7 @@ import read_csv as data
 import spline
 
 path_fits='/Users/baotong/Desktop/period_LW/'
+path_fig='/Users/baotong/Desktop/aas/V63/figure/CV'
 RK=fits.open(path_fits+'RK14.fit')
 orb=RK[1].data['Orb_Per']
 type1=RK[1].data['Type1']
@@ -28,35 +29,43 @@ spin=RK[1].data['_3___Per']
 
 def plot_P_N():
     orb_DN=orb[np.where(type1=='DN')]
-    orb_IP=orb[np.union1d(np.where(type2=='IP'),np.where(type3=='IP'))]
+    orb_Polar=orb[np.where(type2=='AM')]
+    orb_IP=orb[np.union1d(np.where((type2=='IP')|(type2=='DQ')),np.where((type2=='IP')|(type2=='DQ')))]
+    spin_IP=spin[np.union1d(np.where((type2=='IP')|(type2=='DQ')),np.where((type2=='IP')|(type2=='DQ')))]
+    spin_IP/=3600.
+    # print(spin_IP)
     orb_LW=data.P_LW/3600.
     bins=np.logspace(np.log10(0.5), np.log10(100), 51)
-    bins_2=np.logspace(np.log10(0.5), np.log10(15), 21)
+    bins_2=np.logspace(np.log10(0.2), np.log10(14), 41)
     LW_plt=plt.hist(orb_LW,bins=bins_2,histtype = 'step')
     plt.close()
 
-    plt.figure(1,(10,7))
+    plt.figure(1,(12,8))
     P_min = 4944.0 / 3600.
     P_gap = [7740.0 / 3600., 11448.0 / 3600.]
 
-    plt.step(LW_plt[1],np.append(LW_plt[0],0),linestyle='-',lw=3,where='post')
+    plt.step(LW_plt[1],np.append(LW_plt[0],0),linestyle='-',lw=4,where='post')
     plt.loglog()
 
-    plt.hist(orb,bins=bins,histtype = 'step',color='black')
-    plt.hist(orb_DN,bins=bins,histtype = 'step',color='red')
-    plt.hist(orb_IP,bins=bins,histtype = 'step',color='green')
+    # plt.hist(orb,bins=bins,histtype = 'step',color='black')
+    plt.hist(orb_Polar,bins=bins,histtype='step',lw=2,color='blue')
+    plt.hist(orb_DN,bins=bins,histtype = 'step',lw=2,color='red')
+    plt.hist(orb_IP,bins=bins,histtype = 'step',lw=1,color='green')
+    plt.hist(spin_IP, bins = bins, histtype = 'step',lw=1, color = 'purple')
 
-    plt.legend(['LW','CV','DN','IP'])
 
-    plt.plot([P_min, P_min], [0, 100], '--')
+    plt.legend(['LW','Polar','DN','IP','spin_IP'])
+    print(np.max(spin_IP),np.min(spin_IP))
+
+    plt.plot([P_min, P_min], [0, 180], '--')
     plt.plot([P_gap[0], P_gap[0]], [0, 200], '-',lw=2.,color='yellow')
     plt.plot([P_gap[1], P_gap[1]], [0, 200], '-',lw=2.,color='yellow')
     plt.text(P_gap[0]-0.15, 220, 'period gap')
-    plt.text(P_min - 0.41, 100, 'period minum')
+    plt.text(P_min - 0.41, 185, 'period minum')
 
     plt.xlabel('period (hours)')
     plt.ylabel('number of sources')
-    plt.savefig(path_fits+'N_P.eps')
+    plt.savefig(path_fig+'N_P.eps')
     plt.show()
 
 def plot_P_M():
@@ -65,7 +74,7 @@ def plot_P_M():
     # M1TOM2_DN=M1_M2[np.intersect1d(np.where(type1=='DN'),np.where(M1_M2!=0))]
     M1_DN=M1[np.intersect1d(np.where(type1=='DN'),np.where(M1!=0))]
 
-    orb_IP_spin_M1=orb[np.intersect1d(np.union1d(np.where(type2=='IP'),np.where(type3=='IP')),np.where(M1!=0),np.where(spin!=0))]
+    orb_IP_spin_M1=orb[np.intersect1d(np.union1d(np.where((type2=='IP')|(type2=='DQ')),np.where((type2=='IP')|(type2=='DQ'))),np.where(M1!=0),np.where(spin!=0))]
     spin_IP_M1=spin[np.intersect1d(np.union1d(np.where(type2=='IP'),np.where(type3=='IP')),np.where(M1!=0),np.where(spin!=0))]
     M1_spin_IP=M1[np.intersect1d(np.union1d(np.where(type2=='IP'),np.where(type3=='IP')),np.where(M1!=0),np.where(spin!=0))]
     plt.scatter(spin_IP_M1/3600.,orb_IP_spin_M1)
@@ -88,4 +97,4 @@ def plot_GL():
 
     plt.show()
 
-plot_GL()
+plot_P_N()

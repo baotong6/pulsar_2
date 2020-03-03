@@ -22,16 +22,16 @@ T_LW=1016606.18
 #epoch_file=path+'txt_2_8k/'+'SgrA_I_epoch.txt'
 epoch_file='LW_epoch.txt'
 dataname='simulation.txt'
-p_test=55558.
+p_test=25258.
 bin=30
 shift=0.0
 net_percent=0.6
 src_bkg=1-net_percent
 
-amp=0.5
+amp=0.9
 #time=series.get_time_series(54268974.41,0.000617*10,54268974.41+1e6,period=5540.,amp=0.9,model='eclipse')
-#time= series.get_epoch_time_series(cts_rate =cts_rate_temp, period = period_temp, amp = amp, model = 'eclipse')
-time= series.get_epoch_time_series(cts_rate=0.00005, period = 853.83, amp = amp, model = 'sin')
+time= series.get_epoch_time_series(cts_rate =0.0005, period = p_test, amp = amp, model = 'eclipse')
+# time= series.get_epoch_time_series(T_START=54268974.41,N_cts=1000, T_stop=54268974.41+1e6, amp = amp, model = 'eclipse')
 #time=np.loadtxt('old.txt')
 #time=np.loadtxt('/Users/baotong/PycharmProjects/pulsar/.idea/simulation/test_1.txt')
 vdot=0

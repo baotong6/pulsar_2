@@ -6,7 +6,7 @@ import sys
 import os
 import string
 
-path='/Users/baotong/Desktop/period_LW/simulation/simulation_LW_5540/'
+path='/Users/baotong/Desktop/period_LW/simulation/simulation_LW_554/'
 #cts_range=[1,2,3,4,5]
 cts_range=[0.5,1.0,2.0,3.0,4.0,5.0]
 # cts_range=[2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9]
@@ -15,7 +15,7 @@ amp_range=[0.5,0.6,0.7,0.8,0.9]
 #sim_N=10 #单次模拟的源数目
 sim_N=100
 threshold=0.9
-period_real = 5540.
+period_real = 554.
 sim_id_range=np.linspace(1,sim_N,sim_N)
 sim_id_range=sim_id_range.astype(int)
 
@@ -61,7 +61,7 @@ print(detect_rate)
 print(mean)
 
 def make_plot():
-    path_out='/Users/baotong/Desktop/period_LW/simulation/fig_5540/'
+    path_out='/Users/baotong/Desktop/period_LW/simulation/fig_554/'
     os.chdir(path_out)
     plt.figure(1)
     # plt.title('detection')
@@ -69,11 +69,13 @@ def make_plot():
         plt.plot(amp_range,detect_rate[i],marker='v')
 
     #plt.legend(['cr=1','cr=2','cr=3','cr=4','cr=5'])
-    plt.xlabel('amplitude')
-    plt.ylabel('detection-rate')
-    plt.legend(['cts=50','cts=100', 'cts=200', 'cts=300', 'cts=400', 'cts=500'],fontsize='small',loc=[0.8,0.2])
+    plt.xlabel('Amplitude')
+    plt.ylabel('Detection-rate')
+    plt.legend(title='P=554s',labels=['cts=50','cts=100', 'cts=200', 'cts=300', 'cts=400', 'cts=500'],fontsize='small',loc=[0.81,0.08])
+    # plt.text(0.7,0.4,'P=5540s')
     #plt.savefig('detection.eps')
-    plt.savefig('detection_{0}.eps'.format(str(int(period_real))))
+
+    plt.savefig('Detection_{0}.eps'.format(str(int(period_real))))
     plt.close(1)
 
     plt.figure(2)

@@ -25,7 +25,8 @@ def get_tex(mode,ID_use):
         f.writelines(r'\addtolength{\oddsidemargin}{-0.75in}'+'\n')
         f.writelines(r'\addtolength{\evensidemargin}{-0.75in}' + '\n')
         f.writelines(r'\addtolength{\textwidth}{1.5in}'+'\n')
-        f.writelines(r'\addtolength{\topmargin}{0.6in}' + '\n')
+        f.writelines(r'\addtolength{\topmargin}{0.1in}' + '\n')
+        f.writelines(r'\pagestyle{empty}'+'\n')
         # f.writelines(r'\addtolength{\floatsep}{1.0in}'+'\n')
         f.writelines(r'\begin{document}'+'\n')
         i = 0;j=0
@@ -34,7 +35,7 @@ def get_tex(mode,ID_use):
                 f.writelines(r'\begin{figure*}[!ht]'+'\n')
                 f.writelines(r'\centering'+'\n')
 
-            f.writelines(r'\includegraphics[angle =0, width = 0.32\textwidth]{%s}'
+            f.writelines(r'\includegraphics[angle =0, width = 0.33\textwidth]{%s}'
                          %(path_figure+'{0}/pfold_lc_'.format(mode)+str(ID_use[i])+'.eps'))
             f.writelines('\n')
             f.writelines(r'\hfill'+'\n')
@@ -42,12 +43,12 @@ def get_tex(mode,ID_use):
             #os.system('cp '+specname+'.ps '+ specname+'.eps')
             # os.system('convert '+specname+'.ps '+ specname+'.pdf')
             # os.system('sips -r 90 {0}.pdf'.format(specname))
-            f.writelines(r'\rotatebox[origin=c,x=12pt,y=142pt]{270}{\includegraphics[width = 0.22\textwidth]{%s}}'
-                         %(path_figure+mode+'/'+str(ID_use[i])+'.ps'))
+            f.writelines(r'\includegraphics[angle =0, width = 0.33\textwidth]{%s}'
+                         % (path_figure + mode + '/' + str(ID_use[i]) + '_lc.eps'))
             f.writelines('\n')
             f.writelines(r'\hfill'+'\n')
-            f.writelines(r'\includegraphics[angle =0, width = 0.32\textwidth]{%s}'
-                         %(path_figure+mode+'/'+str(ID_use[i])+'_lc.eps'))
+            f.writelines(r'\rotatebox[origin=c,x=12pt,y=135pt]{270}{\includegraphics[width = 0.225\textwidth]{%s}}'
+                         % (path_figure + mode + '/' + str(ID_use[i]) + '.ps'))
             f.writelines('\n')
             j += 3
             if j%12== 0 or i==len(ID_use)-1:
@@ -61,5 +62,5 @@ def get_tex(mode,ID_use):
 
     f.close()
 #get_tex('NSC',data.ID_NSC)
-# get_tex('LW',data.ID_LW)
-get_tex('ND', data.ID_ND)
+get_tex('LW',data.ID_LW)
+# get_tex('ND', data.ID_ND)

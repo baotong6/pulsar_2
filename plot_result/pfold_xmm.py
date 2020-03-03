@@ -32,7 +32,7 @@ def filter_energy(time,energy,band):
 
 def filter_random_photon(time):
     i=0
-    a=len(time)/500.
+    a=len(time)/1000.
     print(a)
     while i <len(time):
         if np.random.randint(0,a)==0:
@@ -78,7 +78,7 @@ def phase_fold(data_file,p_test,bin,net_percent,shift,label):
     energy=np.loadtxt(data_file)[:,1]
     time = filter_energy(time, energy, [200, 10000])
 
-    time=filter_random_photon(time)
+    # time=filter_random_photon(time)
 
     epoch_file=path +'epoch_'+dataname+'.txt'
     T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, 0.0)
@@ -150,7 +150,7 @@ def phase_fold(data_file,p_test,bin,net_percent,shift,label):
     print(time[-1]-time[0])
 
     path_out = '/Volumes/pulsar/xmm_CV/result/fig/'
-    #plt.savefig(path_out + 'pfold_lc_{0}.eps'.format(dataname[0:-3]))
+    plt.savefig(path_out + 'pfold_lc_{0}_spin_half.eps'.format(dataname[0:-3]))
     plt.show()
 
 # phase_fold('513_bkg.txt','LW_epoch.txt',5334.75593,bin = 30, net_percent = 0.9, shift = 0.2, label = 12)
@@ -172,8 +172,9 @@ spin_IP=[805.2,2315.026,1254.284,514.6,809.42,
 path='/Volumes/pulsar/xmm_CV/result/'
 net_p=0.9
 #for i in range(len(name)):
-i=9
-dataname=IP_name[i]+'_pn'
-period=period_IP[i]
+i=0
+dataname=DN_name[i]+'_pn'
+period=period_DN[i]
+# period=6748.09366
 label=dataname
-phase_fold(path +dataname+'.txt', period, bin = 50, net_percent = net_p, shift = 0.3, label = label)
+phase_fold(path +dataname+'.txt', period, bin = 50, net_percent = net_p, shift = 0.6, label = label)

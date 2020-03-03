@@ -135,7 +135,7 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label):
 
     path_out='/Users/baotong/Desktop/aas/V63/figure/LW/'
 
-    #plt.savefig(path_out+'pfold_lc_{0}.eps'.format(dataname[0:-4]))
+    plt.savefig(path_out+'pfold_lc_{0}_second.eps'.format(dataname[0:-4]))
 # phase_fold('513_bkg.txt','LW_epoch.txt',5334.75593,bin = 30, net_percent = 0.9, shift = 0.2, label = 12)
 
 path_NSC='/Users/baotong/Desktop/period/txt_all_obs_IG/'
@@ -144,11 +144,11 @@ path_ND='/Users/baotong/Desktop/period_gc/txt_all_obs/'
 #epoch_file=path+'txt_90/'+'SgrA_I_epoch.txt'
 #epoch_file=path+'txt_2_8k/'+'SgrA_I_epoch.txt'
 path=path_LW
-period=40605.83912
-dataname='109.txt'
-net_p=0.206
+period=5130.57309*2
+dataname='20.txt'
+net_p=0.892
 epoch_file = path + 'epoch_src_' + dataname
-phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.0, label = 'new')
+phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.2, label = '6')
 # for i in range(len(data.ID_LW)):
 # index=23
 # for i in range(index,index+1):

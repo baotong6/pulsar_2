@@ -23,9 +23,13 @@ path='/Users/baotong/Desktop/period_gc/'
 
 sim_info=fits.open(path+'re_model.fit')
 M1=sim_info[1].data.field(0)
-R1=WD_M_R(M1)/(6.955*1e10)
+#白矮星质量
+R1=WD_M_R(M1)/(6.955*1e10)*2
+#白矮星半径
 M2=sim_info[1].data.field(1)
+#伴星质量
 R2=sim_info[1].data.field(2)
+#伴星半径
 Period=sim_info[1].data.field(3)
 Sep=sim_info[1].data.field(4)
 

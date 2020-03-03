@@ -13,12 +13,11 @@ from scipy import optimize
 from sympy import *
 from scipy.optimize import fsolve
 from itertools import chain
-def get_time_series(T_START,N_cts,T_stop,period,amp,model,eqw=0.2):
+def get_time_series(T_START,N_cts,T_stop,period,amp,model,eqw=0.1):
     #N_cts为总光子数
     #T为总观测时间
     #period为周期
     #amp为model的amplitude,反应了时变强度
-    #model现只针对sin函数
     def get_turns(t,period):
         v=1.0/period
         turns=t*v-int(t*v)

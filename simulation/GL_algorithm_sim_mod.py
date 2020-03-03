@@ -43,7 +43,7 @@ from scipy import optimize
 from sympy import *
 from scipy.optimize import fsolve
 from itertools import chain
-def get_time_series(T_START,N_cts,T_stop,period,amp, model,eqw=0.2):
+def get_time_series(T_START,N_cts,T_stop,period,amp, model,eqw=0.1):
     #N_cts为总光子数
     #T为总观测时间
     #period为周期
@@ -296,6 +296,9 @@ def compute_GL(Tlist,epoch_file, m_max=12, w_range=None, ni=10, parallel=False):
         wr = np.extract(np.logical_and(cdf > .025, cdf < .975), w)
         w_peak = w[np.argmax(S)]
         w_mean = np.trapz(S * w, w)
+        plt.semilogy()
+        plt.plot(w,S)
+        plt.show()
         #print(S)
 
         cdf_f = np.array(S_final)
@@ -341,9 +344,9 @@ def write_result(dataname,cts_num,amp_num):
     # epoch_file = path + 'epoch_src_' + str(dataname) + '.txt'
     epoch_file='LW_epoch.txt'
     cts_rate_standard=0.0001
-    amp_standard=1.
-    time = get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period = 45540., amp =amp_standard*amp_num , model = 'sin')
-    w_range = 2 * np.pi * np.arange(1. / 10000, 1. /3000., 1.e-8)
+    amp_standard=0.9
+    time = get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period = 5258., amp =amp_standard*amp_num , model = 'eclipse')
+    w_range = 2 * np.pi * np.arange(1. / 3000, 1. /10000., 1e-8)
     starttime = datetime.datetime.now()
     GL_R = compute_GL(time, epoch_file,w_range=w_range, m_max=12, parallel=True)
     endtime = datetime.datetime.now()
@@ -360,7 +363,7 @@ def write_result(dataname,cts_num,amp_num):
 
     return [srcid, runtime, Prob, wpeak, mopt, wconf_lo, wconf_hi,O_per_w,p_per_w,N_cts]
 
-path_out='./simulation/simulation_LW_5540/'
+path_out='./simulation/simulation_LW_eclipse_5258/'
 def get_result_fromid(dataname,cts_num,amp_num):
     dataname = int(dataname)
     cts_num = float(cts_num)
@@ -389,4 +392,4 @@ import sys
 if __name__ == '__main__':
     get_result_fromid(sys.argv[1],sys.argv[2],sys.argv[3])
 
-#get_result_fromid([29])
+# get_result_fromid('1',5.,0.9)
