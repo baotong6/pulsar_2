@@ -33,9 +33,9 @@ R2=sim_info[1].data.field(2)
 Period=sim_info[1].data.field(3)
 Sep=sim_info[1].data.field(4)
 
-cosi=(R2+R1)/Sep
+cosi=(R1+R2)/Sep
 prob=(0.5*np.pi-np.arccos(cosi))/(0.5*np.pi)
-
+print(M1)
 print(M2)
 print(R1)
 print(R2)
@@ -44,16 +44,23 @@ print(cosi)
 print(np.arccos(cosi)*180/np.pi)
 print(prob)
 #plt.scatter(Period,M2)
-plt.figure(1)
-plt.scatter(Period,prob,marker='+',alpha=0.5
+plt.figure(1,(8,6))
+font1 = {'family': 'Normal',
+         'weight': 'normal',
+         'size': 15, }
+plt.tick_params(labelsize=15)
+plt.scatter(Period,prob,marker='+',alpha=0.9
             ,color='green')
-plt.xlabel('period(h)')
-plt.ylabel('probability')
+plt.xlabel('Period (hours)',font1)
+plt.ylabel('Probability of eclipsing',font1)
+
+plt.savefig('/Users/baotong/Desktop/aas/mod_MN_pCV/figure/sim_LW/p_inCV.eps')
+
 plt.show(1)
 plt.figure(2)
-plt.xlim(0.8,0.0)
-plt.ylim(0.0,0.8)
-plt.scatter(M2,R2,marker='+')
-plt.xlabel('mass')
-plt.ylabel('radius')
-#plt.show(2)
+# plt.xlim(0.8,0.0)
+# plt.ylim(0.0,0.8)
+plt.scatter(Sep,R2,marker='+')
+# plt.xlabel('mass')
+# plt.ylabel('radius')
+plt.show(2)

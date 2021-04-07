@@ -14,45 +14,11 @@ from scipy.fftpack import fft,ifft
 import scipy.signal as ss
 import random
 import pandas as pd
+import read_csv as data
 path_table='/Users/baotong/Desktop/period/table/'
-result_NSC=pd.read_excel(path_table+'final_all_del.csv','result_NSC')
+result_NSC=pd.read_excel(path_table+'final_all_del.csv','result_NSC_IG')
 result_LW=pd.read_excel(path_table+'final_all_del.csv','result_LW')
 result_ND=pd.read_excel(path_table+'final_all_del.csv','result_ND')
-
-ID_NSC=result_NSC['seq']
-print(ID_NSC)
-P_NSC=result_NSC['P']
-flux_NSC=result_NSC['flux']
-label_NSC=result_NSC['label']
-ra_NSC=result_NSC['ra']
-dec_NSC=result_NSC['dec']
-
-
-ID_NSC_old=[]
-P_NSC_old=[]
-flux_NSC_old=[]
-
-ID_NSC_new=[]
-P_NSC_new=[]
-flux_NSC_new=[]
-
-for i in range(len(flux_NSC)):
-    if label_NSC[i]==0:
-        ID_NSC_new.append(ID_NSC[i])
-        P_NSC_new.append(P_NSC[i])
-        flux_NSC_new.append(flux_NSC[i])
-    else:
-        ID_NSC_old.append(ID_NSC[i])
-        P_NSC_old.append(P_NSC[i])
-        flux_NSC_old.append(flux_NSC[i])
-
-ID_NSC_old =np.array(ID_NSC_old)
-P_NSC_old = np.array(P_NSC_old)
-flux_NSC_old = np.array(flux_NSC_old)
-
-ID_NSC_new =np.array(ID_NSC_new)
-P_NSC_new = np.array(P_NSC_new)
-flux_NSC_new = np.array(flux_NSC_new)
 
 ID_LW=result_LW['seq']
 P_LW=result_LW['P']
@@ -95,9 +61,9 @@ def getlen(a,b):
     length=((a[0]-b[0])**2+(a[1]-b[1])**2)**0.5
     return length
 
-path='/Users/baotong/Desktop/li_pr/'
-ACIS_I=np.loadtxt(path+'ACIS-I.txt')
-ACIS_S=np.loadtxt(path+'ACIS-S.txt')
+# path='/Users/baotong/Desktop/li_pr/'
+# ACIS_I=np.loadtxt(path+'ACIS-I.txt')
+# ACIS_S=np.loadtxt(path+'ACIS-S.txt')
 
 def plot_exptime():
     plt.xlabel('ACIS exposure time (ks)',fontsize=12)
@@ -113,14 +79,16 @@ def plot_exptime():
 #plot_exptime()
 
 def plot_pop_period():
+    P_NSC=data.P_NSC_IG
+    ID_NSC=data.ID_NSC_IG
     if len(P_NSC)!=len(ID_NSC) or len(ID_LW)!=len(P_LW):
         print('error')
 
     plt.semilogx()
-    plt.hist(P_NSC,bins=5,histtype='step',color='blue')
-    plt.hist(P_LW,bins=5,histtype='step',color='green')
+    plt.hist(P_NSC,bins=20,histtype='step',color='blue')
+    plt.hist(P_LW,bins=10,histtype='step',color='green')
 
-    #plt.legend('NSC','LW')
+    plt.legend('NSC','LW')
     plt.show()
 #plot_pop_period()
 
@@ -156,19 +124,18 @@ def compare_counterpart():
 #compare_counterpart()
 
 def plot_P_flux():
-
-    # P_NSC=np.array(P_NSC)
-    # flux_NSC = np.array(flux_NSC)
-    # P_LW = np.array(P_LW)
+    P_NSC=result_NSC['P']
+    L_NSC=result_NSC['L']
+    P_LW=result_LW['P']
+    L_LW=result_LW['L31']
+    P_NSC=np.array(P_NSC)
+    L_NSC=np.array(L_NSC)
+    P_LW = np.array(P_LW)
+    L_LW=np.array(L_LW)
     # flux_LW = np.array(flux_LW)
     # P_ND=np.array(P_ND)
     # flux_ND=np.array(flux_ND)
 
-    L_NSC_new=flux_NSC_new*7.7248*1e30
-    L_NSC_old= flux_NSC_old* 7.7248 * 1e30
-    L_LW_old=flux_LW_old*7.7248*1e30
-    L_LW_new= flux_LW_new* 7.7248 * 1e30
-    L_ND=flux_ND*7.7248*1e30
 
     P_min=4944.0/3600.
     P_gap=[7740.0/3600.,11448.0/3600.]
@@ -183,19 +150,17 @@ def plot_P_flux():
     # plt.scatter(P_LW,flux_LW,color='green')
     plt.semilogy()
     #plt.semilogx()
-    plt.scatter(P_NSC_new/3600., L_NSC_new, color='red')
-    plt.scatter(P_LW_new/3600., L_LW_new, color='green')
-    plt.scatter(P_ND / 3600., L_ND, color = 'black')
-    plt.scatter(P_NSC_old/3600., L_NSC_old, color='',marker = 'o',edgecolors='r')
-    plt.scatter(P_LW_old/3600., L_LW_old, color='',marker = 'o',edgecolors='g')
-    plt.legend(['period_gap','NSC', 'LW','ND'])
+    plt.scatter(P_NSC/3600., 1e31*L_NSC, color='red')
+    plt.scatter(P_LW/3600., 1e31*L_LW, color='green')
+    # plt.scatter(P_NSC_old/3600., L_NSC_old, color='',marker = 'o',edgecolors='r')
+    # plt.scatter(P_LW_old/3600., L_LW_old, color='',marker = 'o',edgecolors='g')
+    plt.legend(['period_gap','NSC', 'LW'])
     plt.plot([P_min,P_min],[0,1e34],'--')
     plt.text(P_min-0.5,1e34,'period minum')
     plt.xlabel('period(hr)')
-    plt.ylabel('energy flux(10^-15 erg/s/cm^2)')
     plt.ylabel('Luminosity (erg/s)')
 
-    plt.savefig(path_table+'P_L.eps')
+    #plt.savefig(path_table+'P_L.eps')
     plt.show()
 
 plot_P_flux()
@@ -205,10 +170,13 @@ plot_P_flux()
 # plt.show()
 
 def spatial_P():
+    P_NSC = result_NSC['P']
+    ra_NSC=result_NSC['ra']
+    dec_NSC = result_NSC['dec']
     sgra = [266.4168166, -29.0078250]
     d2sgra_NSC=((ra_NSC - sgra[0]) ** 2 + (dec_NSC - sgra[1])**2)**0.5*3600
     #d2sgra_LW=((ra_LW - sgra[0]) ** 2 + (dec_LW - sgra[1])**2)**0.5*3600
-    plt.scatter(d2sgra_NSC,P_NSC)
+    plt.scatter(dec_NSC,P_NSC)
     #plt.scatter(P_LW,d2sgra_LW)
     plt.show()
 

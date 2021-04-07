@@ -16,7 +16,7 @@ import random
 from astropy.wcs import WCS
 #path='/Users/baotong/Desktop/period/'
 path='/Users/baotong/Desktop/period_LW/'
-path='/Volumes/pulsar/LimWin_damage/merge_data/timing/'
+path='/Volumes/pulsar/CDFS/merge_data/timing/'
 #evt_list='LW_merged_evt.fits'
 #p90_list='SgrA_grt_2000_8000_psf90.fits'
 #p90_list='SgrA_2000_8000_psf90.fits'

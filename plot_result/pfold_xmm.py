@@ -30,10 +30,9 @@ def filter_energy(time,energy,band):
                 i+=1
     return T
 
-def filter_random_photon(time):
+def filter_random_photon(time,counts):
     i=0
-    a=len(time)/1000.
-    print(a)
+    a=len(time)/counts
     while i <len(time):
         if np.random.randint(0,a)==0:
             i += 1
@@ -50,6 +49,8 @@ def get_T_in_mbins(epoch_file,w,m,fi):
     tbin = T/m
     # 每个bin的时间长度
     epoch_info = np.loadtxt(epoch_file)
+    # t_start = epoch_info[:, 0]
+    # t_end = epoch_info[:, 1]
     t_start = np.array([epoch_info[0]])
     t_end = np.array([epoch_info[1]])
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
@@ -73,15 +74,16 @@ def get_T_in_mbins(epoch_file,w,m,fi):
     return T_in_perbin
 
 def phase_fold(data_file,p_test,bin,net_percent,shift,label):
-    time=np.loadtxt(data_file)[:,0]
-    time_bkg=np.loadtxt('513_bkg.txt')[:,0]
-    energy=np.loadtxt(data_file)[:,1]
-    time = filter_energy(time, energy, [200, 10000])
-
-    # time=filter_random_photon(time)
+    a=np.loadtxt(data_file)
+    time=a[:,0]
+    plt.hist(time,bins=500,histtype='step')
+    plt.show()
+    energy=a[:,1]
+    #time = filter_energy(time, energy, [1000, 8000])
+    #time=filter_random_photon(time,500)
 
     epoch_file=path +'epoch_'+dataname+'.txt'
-    T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, 0.0)
+    T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, shift*2*np.pi)
 
     def trans(t,p_test,shift):
         ti =t
@@ -89,18 +91,14 @@ def phase_fold(data_file,p_test,bin,net_percent,shift,label):
         turns = v * ti
         turns += shift
         # 初始相位
-        for i in range(len(turns)):
-            turns[i] = turns[i] - int(turns[i])
+        turns=np.mod(turns, 1.0)
         return turns
 
     turns=trans(time,p_test,shift)
-    turns_b=trans(time_bkg,p_test,shift)
     loc=np.zeros(bin)
-    loc_b= np.zeros(bin)
     for index in turns:
         loc[int(index*bin)] += 1
-    for index in turns_b:
-        loc_b[int(index * bin)] += 1
+
 
     x = np.array([(i / bin + 0.5 / bin) for i in range(bin)])
 
@@ -119,13 +117,15 @@ def phase_fold(data_file,p_test,bin,net_percent,shift,label):
     #plt.plot([0, 2], [bkg_y, bkg_y], '--')
     bkg_x = [0, 2]
     #plt.fill_between(bkg_x, bkg_y_low, bkg_y_high,facecolor = 'yellow', alpha = 0.2)
-    y3=np.concatenate((loc_b,loc_b))
-    y3*=2.1590383026593E-05/5.0169307007741E-05
 
     x2=np.concatenate((x,x+1))
     y2=np.concatenate((loc,loc))
     correct_gap = T_in_perbin / (sum(T_in_perbin) / len(T_in_perbin))
     y2 /= np.concatenate((correct_gap, correct_gap))
+
+    AM=1-min(y2)/max(y2)
+    A0=AM/(2-AM)
+    print('A0={0}'.format(A0))
 
     #plt.figure(1,(8,8))
     plt.title("{0} P={1},cts={2}".format(label[0:-3],str(p_test),str(len(time))), fontsize = 18)
@@ -160,21 +160,26 @@ DN_name=['HT_CAS','OY_CAR','QZ_VIR','RU_PEG','SS_AUR',
       'V893_SCO','VW_HYI','YZ_CNC','V405_PEG','WX_HYI']
 
 IP_name=['AO_PSC','DW_CNC','FO_AQR','HT_CAM','J1509_6649',
-         'J1649_3307','J1719_4100','J1817_2508','J1830_1232','XY_ARI']
+         'J1649_3307','J1719_4100','J1817_2508','J1830_1232','XY_ARI',
+         'V1223_Sgr','IGRJ14257_6117','EX_Hya','LS_Peg','V2400_Oph','AR_Scorpii']
 
 period_DN=[6363.1008,5453.65,5218.56,32365.44,15793.91,
         6563.0304,6417.0144,7499.52,15348.7008,6704.64]
 period_IP=[14325.12,5166.1152,17457.984,5159.1168,21202.56,
-           13020.48,14420.16,5514.048,19344.96,21833.0208]
+           13020.48,14420.16,5514.048,19344.96,21833.0208,12096.0,14580.,
+           5895.4176,15084.02,12268.8,12816]
 spin_IP=[805.2,2315.026,1254.284,514.6,809.42,
-         597.920,1139.550,1660.8,1820,206.298]
+         597.920,1139.550,1660.8,1820,206.298,746.,509.5,4021.62,1854.,927.6,117]
+Polar_name=['EF_Eri','BM_CrB','FL_Cet','V379_Vir','CP_Tuc']
+period_Polar=[4861.3824,5054.4,5228.5824,5305.9968,5342.2848]
 
-path='/Volumes/pulsar/xmm_CV/result/'
+
+#path='/Volumes/pulsar/xmm_CV/result/'
+path='/Users/baotong/Desktop/CDFS/'
 net_p=0.9
 #for i in range(len(name)):
-i=0
-dataname=DN_name[i]+'_pn'
-period=period_DN[i]
-# period=6748.09366
+dataname='J1302_0.5_2_cut_2'
+period=1494.54491
+#period=12924.0
 label=dataname
-phase_fold(path +dataname+'.txt', period, bin = 50, net_percent = net_p, shift = 0.6, label = label)
+phase_fold(path +dataname+'.txt', period, bin = 10, net_percent = net_p, shift = 0., label = label)

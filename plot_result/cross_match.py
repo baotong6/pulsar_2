@@ -19,38 +19,89 @@ import read_csv as data
 def getlen(a,b):
     length=((a[0]-b[0])**2+(a[1]-b[1])**2)**0.5
     return length
-def compare_counterpart():
-    path='/Users/baotong/Desktop/period_LW/'
-    cat1=fits.open(path+'Maureen.fit')
 
-    x2=data.ra_LW
-    y2=data.dec_LW
-    n2=data.ID_LW
+# for globular cluster and pulsar
+def get_input(label):
+    mode='fits'
+    path = "/Users/baotong/Desktop/period_Tuc/"
+    if mode=='table':
+        type = ['47Tuc', 'terzan5', 'M28', 'omg_cen']
+        ##===============from table=================##
+        res = pd.read_excel(path + 'result_0.5_8_all.xlsx', label)
+        ra1 = np.array(res['RA'])
+        dec1 = np.array(res['DEC'])
+        seq1 = np.array(res['seq'])
+        period = np.array(res['P_out'])
+        ##==========================================##
+    elif mode=='fits':
+        ##===============from fits=================##
+        if label=='47Tuc':
+            srclist=fits.open(path + 'xray_properties-592.fits')
+            ra1 = srclist[1].data['RAdeg']
+            dec1= srclist[1].data['DEdeg']
+            seq1 = np.linspace(1, len(ra1), len(ra1)).astype(int)
+        if label=='terzan5':
+            srclist=fits.open(path + 'terzan5_p50_i5_src_1_2_4_8.fits')
+            ra1 = srclist[1].data['RA']
+            dec1= srclist[1].data['DEC']
+            seq1 = np.linspace(1, len(ra1), len(ra1)).astype(int)
+        if label=='M28':
+            srclist=fits.open(path + 'M28_p50_i5_src_1_2_4_8.fits')
+            ra1 = srclist[1].data['RA']
+            dec1= srclist[1].data['DEC']
+            seq1 = np.linspace(1, len(ra1), len(ra1)).astype(int)
+        ##==========================================##
 
-    offset=5*1./3600.
+    ra_dec1=[ra1,dec1]
+    textfile=[]
+    with open(path + 'pulsar_{0}.txt'.format(label), 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline()  # 整行读取数据
+            textfile.append(lines)
+            if not lines:
+                break
+                pass
+    text = textfile[2:-1]
+    text=np.array(text)
+    seq2=[];RA2=[];DEC2=[]
+    for i in range(len(text)):
+        #print(text[i])
+        seq,NAME,P0,RA,DEC,PB,MINM,MEDM,ASSOC,useless = [i for i in text[i].split(';')]
+        seq2.append(seq);RA2.append(RA);DEC2.append(DEC)
+    ra_dec2 = [np.array(RA2).astype(float), np.array(DEC2).astype(float)]
+    return [ra_dec1,ra_dec2,seq1,seq2]
+#print(get_input('47Tuc'))
 
-    x1=cat1[1].data['_RAJ2000']
-    y1=cat1[1].data['_DEJ2000']
-    n1=cat1[1].data['LW']
-    # ID_IR=np.array([311,350,421,461,505,538,599,632,
-    #                 694,782,974,997,1000,1039,1053,1151,1277,1339,1399,1495,1493,1577,1667])
-    #
-    # x1=x1[ID_IR-1]
-    # y1=y1[ID_IR-1]
-    # n1=n1[ID_IR-1]
+def get_NGC6397():
+    file1='/Users/baotong/Desktop/period_NGC6397/Kaluzny.txt'
+    seq1 = np.loadtxt(file1)[:, 0]
+    ra1=np.loadtxt(file1)[:,1]
+    dec1=np.loadtxt(file1)[:,2]
+    ra_dec1 = [ra1, dec1]
 
-    match=[[] for i in range(len(n2))]
-    for i in range(len(n2)):
-        for j in range(len(n1)):
-            if getlen([x2[i],y2[i]],[x1[j],y1[j]])<offset:
-                match[i].append(n1[j])
+    file2=fits.open('/Users/baotong/Desktop/period_NGC6397/ngc6397_catalog.fits')
+    ra2 = file2[1].data['RAdeg']
+    dec2 = file2[1].data['DEdeg']
+    seq2=file2[1].data['Seq']
+    ra_dec2 = [ra2, dec2]
+    return [ra_dec1, ra_dec2, seq1, seq2]
 
-    # print(x1)
-    # print(y2)
-    print(match)
-    plt.scatter(x1,y1,color='red')
-    plt.scatter(x2,y2,color='green')
-    plt.show()
-    plt.legend(['IR','X-ray'])
+def compare_counterpart(ra_dec1,ra_dec2,seq1,seq2):
+
+    offset=1
+    ##arcsec
+
+    match=[[] for i in range(len(seq1))]
+    for i in range(len(seq1)):
+        for j in range(len(seq2)):
+            dis=getlen([ra_dec2[0][j],ra_dec2[1][j]],[ra_dec1[0][i],ra_dec1[1][i]])*3600
+            if dis<offset:
+                match[i].append([seq1[i],seq2[j],dis])
+    print(np.sort(match))
+    # plt.scatter(x1,y1,color='red')
+    # plt.scatter(x2,y2,color='green')
+    # plt.show()
+    # plt.legend(['X-ray','pulsar'])
     # print(match)
-compare_counterpart()
+#compare_counterpart(get_NGC6397()[0],get_NGC6397()[1],get_NGC6397()[2], get_NGC6397()[3])
+compare_counterpart(get_input('47Tuc')[0],get_input('47Tuc')[1],get_input('47Tuc')[2],get_input('47Tuc')[3])

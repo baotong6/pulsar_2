@@ -26,23 +26,6 @@ from astropy.timeseries import LombScargle
 # standard_name='pwn.txt'
 #dataname="Muno2.txt"
 def get_fig_LS(dataname):
-    # def sim_time(dataname):
-    #     time = data.get_data(dataname)[0]
-    #     energy = data.get_data(dataname)[1]
-    #     obs_ID = data.get_data(dataname)[2]
-    #     t = data.get_data(dataname)[3]
-    #     E = data.get_data(dataname)[4]
-    #     dict = data.get_data(dataname)[5]
-    #
-    #     t=np.array(t)
-    #
-    #     sim_t=t-t
-    #     for i in range(len(t)):
-    #
-    #         sim_t[i]=np.random.random(len(t[i]))*(t[i][-1]-t[i][0])+t[i][0]
-    #
-    #     return sim_t
-
     def get_LS(freq,len_bin,dataname):
         time=data.get_data(dataname)[0]
         energy=data.get_data(dataname)[1]
@@ -68,16 +51,6 @@ def get_fig_LS(dataname):
         #epoch1=np.array([2943,3663,3392,3393,3665])
         # epoch2=np.array([5950,5951,5952,5953,5954])
         # epoch3=np.array([9169,9170,9171,9172])
-        #
-        # epoch1 = np.array([13847, 14427, 13848, 13849, 13846, 14438, 13845])
-        # epoch2 = np.array([14461, 13853, 13841, 14465, 14466, 13842, 13839, 13840, 14432, 13838, 13852, 14439])
-        # epoch3 = np.array([14462, 14463, 13851, 15568, 13843, 15570, 14468])
-
-        #epoch_gc=np.array([945,14897,17236,17239,17237,18852,17240,17238,20118,17241,20807,20808])
-        #epoch_gc_1 = np.array([17236, 17239, 17237, 18852, 17240, 17238])
-
-        #use_ID_o=epoch1
-
         use_ID = use_ID_o
         not_in_id = []
         for i in range(len(use_ID_o)):
@@ -92,7 +65,6 @@ def get_fig_LS(dataname):
             time = np.concatenate((dict[use_ID[0]][0], dict[use_ID[1]][0]))
             for i in range(2, len(use_ID)):
                 time = np.concatenate((time, dict[use_ID[i]][0]))
-
 
         #use_ID=[14897,17236,17239,17237,18852,17240,17238,20118,17241,20807,20808]
 
@@ -134,7 +106,7 @@ def get_fig_LS(dataname):
         # plt.scatter(x,window)
         # plt.show()
         print('run1')
-        LS=LombScargle(x,y,dy=1,normalization='standard',fit_mean=True, center_data=True).power(freq,method='cython')
+        LS=LombScargle(x,y,dy=1,normalization='psd',fit_mean=True, center_data=True).power(freq,method='cython')
         LS_W=LombScargle(x,window,normalization='standard',fit_mean=False, center_data=False).power(freq,method='cython')
         FP_99=LombScargle(x,y,dy=1,normalization='standard',fit_mean=True, center_data=True).false_alarm_level(0.01,
                                                                                                                minimum_frequency=freq[0],maximum_frequency=freq[-1])
@@ -157,25 +129,27 @@ def get_fig_LS(dataname):
         cts_window=sum(window)
         return [LS,LS_W,LS_sim,cts,cts_window,[FP_99,FP_90,FP_68]]
 
-    freq_1=[1/50000.,1e-8,3000]
+    freq_1=[1/50000.,1e-8,2000]
     #freq_1=[1e-3,1e-5,1000]
     freq=freq_1[0]+freq_1[1]*np.arange(freq_1[2])
     len_bin=50
 
-    ### uneven sampled freq ###
-    exptime=131610914.53
-    p_unsamp = []
-    freq_unsamp = []
-    p_unsamp.append(1e-6 * exptime)
-    while p_unsamp[-1] < exptime:
-        if p_unsamp[-1] < 0.3 * exptime:
-            p_unsamp.append(p_unsamp[-1] + p_unsamp[-1] ** 2 / (2 * exptime * 2))
-        elif 0.3 * exptime < p_unsamp[-1] < 0.5 * exptime:
-            p_unsamp.append(p_unsamp[-1] + p_unsamp[-1] ** 2 / (3 * exptime * 2))
-        else:
-            p_unsamp.append(p_unsamp[-1] + p_unsamp[-1] ** 2 / (4 * exptime * 2))
-    p_unsamp = np.array(p_unsamp)
-    freq_unsamp = 1.0 / p_unsamp
+    # ### uneven sampled freq ###
+    # exptime=131610914.53
+    # p_unsamp = []
+    # freq_unsamp = []
+    # p_unsamp.append(1e-6 * exptime)
+    # while p_unsamp[-1] < exptime:
+    #     if p_unsamp[-1] < 0.3 * exptime:
+    #         p_unsamp.append(p_unsamp[-1] + p_unsamp[-1] ** 2 / (2 * exptime * 2))
+    #     elif 0.3 * exptime < p_unsamp[-1] < 0.5 * exptime:
+    #         p_unsamp.append(p_unsamp[-1] + p_unsamp[-1] ** 2 / (3 * exptime * 2))
+    #     else:
+    #         p_unsamp.append(p_unsamp[-1] + p_unsamp[-1] ** 2 / (4 * exptime * 2))
+    # p_unsamp = np.array(p_unsamp)
+    # p_unsamp=p_unsamp[np.where((p_unsamp>9500)&(p_unsamp<11000))]
+    # freq_unsamp = 1.0 / p_unsamp
+
     ### uneven sampled freq ###
 
     def make_period_range(pmin, pmax, expT):
@@ -185,10 +159,14 @@ def get_fig_LS(dataname):
             P.append(P[-1] + dP)
         return np.array(P)
 
-    freq=1./make_period_range(3000,6000,exptime)
+    #freq=1./make_period_range(9500,11000,exptime)
+    #freq=freq_unsamp
+    border=1000
+    vary=np.array([i for i in range(0,border)])
+    freq=1/50000.+vary*1.e-8
 
 
-    res_normal=get_LS(freq,len_bin=64,dataname=dataname)
+    res_normal=get_LS(freq,len_bin=100,dataname=dataname)
     LS=res_normal[0]
     LS_W=res_normal[1]
     cts=res_normal[3]
@@ -242,7 +220,7 @@ def get_fig_LS(dataname):
     # plt.savefig(path+'fig_ep2_200_30k/'+dataname[0:-4]+'.jpeg')
     plt.show()
     # plt.close()
-
+get_fig_LS('973.txt')
 
 def light_curve(dataname):
     time = data.get_data(dataname)[0]
@@ -368,16 +346,15 @@ def light_curve(dataname):
 # for item in cand_ID:
 #     get_fig_LS(str(item) + '.txt', standard_name)
 
-import pandas as pd
-path_table='/Users/baotong/Desktop/period/table/'
-result_NSC=pd.read_excel(path_table+'final_all_del.csv','result_NSC')
-result_LW=pd.read_excel(path_table+'final_all_del.csv','result_LW')
-result_ND=pd.read_excel(path_table+'final_all_del.csv','result_ND')
-
-ID_NSC=result_NSC['seq']
-ID_LW=result_LW['seq']
-ID_ND=result_ND['seq']
-# item='1677'
-for item in ID_LW:
-#get_fig_LS(str(item)+'.txt')
-    light_curve(str(item)+'.txt')
+# path_table='/Users/baotong/Desktop/period/table/'
+# result_NSC=pd.read_excel(path_table+'final_all_del.csv','result_NSC')
+# result_LW=pd.read_excel(path_table+'final_all_del.csv','result_LW')
+# result_ND=pd.read_excel(path_table+'final_all_del.csv','result_ND')
+#
+# ID_NSC=result_NSC['seq']
+# ID_LW=result_LW['seq']
+# ID_ND=result_ND['seq']
+# # item='1677'
+# for item in ID_LW:
+# #get_fig_LS(str(item)+'.txt')
+#     light_curve(str(item)+'.txt')

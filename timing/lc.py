@@ -7,7 +7,7 @@ from astropy.io import fits
 import sys
 import os
 import string
-import correct as correct
+# import correct as correct
 from datetime import datetime
 from scipy.interpolate import lagrange
 from scipy import interpolate
@@ -93,7 +93,7 @@ energy_2=energy[cut[0]+1:cut[1]]
 #t2=time
 #energy_2=energy
 #print len(t2),len(energy_2)
-print t2[1]-t2[0]
+print(t2[1]-t2[0])
 
 def delete_photon(time,energy):
     i=0
@@ -171,4 +171,4 @@ def TB():
 TB=TB()
 np.save("right_time.npy",TB)
 np.save("obs_time.npy",t2)
-print 'done'
+print('done')

@@ -20,8 +20,9 @@ def get_line_context(file_path, line_number):
 path_ND='/Volumes/pulsar/GC/spectra/aprates'
 path_LW='/Volumes/pulsar/LimWin_damage/merge_data/spectra/aprates'
 path_NSC='/Volumes/pulsar/SgrA/merge_data/spectra/spectra_p/aprates'
+path_Tuc='/Volumes/pulsar/terzan5/merge_data/spectra/aprates'
 def plot_lc_ap(mode):
-    path_out='/Users/baotong/Desktop/aas/V63/figure/'+mode+'/'
+    #path_out='/Users/baotong/Desktop/aas/MN_pCV/figure/'+mode+'/'
     if mode=='ND':
         src_ID=data.ID_ND
         obs_ID=np.loadtxt('ACIS-I_epoch.txt')[:,2]
@@ -30,11 +31,22 @@ def plot_lc_ap(mode):
         os.chdir(path_ND)
     elif mode=='LW':
         src_ID=data.ID_LW
+        #src_ID=['202']
         obs_ID=np.loadtxt('LW_epoch.txt')[:,2]
         obs_time=(np.loadtxt('LW_epoch.txt')[:,0]+np.loadtxt('LW_epoch.txt')[:,1])/2
         os.chdir(path_LW)
         time = obs_time / 86400 + 2449352.5 - 2400000.5
-
+    elif mode == '47Tuc':
+        src_ID = ['245', '453', '182', '304', '224', '223', '211', '462',
+                  '402', '216', '345', '258', '292', '321', '224', '283', '350',
+                  '346', '407', '284', '314']
+        src_ID = ['245']
+        path_Tuc = '/Volumes/pulsar/47Tuc/merge_data/spectra/aprates/'
+        EPOCH = np.loadtxt(path_Tuc + '47Tuc_epoch.txt')
+        obs_ID = EPOCH[:, 2]
+        obs_time = (EPOCH[:, 0] + EPOCH[:, 1]) / 2
+        os.chdir(path_Tuc)
+        time = obs_time / 86400 + 2449352.5 - 2400000.5
     elif mode=='NSC':
         src_ID = data.ID_NSC
         obs_ID = np.loadtxt('SgrA_I_epoch.txt')[:, 2]
@@ -72,6 +84,7 @@ def plot_lc_ap(mode):
                 cts_rate_high.append(float(a_high))
 
             else:
+                print('continue')
                 continue
 
         def get_VI(cts_rate_m, cts_rate_low, cts_rate_high):
@@ -96,29 +109,42 @@ def plot_lc_ap(mode):
             return VI
 
         VI = get_VI(cts_rate, cts_rate_low, cts_rate_high)
+        cts_rate=np.array(cts_rate)*1e7
+        cts_rate_low=np.array(cts_rate_low)*1e7
+        cts_rate_high=np.array(cts_rate_high)*1e7
+
+        font1 = {'family': 'Normal',
+                 'weight': 'normal',
+                 'size': 15, }
+
         #plt.figure(1,(10,7.5))
         fig, (ax, ax2) = plt.subplots(1, 2,figsize=(10,7.5),sharey = True)
-        #plt.title('{0} #{1}, VI={2}'.format(mode, k + 1, round(VI, 2)), fontsize = 20)
-        ax.set_title('{0} #{1}, VI={2}'.format(mode, k + 1, round(VI, 2)), fontsize = 20)
-        plt.semilogy()
+        # plt.semilogy()
+        plt.title('{0} #{1}, VI={2}'.format(mode, k + 1, round(VI, 2)), fontsize = 20)
+        #ax.set_title('{0} #{1}, VI={2}'.format(mode, k + 1, round(VI, 2)), fontsize = 20)
+        #ax.set_title('{0} {1}, VI={2}'.format(mode, 'F1', round(VI, 2)), fontsize = 20)
         # plt.ylabel('cts rate  '+r'$(erg\cdot s^{-1} \cdot cm^{-2})$', fontsize = 15)
         # plt.xlabel('MJD', fontsize = 15)
 
-        ax2.set_xlabel('MJD', fontsize = 15)
-        ax.set_ylabel('cts rate  '+r'$(erg\cdot s^{-1} \cdot cm^{-2})$', fontsize = 15)
+        ax2.set_xlabel('MJD',font1)
+        ax.set_ylabel('photon flux ( '+r'$\rm 10^{-7} ph \,s^{-1} \, cm^{-2}$'+' )', font1)
+        ax.tick_params(labelsize = 15)
+        ax2.tick_params(labelsize=15)
         # plt.ylim(5e-8,3e-5)
-        if np.min(cts_rate_low) > 1e-10:
-            plt.ylim(ymin = np.min(cts_rate_low) * 0.8, ymax = np.max(cts_rate_high) * 1.2)
-        else:
-            plt.ylim(ymin = 6e-8, ymax = np.max(cts_rate_high) * 1.2)
+        # if np.min(cts_rate_low) > 1e-10:
+        #     plt.ylim(ymin = np.min(cts_rate_low) * 0.8, ymax = np.max(cts_rate_high) * 1.2)
+        # else:
+        #     plt.ylim(ymin = 6e-8, ymax = np.max(cts_rate_high) * 1.2)
         plt.xlim(np.min(use_obs_time) - 100, np.max(use_obs_time) + 100)
         for i in range(len(use_obs_time)):
             if cts_rate_low[i] == 0:
-                ax.annotate("", xy = (use_obs_time[i], cts_rate_high[i] * 0.5),
+                ax.plot([use_obs_time[i]-15,use_obs_time[i]+15],[cts_rate_high[i],cts_rate_high[i]],color='red')
+                ax.annotate("", xy = (use_obs_time[i], cts_rate_high[i] * 0.8),
                              xytext = (use_obs_time[i], cts_rate_high[i]), color = "red",
                              weight = "bold",
                              arrowprops = dict(arrowstyle = "->", connectionstyle = "arc3", color = "red"))
-                ax2.annotate("", xy = (use_obs_time[i], cts_rate_high[i] * 0.5),
+                ax2.plot([use_obs_time[i] - 0.4, use_obs_time[i] + 0.4], [cts_rate_high[i], cts_rate_high[i]], color = 'red')
+                ax2.annotate("", xy = (use_obs_time[i], cts_rate_high[i] * 0.8),
                              xytext = (use_obs_time[i], cts_rate_high[i]), color = "red",
                              weight = "bold",
                              arrowprops = dict(arrowstyle = "->", connectionstyle = "arc3", color = "red"))
@@ -139,19 +165,25 @@ def plot_lc_ap(mode):
                 #         fmt = 'o', capsize = 3, elinewidth = 1, ecolor = 'red')
 
         ###########################################################################################
-        # # For LW
+        # For LW
         # ax.set_xlim(52100, 53150)  # most of the data
         # ax2.set_xlim(53200, 53230)  # outliers only
 
         # For ND
-        ax.set_xlim(50250, 50300)  # most of the data
-        ax2.set_xlim(55000, 56700)  # outliers only
+        # ax.set_xlim(50250, 50300)  # most of the data
+        # ax2.set_xlim(55000, 56700)  # outliers only
+
+        # For 47Tuc
+        ax.set_xlim(50000, 51500)  # most of the data
+        ax2.set_xlim(55400, 55700)  # outliers only
+
+
 
         # hide the spines between ax and ax2
         ax.spines['right'].set_visible(False)
         ax2.spines['left'].set_visible(False)
         ax.yaxis.tick_left()
-        ax.tick_params(labeltop = 'off')  # don't put tick labels at the top
+        #ax.tick_params(labeltop = 'off')# don't put tick labels at the top
         ax2.yaxis.tick_right()
 
         # Make the spacing between the two axes a bit smaller
@@ -172,14 +204,15 @@ def plot_lc_ap(mode):
         ax.plot((1 - d, 1 + d), (1 - d, 1 + d), **kwargs)  # bottom-left diagonal
 
         kwargs.update(transform = ax2.transAxes)  # switch to the bottom axes
+
         ax2.plot((-d, d), (-d, +d), **kwargs)  # top-right diagonal
         ax2.plot((-d, d), (1 - d, 1 + d), **kwargs)  # bottom-right diagonal
         ###########################################################################################
 
         plt.savefig(path_out + str(ID_note) + '_lc.eps')
-        #plt.show()
-        plt.close()
-plot_lc_ap('ND')
+        plt.show()
+        #plt.close()
+plot_lc_ap('47Tuc')
 
 
 

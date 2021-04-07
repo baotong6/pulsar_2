@@ -25,10 +25,6 @@ import read_data as data
 #
 #import fits_to_txt
 starttime=datetime.datetime.now()
-# dataname="3525.txt"
-#dataname="Muno4.txt"
-#dataname="Muno6.txt"
-#path='/Users/baotong/Desktop/period_gc/'
 def sim_time(dataname):
     time = data.get_data(dataname)[0]
     energy = data.get_data(dataname)[1]
@@ -122,8 +118,8 @@ def get_Z2(dataname,freq):
 
         for i in range(2,len(use_ID)):
             time=np.concatenate((time,dict[use_ID[i]][0]))
-    #plt.hist(time-time[0],bins=50,histtype='step')
-    #plt.show()
+    plt.hist(time-time[0],bins=50,histtype='step')
+    plt.show()
     N = len(time)
 
     def turns(t,f):
@@ -179,7 +175,7 @@ def make_period_range(pmin,pmax,expT):
 def get_fig_Z2(dataname):
     border=10000
     vary=np.array([i for i in range(0,border)])
-    freq=1/20000.+vary*1.e-9
+    freq=1/4.+vary*1.e-5
     #freq=1/100000.+vary*1.e-6
     #P = make_period_range(3600, 8000, 2e8)
     #freq=1.0/P
@@ -246,7 +242,7 @@ def get_fig_Z2(dataname):
 
     #plt.savefig(path+'fig_Z/'+dataname[0:-4]+"_Z2.eps")
 
-item='2730'
+item='1502'
 get_fig_Z2(str(item) + '.txt')
 
 # endtime=datetime.datetime.now()

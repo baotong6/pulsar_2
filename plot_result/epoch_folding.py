@@ -30,16 +30,27 @@ def trans(t,p_test,shift=0):
         turns[i]=turns[i] - int(turns[i])
     return turns
 
-def get_T_in_mbins(epoch_file,w,m,fi=0.):
-    #m==bin
+def get_T_in_mbins(epoch_file,w,m,fi=0.0):
     T=2*np.pi/w
     T_in_perbin = np.zeros(m)
     # 每个bin的总积分时间
     tbin = T/m
     # 每个bin的时间长度
     epoch_info = np.loadtxt(epoch_file)
-    t_start = np.array([epoch_info[0]])
+    #epoch_info=[epoch_info]
+    #t_start=epoch_info[0]
+    #t_end=epoch_info[1]
+    # t_start = epoch_info[:, 0]
+    # t_end = epoch_info[:, 1]
+
+    epoch_info = np.loadtxt(epoch_file)
+    #epoch_info = [epoch_info]
+    # t_start = epoch_info[:, 0]
+    # t_end = epoch_info[:, 1]
+    # ID = epoch_info[:, 2]
+    t_start=np.array([epoch_info[0]])
     t_end = np.array([epoch_info[1]])
+
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
     N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
     intN_bin_t_start=np.floor(N_bin_t_start)+1
@@ -72,24 +83,25 @@ def compute_bin(Tlist, m, w, fi=0):
 #     turns=trans(time,1./freq)
 #     for i in len(turns):
 
-path='/Volumes/pulsar/xmm_CV/result/'
-
-name=['HT_CAS','OY_CAR','QZ_VIR','RU_PEG','SS_AUR',
-      'V893_SCO','VW_HYI','YZ_CNC','V405_PEG','AO_PSC',
-      'DW_CNC','FO_AQR','HT_CAM','J1509_6649','J1649_3307',
-      'J1719_4100','J1817_2508','J1830_1232','XY_ARI']
-period_all=[6363.1008,5453.65,414.,32365.44,15793.91,
-        6563.0304,6417.0144,7499.52,15348.7008,12927.6864,
-        5166.1152,17457.984,5159.1168,21202.56,13020.48,
-        14420.16,5512.32,19344.96,21833.0208]
-i=16
-dataname=name[i]+'_pn'+'.txt'
+# path='/Volumes/pulsar/xmm_CV/result/'
+#
+# name=['HT_CAS','OY_CAR','QZ_VIR','RU_PEG','SS_AUR',
+#       'V893_SCO','VW_HYI','YZ_CNC','V405_PEG','AO_PSC',
+#       'DW_CNC','FO_AQR','HT_CAM','J1509_6649','J1649_3307',
+#       'J1719_4100','J1817_2508','J1830_1232','XY_ARI']
+# period_all=[6363.1008,5453.65,414.,32365.44,15793.91,
+#         6563.0304,6417.0144,7499.52,15348.7008,12927.6864,
+#         5166.1152,17457.984,5159.1168,21202.56,13020.48,
+#         14420.16,5512.32,19344.96,21833.0208]
+# i=16
+path='/Volumes/pulsar/WR/0802410101/txt/'
+dataname='WR1_pn.txt'
 epoch_file=path+'epoch_'+dataname
-period=period_all[i]
+period=28153.90195
 time=np.loadtxt(path+dataname)[:,0]
 p_test=period
-P_all=np.linspace(0.99*p_test,1.01*p_test,5000)
-bin=100
+P_all=np.linspace(0.5*p_test,1.5*p_test,5000)
+bin=20
 S=[]
 for i in range(len(P_all)):
     w=2*np.pi/P_all[i]

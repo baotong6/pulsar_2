@@ -17,6 +17,13 @@ path_table = '/Users/baotong/Desktop/period/table/'
 result_NSC = pd.read_excel(path_table + 'final_all_del.csv', 'result_NSC')
 result_LW=pd.read_excel(path_table+'final_all_del.csv','result_LW')
 result_ND=pd.read_excel(path_table+'final_all_del.csv','result_ND')
+result_NSC_IG=pd.read_excel(path_table + 'final_all_del.csv', 'result_NSC_IG')
+
+ID_NSC_IG=result_NSC_IG['seq']
+P_NSC_IG=result_NSC_IG['P']
+ra_NSC_IG=result_NSC_IG['ra']
+dec_NSC_IG=result_NSC_IG['dec']
+net_percent_NSC_IG=result_NSC_IG['net_percent']
 
 ID_NSC=result_NSC['seq']
 P_NSC=result_NSC['P']

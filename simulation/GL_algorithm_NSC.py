@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 import functools
 import datetime
+
 starttime = datetime.datetime.now()
 def compute_bin(Tlist, m, w, fi):
     n = np.zeros(m, 'int')
@@ -261,8 +262,8 @@ def get_T_in_mbins(epoch_file,w,m,fi):
         else:
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
-path_out='./period_NSC/'
-path='./period_NSC/txt_all_obs/'
+path_out='./period_NSC_merge_IG/'
+path='./period_NSC_merge_IG/txt_all_obs_IG/'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
 def write_result(dataname):
     time=np.loadtxt(path+ str(dataname)+'.txt')[:,0]
@@ -280,52 +281,47 @@ def write_result(dataname):
     wconf_hi = GL_R[7][1]
     O_per_w=GL_R[9]
     p_per_w=GL_R[10]
+    N_cts = len(time)
 
-    return [srcid, runtime, Prob, wpeak, mopt, wconf_lo, wconf_hi,O_per_w,p_per_w]
+    return [srcid, runtime, Prob, wpeak, mopt, wconf_lo, wconf_hi,O_per_w,p_per_w,N_cts]
 
-
-def get_result_fromid(id_range):
-    result_srcid = []
-    result_runtime = []
-    result_Prob = []
-    result_wpeak = []
-    result_mopt = []
-    result_wconf_lo = []
-    result_wconf_hi = []
-    result_O_per_w=[]
-    result_p_per_w=[]
-
-    for i in id_range:
-        res = write_result(i)
-        result_srcid.append(res[0])
-        result_runtime.append(res[1])
-        result_Prob.append(res[2])
-        result_wpeak.append(res[3])
-        result_mopt.append(res[4])
-        result_wconf_lo.append(res[5])
-        result_wconf_hi.append(res[6])
-        result_O_per_w.append(res[7])
-        result_p_per_w.append(res[8])
-
-    result_wpeak = np.array(result_wpeak)
+def get_result_fromid(dataname):
+    dataname = int(dataname)
+    cts_num = float(cts_num)
+    amp_num = float(amp_num)
+    res = write_result(dataname = dataname)
+    result_srcid=res[0]
+    result_runtime=res[1]
+    result_Prob=res[2]
+    result_wpeak=res[3]
+    result_mopt=res[4]
+    result_wconf_lo=res[5]
+    result_wconf_hi=res[6]
+    result_O_per_w=res[7]
+    result_p_per_w=res[8]
     result_period = 2 * np.pi / result_wpeak
+    result_N_cts=res[9]
     result = np.column_stack((result_srcid, result_runtime, result_Prob, result_wpeak, result_period, result_mopt,
-                              result_wconf_lo, result_wconf_hi))
+                              result_wconf_lo, result_wconf_hi,result_N_cts))
     #print(result)
     #np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result, fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f %10.5f %10.5f')
-    np.savetxt(path_out+'result_NSC_all_obs/'+'result_1h_3h_{0}_{1}.txt'.format(id_range[0],id_range[-1]), result,
-               fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f')
-
-#cand_id=np.linspace(1,518,518)
-cand_id=np.loadtxt('cand_id.txt')
-cand_id=cand_id.astype(int)
-def choose_id(a1, a2):
-    a1=int(a1)
-    a2=int(a2)
-    get_result_fromid(cand_id[a1:a2])
+    np.savetxt(path_out+'result_NSC_cand/result_1h_3h_{0}.txt'.format(str(dataname)), result,
+               fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f %10d')
 
 import sys
 if __name__ == '__main__':
-    choose_id(sys.argv[1],sys.argv[2])
+    get_result_fromid(sys.argv[1])
+
+#cand_id=np.linspace(1,518,518)
+# cand_id=np.loadtxt('cand_id.txt')
+# cand_id=cand_id.astype(int)
+# def choose_id(a1, a2):
+#     a1=int(a1)
+#     a2=int(a2)
+#     get_result_fromid(cand_id[a1:a2])
+#
+# import sys
+# if __name__ == '__main__':
+#     choose_id(sys.argv[1],sys.argv[2])
 
 #get_result_fromid([29])

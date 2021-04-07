@@ -52,25 +52,48 @@ def plot_Pdet_Hong():
         period_get=[]
         for j in range(1,sim_N+1):
             temp_info = np.loadtxt(path_LW + '{0}/result_sim_{1}.txt'.format(str(ID_LW_old[i]),str(j)))
-            if temp_info[2] > threshold and 0.01 * period_real < temp_info[4] < 1.01 * period_real:
+            if temp_info[2] > threshold and 0.99 * period_real < temp_info[4] < 1.01 * period_real:
                 detect += 1
                 period_get.append(temp_info[4])
 
         detect_rate.append(detect/sim_N)
-
+    #plt.figure(1,(9,7))
     x=np.linspace(1,10,10)
+    xtick=[1,2,3,4,5,6,7,8,9,10]
+    plt.xticks(xtick)
+    plt.tick_params(labelsize=15)
     plt.plot(x,detect_rate,marker='o')
     plt.plot(x,Pdet_old,marker='o')
-    plt.xlabel('H-ID')
-    plt.ylabel('Detection ate')
+    plt.xlabel('Source ID',fontsize=15)
+    plt.ylabel('Detection rate',fontsize=15)
     plt.legend(['GL method','LS method'])
     # for k in range(len(x)):
     #     plt.plot([x[k],x[k]],[0,Pdet_old[k]],'--')
-    #plt.savefig('/Users/baotong/Desktop/period_LW/simulation/fig_Pdet/Pdet_com.eps')
+    plt.savefig('/Users/baotong/Desktop/aas/mod_MN_pCV/figure/sim_LW/Pdet_com.eps',bbox_inches='tight')
     plt.show()
     print(Pdet_old)
     print(detect_rate)
 plot_Pdet_Hong()
+
+def plot_P_P():
+    path_out = '/Users/baotong/Desktop/aas/mod_MN_pCV/figure/LW/'
+    P_LW_LS = np.array([10342.30,5131.14,7448.40,8535.67,6341.54,4728.53,12075.81,4890.23,6597.41,5262.05])
+    P_LW_GL = np.array([10342.30,5130.57,7448.98,8546.28,6335.85,4728.90,12002.70,4886.79,6597.55, 5261.93])
+    ratio=P_LW_LS/P_LW_GL
+    #plt.figure(1, (7,5))
+    #plt.figure(1,(9,7))
+    plt.ylim(0.99,1.01)
+    ytick=[0.990,0.995,1.000,1.005,1.010]
+    plt.yticks(ytick)
+    plt.tick_params(labelsize=15)
+    plt.xlabel(r'$P_{GL}$',fontsize=15)
+    plt.ylabel(r'$\frac{P_{LS}}{P_{GL}}$',rotation='horizontal',fontsize=20,horizontalalignment='right')
+    #plt.ylabel(r'$\frac{P_{LS}}{P_{GL}}$',fontsize=15)
+    plt.scatter(P_LW_GL,ratio)
+    plt.plot([4000,12500],[1,1],'--',color='orange')
+    plt.savefig(path_out+'P_comp.eps',bbox_inches='tight')
+    plt.show()
+#plot_P_P()
 
 def Pdet_LW():
     path_LW = '/Users/baotong/Desktop/period_LW/simulation/Pdet_LW/'

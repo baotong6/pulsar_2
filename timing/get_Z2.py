@@ -18,7 +18,7 @@ import random
 import read_data as data
 
 #采样频率数
-v=10000
+v=44999
 ##(1-p)**N=0.99
 #置信度99%
 p99=1-0.99**(1.0/v)
@@ -27,10 +27,10 @@ x1=[]
 y1=[]
 x2=[]
 y2=[]
-for x in np.linspace(10,100,4000):
+for x in np.linspace(1,1000,5000):
     if stats.chi2.cdf(x,2)!=0:
-        y1.append(np.abs((1-stats.chi2.cdf(x,100-1))-p99))
-        y2.append(np.abs((1-stats.chi2.cdf(x,100-1))-p90))
+        y1.append(np.abs((1-stats.chi2.cdf(x,20-1))-p99))
+        y2.append(np.abs((1-stats.chi2.cdf(x,20-1))-p90))
         #print y1
         x1.append(x)
         x2.append(x)

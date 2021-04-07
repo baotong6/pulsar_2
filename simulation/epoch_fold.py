@@ -96,18 +96,19 @@ def compute_bin(Tlist, m, w, fi=0):
 #     for i in len(turns):
 
 path='/Users/baotong/Desktop/period/'
-path_txt=path+'txt_all_obs_G/'
-dataname='cnball.txt'
+path_txt=path+'txt_all_obs_I/'
+dataname='442.txt'
 # epoch_file=path+'txt_90/'+'SgrA_I_epoch.txt'
 # epoch_file=path+'txt_2_8k/'+'SgrA_I_epoch.txt'
 #epoch_file=path+'txt_all_obs_IG/'+'SgrA_I_epoch.txt'
-epoch_file=path+'txt_all_obs_G/'+'epoch_src_'+dataname
+epoch_file=path+'txt_all_obs_I/'+'epoch_src_'+dataname
 
 time=np.loadtxt(path_txt+dataname)[:,0]
 #time= series.get_epoch_time_series(cts_rate =cts_rate_temp, period = period_temp, amp = amp, model = 'sin')
 #print(get_T_in_mbins(epoch_file,2*np.pi/864000,bin))
-p_test=25.129
-P_all=np.linspace(0.95*p_test,1.05*p_test,5000)
+p_test=48000.
+#P_all=np.linspace(0.97*p_test,1.03*p_test,10000)
+P_all=np.linspace(7000.,41000.,10000)
 bin=20
 S=[]
 for i in range(len(P_all)):

@@ -34,9 +34,9 @@ import multiprocessing as mp
 import functools
 import datetime
 #import read_data as data
-import read_data_gc as data
+#import read_data_gc as data
 starttime = datetime.datetime.now()
-T = 1618692.94
+#T = 1618692.94
 def compute_bin(Tlist, m, w, fi):
     n = np.zeros(m, 'int')
     j = np.floor(m * np.mod(w * Tlist + fi, 2 * np.pi) / (2 * np.pi))
@@ -57,6 +57,21 @@ def compute_factor(N, m, v):
     f = f1 + f3 - f2 - np.log(2 * np.pi * v)
     return f
 
+def filter_energy(time,energy,band):
+    T=time
+    E=energy
+    i=0
+    if len(time)!=len(energy):
+        print('error')
+        return None
+    else:
+        while i <len(E):
+            if E[i]<band[0] or E[i]>band[1]:
+                E=np.delete(E,i)
+                T=np.delete(T,i)
+            else:
+                i+=1
+    return T
 
 def precompute_binmult(N):
     #return [lg(n!) for n in range(1,N)], 第一项忽略
@@ -124,7 +139,7 @@ def compute_Om1w(Tlist, m_max, w, fa, fbin, ni):  # compute odds-ratios for bins
     return Om1w
 
 
-def compute_GL(Tlist, m_max=12, w_range=None, ni=10, parallel=False):
+def compute_GL(Tlist, m_max=20, w_range=None, ni=10, parallel=False):
     # initialize output values
     O_period = None
     p_period = None
@@ -181,6 +196,7 @@ def compute_GL(Tlist, m_max=12, w_range=None, ni=10, parallel=False):
         O_period = np.sum(O1m)  # integrated odds ratio
         p_period = O_period / (1 + O_period)  # likelihood of periodic event
         cdf = np.array(S)
+        plt.semilogy()
         plt.step(w, cdf)
         plt.show()
         for i in range(0, np.size(S)):
@@ -207,7 +223,8 @@ def get_T_in_mbins(epoch_file,w,m,fi):
     epoch_info = np.loadtxt(epoch_file)
     t_start = epoch_info[:, 0]
     t_end = epoch_info[:, 1]
-    ID = epoch_info[:, 2]
+    # t_start=[epoch_info[0]]
+    # t_end = [epoch_info[1]]
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
     N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
     intN_bin_t_start=np.floor(N_bin_t_start)+1
@@ -227,9 +244,9 @@ def get_T_in_mbins(epoch_file,w,m,fi):
         else:
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
-
-path='/Users/baotong/Desktop/period/'
-epoch_file =path + 'txt_90/SgrA_I_epoch.txt'
+path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
+#path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
+epoch_file =path + 'epoch_src_746.txt'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
 
 result_srcid=[]
@@ -239,17 +256,18 @@ result_wpeak=[]
 result_mopt=[]
 result_wconf_lo=[]
 result_wconf_hi=[]
-
-
 def write_result(dataname):
-    #path = '/Users/baotong/Desktop/period/txt_90/'
-    path = '/Users/baotong/Desktop/period_gv/txt/'
+    path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
+    #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
     filename=str(dataname)+'.txt'
-    time = data.get_data(filename)[0]
-
-    w_range=2*np.pi*np.arange(1./500,1./100,1.e-6)
+    time = np.loadtxt(path + str(dataname) + '.txt')[:, 0]
+    energy=np.loadtxt(path + str(dataname) + '.txt')[:, 1]
+    #time = filter_energy(time, energy, [200, 500])
+    #time=np.loadtxt(path+str(dataname)+'.txt')
+    counts=len(time)
+    w_range=2*np.pi*np.arange(1./400,1./200,1.e-6)
     starttime = datetime.datetime.now()
-    GL_R=compute_GL(time,w_range=w_range,m_max=12,parallel=True)
+    GL_R=compute_GL(time,w_range=w_range,m_max=10,parallel=False)
     endtime = datetime.datetime.now()
     srcid=dataname
     runtime=(endtime - starttime).seconds
@@ -259,7 +277,7 @@ def write_result(dataname):
     wconf_lo=GL_R[7][0]
     wconf_hi=GL_R[7][1]
 
-    return [srcid,runtime,Prob,wpeak,mopt,wconf_lo,wconf_hi]
+    return [srcid,runtime,Prob,wpeak,mopt,wconf_lo,wconf_hi,counts]
 
 def get_result_fromid(id_range):
     result_srcid = []
@@ -269,6 +287,7 @@ def get_result_fromid(id_range):
     result_mopt = []
     result_wconf_lo = []
     result_wconf_hi = []
+    result_counts=[]
 
     for i in id_range:
         res = write_result(i)
@@ -279,17 +298,18 @@ def get_result_fromid(id_range):
         result_mopt.append(res[4])
         result_wconf_lo.append(res[5])
         result_wconf_hi.append(res[6])
+        result_counts.append(res[7])
     result_wpeak = np.array(result_wpeak)
     result_period = 2 * np.pi / result_wpeak
     # result = np.column_stack((result_srcid, result_runtime, result_Prob, result_wpeak, result_period, result_mopt,
     #                           result_wconf_lo, result_wconf_hi))
     result = np.column_stack((result_runtime, result_Prob, result_wpeak, result_period, result_mopt,
-                              result_wconf_lo, result_wconf_hi))
+                              result_wconf_lo, result_wconf_hi,result_counts))
     print(result)
     #np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result, fmt='%10d %10.2f %10.2f %10.5f %10.5f %10d %10.5f %10.5f')
-    np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result,
-               fmt='%10.2f %10.2f %10.5f %10.5f %10d %10.5f %10.5f')
+    np.savetxt(path+'result_10h_{0}.txt'.format(id_range[0]), result,
+               fmt='%10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
-get_result_fromid(['451'])
+get_result_fromid(['127'])
 
 #choose_id(1, 3)

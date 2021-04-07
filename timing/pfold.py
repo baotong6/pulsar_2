@@ -11,23 +11,24 @@ from datetime import datetime
 from scipy.interpolate import lagrange
 from scipy import interpolate
 from scipy.optimize import curve_fit
-# import read_data as data
+import read_data as data
 #import read_data_gc as data
-import read_data_lw as data
+#import read_data_lw as data
 
-path='/Users/baotong/Desktop/period_LW/'
+path='/Users/baotong/Desktop/period/'
 #dataname="src2338_I_lc.txt"
-dataname='513.txt'
+dataname='1671.txt'
 #epoch_file=path+'txt_90/'+'SgrA_I_epoch.txt'
 #epoch_file=path+'txt_2_8k/'+'SgrA_I_epoch.txt'
-epoch_file=path+'txt_all_obs/'+'epoch_src_'+dataname
+epoch_file=path+'txt_all_obs_IG/'+'epoch_src_'+dataname
+
 #epoch_file = path + 'txt_G/' + 'SgrA_G_epoch.txt'
 #epoch_file =path + 'txt_merge_2_8k/' + 'SgrA_IG_epoch.txt'
 
-p_test=10669.51187
+p_test=48016.90195
 bin=20
 shift=0.0
-net_percent=0.916
+net_percent=0.716
 src_bkg=1-net_percent
 
 ##tot cts/bkg cts
@@ -187,7 +188,7 @@ def get_T_in_mbins(epoch_file,w,m,fi):
         else:
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
-T_in_perbin=get_T_in_mbins(epoch_file,2*np.pi/p_test,bin,0.0)
+T_in_perbin=get_T_in_mbins(epoch_file,2*np.pi/p_test,bin,shift*2*np.pi)
 
 x=phasefold(time,num_p=1.0,bin=bin
             ,p_test=p_test)[0]

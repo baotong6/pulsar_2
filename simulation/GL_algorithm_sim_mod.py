@@ -92,8 +92,8 @@ def get_time_series(T_START,N_cts,T_stop,period,amp, model,eqw=0.1):
 
 def get_epoch_time_series(cts_rate,period,amp, model):
     t=[]
-    # epoch = np.loadtxt('SgrA_I_epoch.txt')
-    epoch = np.loadtxt('LW_epoch.txt')
+    epoch = np.loadtxt('SgrA_IG_epoch.txt')
+    # epoch = np.loadtxt('LW_epoch.txt')
     tstart=epoch[:,0]
     tstop=epoch[:,1]
     exp_time_epoch=epoch[:,-1]
@@ -103,6 +103,7 @@ def get_epoch_time_series(cts_rate,period,amp, model):
         t.append(get_time_series(tstart[i],cts,tstop[i],period,amp,model=model))
     t=list(chain.from_iterable(t))
     t = np.array(t)
+    t = t + np.random.rand(len(t)) * 3.2 - 1.6
     return t
 starttime = datetime.datetime.now()
 
@@ -186,6 +187,7 @@ def compute_W_scaled(Tlist, epoch_file,m, w, fi, factor, fbin):
         f = f + fbin[n[i]]
     ln_S_wfi=compute_S(epoch_file,Tlist,w,m,fi)
     y = np.exp(f + factor+ln_S_wfi)
+    #y=np.exp(f+factor)
     return y
 
 
@@ -296,9 +298,9 @@ def compute_GL(Tlist,epoch_file, m_max=12, w_range=None, ni=10, parallel=False):
         wr = np.extract(np.logical_and(cdf > .025, cdf < .975), w)
         w_peak = w[np.argmax(S)]
         w_mean = np.trapz(S * w, w)
-        plt.semilogy()
-        plt.plot(w,S)
-        plt.show()
+        #plt.semilogy()
+        #plt.plot(w,S)
+        #plt.show()
         #print(S)
 
         cdf_f = np.array(S_final)
@@ -342,11 +344,11 @@ def compute_GL(Tlist,epoch_file, m_max=12, w_range=None, ni=10, parallel=False):
 def write_result(dataname,cts_num,amp_num):
     # time=np.loadtxt(path+ str(dataname)+'.txt')[:,0]
     # epoch_file = path + 'epoch_src_' + str(dataname) + '.txt'
-    epoch_file='LW_epoch.txt'
+    epoch_file='SgrA_IG_epoch.txt'
     cts_rate_standard=0.0001
-    amp_standard=0.9
-    time = get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period = 5258., amp =amp_standard*amp_num , model = 'eclipse')
-    w_range = 2 * np.pi * np.arange(1. / 3000, 1. /10000., 1e-8)
+    amp_standard=1.0
+    time = get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period =36000., amp =amp_standard*amp_num , model = 'sin')
+    w_range = 2 * np.pi * np.arange(1. / 50000, 1. /10000., 1e-7)
     starttime = datetime.datetime.now()
     GL_R = compute_GL(time, epoch_file,w_range=w_range, m_max=12, parallel=True)
     endtime = datetime.datetime.now()
@@ -363,7 +365,7 @@ def write_result(dataname,cts_num,amp_num):
 
     return [srcid, runtime, Prob, wpeak, mopt, wconf_lo, wconf_hi,O_per_w,p_per_w,N_cts]
 
-path_out='./simulation/simulation_LW_eclipse_5258/'
+path_out='./simulation/simulation_NSC_36000/'
 def get_result_fromid(dataname,cts_num,amp_num):
     dataname = int(dataname)
     cts_num = float(cts_num)
@@ -388,8 +390,10 @@ def get_result_fromid(dataname,cts_num,amp_num):
                fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f %10d')
 
 
+
+
 import sys
 if __name__ == '__main__':
     get_result_fromid(sys.argv[1],sys.argv[2],sys.argv[3])
-
+    sys.exit(0)
 # get_result_fromid('1',5.,0.9)

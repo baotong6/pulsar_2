@@ -8,7 +8,8 @@ import string
 
 path_1='/Users/baotong/Desktop/period_LW/simulation/simulation_LW_eclipse_5258/'
 path_2='/Users/baotong/Desktop/period_LW/simulation/simulation_LW_eclipse_15258/'
-cts_range=[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0]
+path_3='/Users/baotong/Desktop/period_LW/simulation/simulation_LW_eclipse_45258/'
+cts_range=[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,11.0,15.0,20.0]
 # cts_range=[10.0,11.0,12.0,13.0,14.0,15.0]
 width=0.9
 amp_all=[0.9]
@@ -36,7 +37,9 @@ def get_info(path,period_real):
             for i in sim_id_range:
                 temp_info=np.loadtxt(path+'result_{0}_{1}/result_sim_{3}.txt'.format(str(cts_rate),str(ec_amp),str(width),str(i)))
                 cts_get.append(temp_info[-1])
-                if temp_info[2]>threshold and 0.2*period_real<temp_info[4]<1.2*period_real:
+                if temp_info[2]>threshold and 0.99*period_real<temp_info[4]<1.01*period_real \
+                    or 1.98*period_real<temp_info[4] <2.01*period_real\
+                    or 2.97*period_real<temp_info[4] <3.03*period_real :
                     detect+=1
                     period_get.append(temp_info[4])
             period_get_array=np.array(period_get)
@@ -63,7 +66,6 @@ def get_info(path,period_real):
 
         return [detect_rate,mean,var,std,cts]
 
-
 def make_plot():
     plt.figure(1)
     #plt.title('detection')
@@ -77,13 +79,18 @@ def make_plot():
     for i in range(len(cts)):
         plt.plot(cts[i],detect_rate[i],marker='v',color='red')
 
+    detect_rate = get_info(path_3, 45258.)[0]
+    cts = get_info(path_3, 45258.)[-1]
+    for i in range(len(cts)):
+        plt.plot(cts[i], detect_rate[i], marker = 'v', color = 'magenta')
 
     #plt.legend(['cr=1','cr=2','cr=3','cr=4','cr=5'])
     plt.xlabel('Counts')
     plt.ylabel('Detection rate')
-    plt.legend(['P=5258s','P=15258s'])
+    plt.legend(['P=5258s','P=15258s','P=45258s'])
+    print(cts)
     #plt.legend(['width=0.2', 'width=0.3', 'width=0.4', 'width=0.5'],loc='best')
-    #plt.savefig('detection.eps')
+    #plt.savefig('/Users/baotong/Desktop/aas/pCV_in_LW/figure/sim_LW/eclipse.eps')
     #plt.savefig('./fig/'+'detection_{0}.eps'.format(str(period_real)))
     plt.show()
    # plt.close(1)

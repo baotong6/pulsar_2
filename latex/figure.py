@@ -14,8 +14,17 @@ from scipy.optimize import curve_fit
 import pandas as pd
 import read_csv as data
 
-path_out='/Users/baotong/Desktop/aas/V63/'
-path_figure='/Users/baotong/Desktop/aas/V63/figure/'
+path_out='/Users/baotong/Desktop/aas/pCV_GC/'
+path_figure='/Users/baotong/Desktop/aas/pCV_GC/figure/'
+###----------------read table---------------###
+label='omg_cen'
+path_table = '/Users/baotong/Desktop/period_Tuc/'
+result_Tuc = pd.read_excel(path_table + 'result_0.5_8_all.xlsx', label)
+
+ID_Tuc=result_Tuc['seq']
+P_Tuc=result_Tuc['P_out']
+net_percent_Tuc=result_Tuc['net_percent']
+###----------------read table---------------###
 
 def get_tex(mode,ID_use):
     os.chdir(path_figure+mode)
@@ -24,7 +33,7 @@ def get_tex(mode,ID_use):
         f.writelines(r'\usepackage{graphics}'+'\n')
         f.writelines(r'\addtolength{\oddsidemargin}{-0.75in}'+'\n')
         f.writelines(r'\addtolength{\evensidemargin}{-0.75in}' + '\n')
-        f.writelines(r'\addtolength{\textwidth}{1.5in}'+'\n')
+        f.writelines(r'\addtolength{\textwidth}{1.2in}'+'\n')
         f.writelines(r'\addtolength{\topmargin}{0.1in}' + '\n')
         f.writelines(r'\pagestyle{empty}'+'\n')
         # f.writelines(r'\addtolength{\floatsep}{1.0in}'+'\n')
@@ -43,11 +52,11 @@ def get_tex(mode,ID_use):
             #os.system('cp '+specname+'.ps '+ specname+'.eps')
             # os.system('convert '+specname+'.ps '+ specname+'.pdf')
             # os.system('sips -r 90 {0}.pdf'.format(specname))
-            f.writelines(r'\includegraphics[angle =0, width = 0.33\textwidth]{%s}'
+            f.writelines(r'\includegraphics[angle =0, width = 0.33\textwidth,bb=-54 126 666 666]{%s}'
                          % (path_figure + mode + '/' + str(ID_use[i]) + '_lc.eps'))
             f.writelines('\n')
             f.writelines(r'\hfill'+'\n')
-            f.writelines(r'\rotatebox[origin=c,x=12pt,y=135pt]{270}{\includegraphics[width = 0.225\textwidth]{%s}}'
+            f.writelines(r'\rotatebox[origin=c,x=12pt,y=125pt]{270}{\includegraphics[width = 0.23\textwidth]{%s}}'
                          % (path_figure + mode + '/' + str(ID_use[i]) + '.ps'))
             f.writelines('\n')
             j += 3
@@ -62,5 +71,5 @@ def get_tex(mode,ID_use):
 
     f.close()
 #get_tex('NSC',data.ID_NSC)
-get_tex('LW',data.ID_LW)
+get_tex(label,ID_Tuc)
 # get_tex('ND', data.ID_ND)

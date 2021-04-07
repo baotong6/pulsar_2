@@ -19,17 +19,24 @@ from astropy.table import Table, Column
 #path='/Volumes/halo/GC/merge_data/xdata/'
 #obsID=['945','14897','17236','17239','17237','18852','17240','17238','20118','17241','20807','20808']
 
-path='/Volumes/pulsar/LimWin/merge_data/xdata/'
-obsID=['6362','5934','6365','9505','9855','9502','9500','9501','9854','9503','9892','9893','9504']
-label=['ACIS-I','ACIS-S','LW']
+# path='/Volumes/pulsar/LimWin/merge_data/xdata/'
+# obsID=['6362','5934','6365','9505','9855','9502','9500','9501','9854','9503','9892','9893','9504']
+# label=['ACIS-I','ACIS-S','LW']
 
+path='/Volumes/pulsar/M28/merge_data/xdata/'
+# obsID=['3798','10059','13225','13252','13705','13706' ,
+#         '14339','14475','14476','14477','14478','14479',
+#         '14625','15615','15750','16638','17779','18881']
+# label=['terzan5']
+obsID=['2684','2685','2683','9132','9133','16748','16749','16750']
+label=['M28']
 def get_epoch_file(obsID,label):
     TSTART = []
     TSTOP = []
 
     for item in obsID:
         #hdul=fits.open(path+'GC_'+item+'_reproj_evt.fits')
-        hdul = fits.open(path + 'LW_' + item + '_reproj_evt.fits')
+        hdul = fits.open(path + 'all_bcc_'+item+'_reproj_evt.fits')
         TSTART.append(hdul[1].header['TSTART'])
         TSTOP.append(hdul[1].header['TSTOP'])
 
@@ -38,7 +45,9 @@ def get_epoch_file(obsID,label):
     obsID=np.array(obsID)
     obsID=obsID.astype('int')
     epoch_info=np.column_stack((TSTART,TSTOP,obsID,TSTOP-TSTART))
-    np.savetxt(path+label[2]+'_epoch.txt',epoch_info,fmt='%15.2f %15.2f %10d %20.2f')
+    epoch_info = epoch_info[epoch_info[:, 0].argsort()]
+    print(epoch_info)
+    np.savetxt(path+label[0]+'_epoch.txt',epoch_info,fmt='%15.2f %15.2f %10d %20.2f')
 get_epoch_file(obsID,label)
 
 def get_index_in_list(list,a):

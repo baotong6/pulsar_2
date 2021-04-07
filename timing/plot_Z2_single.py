@@ -18,25 +18,22 @@ import scipy.stats as stats
 import random
 
 #path='/Volumes/halo/chandra_obs_hr_m04_for_baotong/'
-path='/Users/baotong/xmm_obs/'
+#path='/Users/baotong/xmm/0109110101/'
 #path='/Users/baotong/Desktop/period/'
-#path='/Volumes/halo/redgiant/'
+path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
 #dataname="Muno4.txt"
 #dataname="Muno6.txt"
-dataname='src22pn'
+p99_Z2 = 67.74654931
+p90_Z2 = 61.35167033
 
+dataname='89'
+# evt_list_name=['WR1']
 def get_Z2(dataname,freq):
-    time = np.loadtxt(path + 'txt/' + dataname + '.txt')[:,0]
-    #time=   np.loadtxt(path + 'txt/' + dataname + '.txt')[:,0]
-    #time = np.loadtxt(path + 'txt/' + dataname + '_s.txt')[:, 0]
-    #time = np.loadtxt(path + 'txt_G/' + dataname + '.txt')[:, 0]
-    #time=np.loadtxt(path + 'txt/evt_list10956.txt')[:,0]
+    time=   np.loadtxt(path + dataname + '.txt')[:,0]
     N=len(time)
     def turns(t,f):
         ti=t-t[0]
-        #print ti
         v=f
-        #p_test = 1.0/5.500550055005501e-06
         p=1.0/v
         # pdot=-vdot/(v*v)
         # vddot = 2.0 * pdot * pdot / (p * p * p)
@@ -46,40 +43,37 @@ def get_Z2(dataname,freq):
         INT_turns=np.trunc(turns)
         turns=turns-INT_turns
         turns = 2.0*np.pi*turns #+ vdot * ti * ti / 2.0 + vddot * ti * ti * ti / 6.0
-        #print turns
-        #turns=list(turns)
-        #turns=np.array(turns[0])
-        #初始相位
         return turns
     #print time
     Z2=[]
-    plt.hist(time-time[0],bins=60,histtype='step')
-    plt.show()
 
     for fi in freq:
         Z2.append((2.0 / N)*(sum(np.cos(turns(time,fi)))**2+sum(np.sin(turns(time,fi))**2)))
     cts=len(time)
     return [Z2,cts]
-
-# border=100
-# vary=np.array([i for i in range(0,border)])
-# freq=1/10000.+vary*(1/100000.)
-
+T_tot=1e8
+freq=np.arange(1/T_tot,0.5/5000,1/(5*T_tot))
+freq=freq[np.where(freq>1/100000)]
+[Z2,cts]=get_Z2(dataname,freq)
+Z2=np.array(Z2)
+plt.figure(1,(7,7))
+plt.title(dataname+',cts={0}'.format(cts))
+plt.semilogx(freq,[p99_Z2 for i in range(len(Z2))],'--',color='black')
+plt.semilogx(freq,[p90_Z2 for i in range(len(Z2))],'--',color='red')
+plt.step(freq,Z2,color='black')
+plt.text(0.0005,p99_Z2+1,"99%")
+plt.text(0.0005,p90_Z2+1,"90%")
+plt.show()
 
 def make_period_range(pmin, pmax, expT):
     P = [pmin]
     while P[-1] < pmax:
-        dP = 0.05 * P[-1] ** 2 / (expT - P[-1])
+        dP = 0.01 * P[-1] ** 2 / (expT - P[-1])
         P.append(P[-1] + dP)
     return np.array(P)
-
-
-freq = 1. / make_period_range(2000, 10000, 2e4)
 # border=10000
 # vary=np.array([i for i in range(0,border)])
 # freq=1.e-4+vary*1.e-6
-p99_Z2 = 27.6244
-p90_Z2 = 22.9232
 
 #
 # evt_list_ID=np.arange(1,49)
@@ -103,7 +97,6 @@ p90_Z2 = 22.9232
 #                'src6pn','src7pn','src8pn','src9pn','src10pn',
 #                'src11pn','src12pn','src14pn','src15pn','src15pn','src16pn']
 
-evt_list_name=['src22pn']
 for i in range(len(evt_list_name)):
     dataname=evt_list_name[i]
     Z2=get_Z2(dataname,freq)[0]

@@ -56,6 +56,7 @@ def get_txt(regname):
         return [reg_x,reg_y,reg_r]
     reg=read_region(regname)
 
+
     def where_region(x,y,reg):
         r=np.array((x-reg[0],y-reg[1]))
         len_r=np.sqrt(r[0]**2+r[1]**2)
