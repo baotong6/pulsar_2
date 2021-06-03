@@ -16,7 +16,7 @@ from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,Average
 from stingray.simulator import simulator, models
 import matplotlib.font_manager as font_manager
 from astropy.timeseries import LombScargle
-font_prop = font_manager.FontProperties(size=16)
+# font_prop = font_manager.FontProperties(size=16)
 import warnings
 from functools import reduce
 import csv
@@ -98,12 +98,12 @@ def get_LS(time, flux,freq,trial=1):
 
     # LS = LombScargle(x, y, dy = 1, normalization = 'standard', fit_mean = True,
     #                  center_data = True).power(freq, method = 'cython')
-    LS = LombScargle(x, y,normalization = 'psd')
+    LS = LombScargle(x, y,normalization = 'standard')
     # LS = LombScargle(x, y, dy, normalization='psd')
     power = LS.power(freq)
 
     # print('freq_num={0}'.format(len(freq)))
-    # FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
+    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     # FP_99 = LS.false_alarm_level(0.0027, minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     # FP_90 = LS.false_alarm_level(0.05,  minimum_frequency=freq[0],
     #                              maximum_frequency=freq[-1], method='baluev')
@@ -379,6 +379,9 @@ def get_lc_onesource(k,src_index,num_trials=2):
     T_exp = 11000154.981141508
     freq=np.arange(1/T_exp,0.5/dt,1/(5*T_exp))
     freq=freq[np.where(freq > 1 / 20000.)]
+    if os.path.exists(path+'/simulation/{0}_LS_simP.csv'.format(src_index)):
+        print('caution! file exists')
+        return None
     with open(path + '/simulation/{0}_LS_simP.csv'.format(src_index), 'a+') as csvfile:
         header = freq
         header = header.astype('str')
@@ -406,12 +409,100 @@ def get_lc_onesource(k,src_index,num_trials=2):
             writer.writerows([temp[-1]])
             k_trial+=1
 
-
-        # FP.append(temp[0]);period.append(temp[1]);peakP.append(temp[2]);power_P.append(temp[3])
-    # result = np.column_stack((FP, period, peakP,power_P))
-    # np.savetxt(path + 'simulation/' + 'trial_out_src{0}_REJ1034+396_noQPO.txt'.format(src_index), result,
-    #            fmt="%10.5f %10.5f %10.10f %10.10f")
-# get_lc_onesource(3,'236',num_trials=10000)
+def get_lc_onesource_fixpds(k,src_index,num_trials=2):
+    k_trial =0
+    FP = [];
+    period = [];
+    cts_num=[];
+    peakP=[];
+    power_P=[]
+    path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep{0}/'.format(k)
+    epoch_file = np.loadtxt(path + 'CDFS_epoch_ep{0}.txt'.format(k))
+    tstart = epoch_file[:, 0];tstop = epoch_file[:, 1]
+    ID=epoch_file[:,2];exptime = epoch_file[:, 3]
+    evt_file = np.loadtxt(path + '{0}.txt'.format(src_index))
+    bkgevt_file = np.loadtxt(path + '{0}_bkg.txt'.format(src_index))
+    for i in range(len(ID)):
+        index = len(np.where(evt_file[:,2] == ID[i])[0])
+        index_b=len(np.where(bkgevt_file[:,2] == ID[i])[0])
+        cts_num.append(index-index_b/12.)
+    dt = 100
+    T_exp = 11000154.981141508
+    freq=np.arange(1/T_exp,0.5/dt,1/(5*T_exp))
+    freq=freq[np.where(freq > 1 / 20000.)]
+    if os.path.exists(path+'/simulation/{0}_LS_simP_fixpds.csv'.format(src_index)):
+        print('caution! file exists')
+        return None
+    with open(path + '/simulation/{0}_LS_simP_fixpds.csv'.format(src_index), 'a+') as csvfile:
+        header = freq
+        header = header.astype('str')
+        writer = csv.writer(csvfile)
+        for i in range(len(exptime)):
+            cts_rate = cts_num[i] / (2 * exptime[i]) * dt  # 实际的cts-rate应为这个的2倍
+            num_bins = int(exptime[i] / dt)
+            sim = simulator.Simulator(N=num_bins, mean=cts_rate, dt=dt)
+            w = np.arange(1 / exptime[i], 0.5 / dt, 1 / exptime[i])
+            spectrum = bending_po(w, [2.3e-3, 3.4, 0.40, 4.3e-4])
+            # spectrum = bending_po(w, [2.3e-3, 3.4, 0.40, 4.3e-4]) + generalized_lorentzian(w, [1.0518215e-3,1.0518215e-3/16,200,2])
+            lc = sim.simulate(spectrum)
+            lc.counts += cts_rate
+            lc.counts[np.where(lc.counts < 0)] = 0
+            lc.time+=tstart[i]
+            if i==0: lc_all=lc
+            else: lc_all=lc_all.join(lc)
+        print('run')
+        print(lc_all.time)
+        while k_trial<num_trials:
+            ev_all = EventList()
+            ev_all.time = sim_evtlist(lc_all) + tstart[0]
+            # ev_all = ev_all.join(ev)
+            lc_new = ev_all.to_lc(dt=dt, tstart=ev_all.time[0] - 0.5 * dt, tseg=ev_all.time[-1] - ev_all.time[0])
+            temp = get_LS(lc_new.time, lc_new.counts, freq=freq, trial=k_trial)
+            writer.writerows([temp[-1]])
+            k_trial+=1
+# get_lc_onesource_fixpds(3,'236',num_trials=10000)
+def get_lc_onesource_const(k,src_index,num_trials=100):
+    dt=100
+    k_trial =0
+    FP = [];
+    period = [];
+    cts_num=[];
+    peakP=[];
+    power_P=[]
+    dt = 100
+    T_exp = 11000154.981141508
+    freq=np.arange(1/T_exp,0.5/dt,1/(5*T_exp))
+    freq=freq[np.where(freq > 1 / 20000.)]
+    path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep{0}/'.format(k)
+    epoch_file = np.loadtxt(path + 'CDFS_epoch_ep{0}.txt'.format(k))
+    tstart = epoch_file[:, 0];tstop = epoch_file[:, 1]
+    ID=epoch_file[:,2];exptime = epoch_file[:, 3]
+    evt_file = np.loadtxt(path + '{0}.txt'.format(src_index))
+    bkgevt_file = np.loadtxt(path + '{0}_bkg.txt'.format(src_index))
+    if os.path.exists(path+'/simulation/{0}_LS_simP_const.csv'.format(src_index)):
+        print('caution! file exists')
+        return None
+    with open(path + '/simulation/{0}_LS_simP_const.csv'.format(src_index), 'a+') as csvfile:
+        header = freq
+        header = header.astype('str')
+        writer = csv.writer(csvfile)
+        while k_trial <num_trials:
+            ev_all = EventList()
+            for i in range(len(ID)):
+                index = len(np.where(evt_file[:,2] == ID[i])[0])
+                index_b=len(np.where(bkgevt_file[:,2] == ID[i])[0])
+                temp=index-index_b/12.
+                if temp<0:temp=0
+                cts_num=np.random.poisson(temp)
+                ev=EventList()
+                ev.time=np.random.uniform(tstart[i]-dt/2,tstop[i]+dt/2,cts_num)
+                ev_all = ev_all.join(ev)
+            lc_new = ev_all.to_lc(dt=dt, tstart=ev_all.time[0] - 0.5 * dt, tseg=ev_all.time[-1] - ev_all.time[0])
+            # T_exp=lc_new.time[-1]-lc_new.time[0]
+            temp = get_LS(lc_new.time, lc_new.counts, freq=freq, trial=k_trial)
+            writer.writerows([temp[-1]])
+            k_trial += 1
+# get_lc_onesource_const(3,'19',num_trials=10000)
 
 def get_LSP_disb_CR(k,CR,num_trials=100):
     k_trial=0
@@ -455,29 +546,6 @@ def get_LSP_disb_CR(k,CR,num_trials=100):
     result=np.column_stack((FP,period))
     np.savetxt(path+'simulation/'+'trial_out_1hr_{0}_REJ1034+396.txt'.format(cr_str[j]),result,fmt="%10.5f %10.5f")
     return ev_all
-
-
-# for j in [0,1,2,3,4,5,6]:
-#     get_lc_byspec(1, j)
-#     get_lc_byspec(2,j)
-#     get_lc_byspec(3,j)
-#     get_lc_byspec(4,j)
-#
-#     get_lc_byspec_01hr(1, j)
-#     get_lc_byspec_01hr(2, j)
-#     get_lc_byspec_01hr(3, j)
-#     get_lc_byspec_01hr(4, j)
-#
-#     get_lc_byspec_04hr(1, j)
-#     get_lc_byspec_04hr(2, j)
-#     get_lc_byspec_04hr(3, j)
-#     get_lc_byspec_04hr(4, j)
-#
-#     get_lc_byspec_1hr(1, j)
-#     get_lc_byspec_1hr(2, j)
-#     get_lc_byspec_1hr(3, j)
-#     get_lc_byspec_1hr(4, j)
-
 
 def plot_result_scatter(k_num,threshold):
     figlabel=[[0,0],[0,1],[1,0],[1,1]]
@@ -591,6 +659,8 @@ def plot_result_DR(k,threshold):
     CRhist = plt.hist(CDFS_LS_res[:, 5], bins=bins_CR, histtype='step')
     # print(CRhist)
     print(len(np.where(CDFS_LS_res[:,5]>4e-4)[0]))
+    #计算大于某个流量的源有多少
+
     plt.close()
     cts_rate=np.array([2e-5,5e-5,1e-4,2e-4,3e-4,4e-4,5e-4])*2
     plt.figure(1)
@@ -629,14 +699,15 @@ def plot_result_DR(k,threshold):
                                    np.where(np.abs(period - 2*1000.) > 10),np.where(np.abs(period - 200.) > 10),
                                    np.where(period<20000)))]
     CDFS_LS_res=CDFS_LS_res[good_id]
-    # np.savetxt('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/LS_good_result_{0}.txt'.format(k),CDFS_LS_res,fmt='%10d %15.5f %15.5f %10d %10d %15.10f')
+    np.savetxt('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/LS_good_result_{0}.txt'.format(k),CDFS_LS_res,fmt='%10d %15.5f %15.5f %10d %10d %15.10f')
     det_NUM=len(good_id[0])
     src_id=src_id.astype('int')
     GOODID=src_id[good_id]
     # print(len(GOODID))
+    print(sim_real_NUM)
     return [sim_NUM,det_NUM,sim_real_NUM]
 
-plot_result_DR(3,0.95)
+plot_result_DR(4,0.9)
 
 def plot_LS_sim_det(k):
     x=[];y1=[];y2=[];y3=[]

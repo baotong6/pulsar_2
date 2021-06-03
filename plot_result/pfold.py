@@ -16,6 +16,11 @@ from astropy.stats import poisson_conf_interval
 import scipy
 # import mpmath
 #import read_csv as data
+
+font1 = {'family': 'Normal',
+         'weight': 'normal',
+         'size': 18, }
+
 ###----------------read table---------------###
 path_table = '/Users/baotong/Desktop/period/table/'
 result_NSC = pd.read_excel(path_table + 'final_all_del.csv', 'result_NSC')
@@ -90,34 +95,33 @@ def get_T_in_mbins(epoch_file,w,m,fi):
         else:
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
-def plot_longT_V(data_file,epoch_file):
+def plot_longT_V(data_file,bkg_file,epoch_file):
     epoch_info = np.loadtxt(epoch_file)
     t_start = epoch_info[:, 0]
     t_end = epoch_info[:, 1]
     obsID = epoch_info[:, 2]
     expT = epoch_info[:, 3]
     time = np.loadtxt(data_file)
-    cts=[]
+    time_bkg=np.loadtxt(bkg_file)
+    cts=[];bkg_cts=[]
     for i in range(len(obsID)):
         cts.append(len(np.where(time[:,2]==obsID[i])[0]))
+        bkg_cts.append(len(np.where(time_bkg[:, 2] == obsID[i])[0]))
     cts=np.array(cts)
-    CR=cts/expT
+    bkg_cts=np.array(bkg_cts)
+    CR=(cts-bkg_cts/12)/expT
+    CR_ERR=np.sqrt(CR*expT)/expT
     print(obsID[np.where(CR>0.0006)])
-    plt.plot(t_start,CR,marker='+')
+    plt.errorbar(t_start,CR,CR_ERR,fmt='o',capsize=3, elinewidth=1, ecolor='red')
     plt.show()
-path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
-dataname='89.txt'
-# plot_longT_V(path + dataname, path + 'epoch_src_' + dataname)
 
-def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label):
+def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
     time=np.loadtxt(data_file)[:,0]
-    # plt.hist(time-time[0],bins=500)
-    # plt.show()
-    #time=time[1164:6878]
-    # time_bkg=np.loadtxt('513_bkg.txt')[:,0]
     energy=np.loadtxt(data_file)[:,1]
+    # plt.hist(time,bins=100,histtype='step')
+    # plt.show()
     # time=filter_energy(time,energy,[500,2000])
-    T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, shift*2*np.pi)
+    # T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, shift*2*np.pi)
     #print(T_in_perbin)
     def trans(t,p_test,shift):
         ti =t
@@ -166,17 +170,14 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label):
 
     x2=np.concatenate((x,x+1))
     y2=np.concatenate((loc,loc))
-    correct_gap = T_in_perbin / (sum(T_in_perbin) / len(T_in_perbin))
-    y2 /= np.concatenate((correct_gap, correct_gap))
+    # correct_gap = T_in_perbin / (sum(T_in_perbin) / len(T_in_perbin))
+    # y2 /= np.concatenate((correct_gap, correct_gap))
     y2_err=np.array(poisson_conf_interval(y2,interval='frequentist-confidence'))
     y2_err[0]=y2-y2_err[0]
     y2_err[1]=y2_err[1]-y2
 
     #label='F1'
     plt.title("#{0} P={1:.2f},C={2}".format(label,p_test,str(len(time))), fontsize = 18)
-    font1 = {'family': 'Normal',
-             'weight': 'normal',
-             'size': 18,}
     plt.xlabel('phase',font1)
     plt.ylabel('counts/bin',font1)
     plt.tick_params(labelsize = 18)
@@ -197,10 +198,7 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label):
     ax2.set_ylim([0,yhigh])
     ax2.tick_params(labelsize=18)
 
-    #path_out='/Users/baotong/Desktop/aas/V63/figure/LW/'
-    # path_out='/Users/baotong/Desktop/aas/pCV_GC/figure/47Tuc/'
-    path_out='/Users/baotong/Desktop/CDFS/report1/'
-    # plt.savefig(path_out+'pfold_lc_{0}.eps'.format(label))
+    plt.savefig(pathout+'pfold_lc_{0}.eps'.format(label))
     plt.show()
     #plt.close()
 # phase_fold('513_bkg.txt','LW_epoch.txt',5334.75593,bin = 30, net_percent = 0.9, shift = 0.2, label = 12)
@@ -217,35 +215,15 @@ path_terzan='/Users/baotong/Desktop/period_terzan5/txt_all_obs_0.5_8/'
 path_M28='/Users/baotong/Desktop/period_M28/txt_all_obs_0.5_8/'
 path_NGC6397='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
 path_NGC6752='/Users/baotong/Desktop/period_NGC6752/txt_all_obs_0.5_8/'
-path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
-path=path_CDFS
-period= 306.37944
-dataname='236.txt'
-net_p=0.9
-epoch_file = path + 'epoch_src_' + dataname
-phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.2, label =dataname[0:-4])
+path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/'
+path_xmmCDFS='/Users/baotong/Desktop/CDFS/xmm_txt/'
 
-# index=0
-# #for i in range(len(ID_Tuc)):
-# for i in range(index,index+1):
-#     path_table='/Users/baotong/Desktop/period_Tuc/'
-#     # path_NSC_I = '/Users/baotong/Desktop/period/txt_all_obs_I/'
-#     # path_NSC_G = '/Users/baotong/Desktop/period/txt_all_obs_G/'
-#     # path_NSC_IG = '/Users/baotong/Desktop/period/txt_all_obs_IG/'
-#     # path_Tuc_soft = '/Users/baotong/Desktop/period_Tuc/txt_all_obs_0.5_2/'
-#     # path_Tuc_hard = '/Users/baotong/Desktop/period_Tuc/txt_all_obs_p90_2_8/'
-#     path = '/Users/baotong/Desktop/period_M28/txt_all_obs_0.5_8/'
-#     res = pd.read_excel(path_table + 'result_0.5_8_all.xlsx', 'M28')
-#     P_Tuc=res['P_out'];net_percent_Tuc=res['net_percent'];ID_Tuc=res['seq']
-#
-#     period=P_Tuc[i]
-#     net_p=net_percent_Tuc[i]
-#     dataname=str(ID_Tuc[i])+'.txt'
-#     label=str(ID_Tuc[i])
-#     if dataname[-7:-4]=='001' or dataname[-7:-4]=='002':
-#         dataname=dataname[0:-7]+dataname[-4:]
-#     epoch_file = path + 'epoch_src_' + dataname
-#     # phase_fold(path + dataname, epoch_file, period, bin=20, net_percent=net_p, shift=0.6, label=dataname[0:-4])
-#
-#     # dataname_out=str(data.ID_LW[i])+'_exclude.txt'
-#     phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.4, label = label)
+figurepath='/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
+if __name__=='__main__':
+    path=path_CDFS
+    period=1/4.36e-4
+
+    dataname='XID19_06.txt'
+    net_p=0.9
+    epoch_file = path + 'epoch_src_' + dataname
+    phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.9, label =dataname[0:-4],pathout=figurepath)

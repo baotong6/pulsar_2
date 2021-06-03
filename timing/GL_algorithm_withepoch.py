@@ -37,6 +37,39 @@ import datetime
 #import read_data_gc as data
 starttime = datetime.datetime.now()
 #T = 1618692.94
+
+def get_T_in_mbins(epoch_file,w,m,fi):
+    T=2*np.pi/w
+    T_in_perbin = np.zeros(m)
+    # 每个bin的总积分时间
+    tbin = T/m
+    # 每个bin的时间长度
+    # epoch_info = np.loadtxt(epoch_file)
+    epoch_info=epoch_file
+    t_start = epoch_info[:, 0]
+    t_end = epoch_info[:, 1]
+    # t_start=[epoch_info[0]]
+    # t_end = [epoch_info[1]]
+    N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
+    N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
+    intN_bin_t_start=np.floor(N_bin_t_start)+1
+    intN_bin_t_end=np.floor(N_bin_t_end)
+    intN_bin_t_start=intN_bin_t_start.astype(int)
+    intN_bin_t_end=intN_bin_t_end.astype(int)
+    for i in range(len(N_bin_t_start)):
+        if intN_bin_t_end[i]>=intN_bin_t_start[i]:
+            T_in_perbin+=int((intN_bin_t_end[i]-intN_bin_t_start[i])/m)*tbin
+            #print(intN_bin_t_start[i]-1)
+            T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(intN_bin_t_start[i]-N_bin_t_start[i])*tbin
+            T_in_perbin[np.mod(intN_bin_t_end[i],m)]+=(N_bin_t_end[i]-intN_bin_t_end[i])*tbin
+            rest=np.mod(intN_bin_t_end[i]-intN_bin_t_start[i],m)
+            for k in range(rest):
+                T_in_perbin[int(np.mod((intN_bin_t_start[i] + k), m))] += tbin
+            #print(rest)
+        else:
+            T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
+    return T_in_perbin
+
 def compute_bin(Tlist, m, w, fi):
     n = np.zeros(m, 'int')
     j = np.floor(m * np.mod(w * Tlist + fi, 2 * np.pi) / (2 * np.pi))
@@ -88,7 +121,7 @@ def compute_S(epoch_file,Tlist,w,m,fi):
     ln_S_wfi=-sum(n*np.log(s_wfi))
     return ln_S_wfi
 
-def compute_W_scaled(Tlist, m, w, fi, factor, fbin):
+def compute_W_scaled(Tlist, m, w, fi, factor, fbin,epoch_file):
     # compute the scaled multiplicity 1/Wm(w,fi) (see eqn. 5.25)
     # actually, it compute only n1!n2!...nm!,cause N! is been reduced in compute_factor --Tong
     # note that for large arrival time numbers the multiplicity becomes
@@ -110,18 +143,18 @@ def compute_W_scaled(Tlist, m, w, fi, factor, fbin):
     return y
 
 
-def compute_Om1(w, Tlist, m, factor, fbin, ni):
+def compute_Om1(w, Tlist, m, factor, fbin, ni,epoch_file):
     # compute  specific odds-ratios (eqn. 5.25)
     p = np.arange(0, ni) / float(ni) * 2 * np.pi / m
     #p 即为输入的fi
     # intgration range, only integrate over a single bin, as values of the integral repeat over bins
     y = np.zeros(np.size(p), 'float')  # array to hold values of W_scaled over the integration range
     for i in range(0, np.size(y)):
-        y[i] = compute_W_scaled(Tlist, m, w, p[i], factor, fbin)
+        y[i] = compute_W_scaled(Tlist, m, w, p[i], factor, fbin,epoch_file)
     return np.trapz(y, p) * m  # return intregrated W_Scaled
 
 
-def compute_Om1wPar(Tlist, m_max, w, fa, fbin, ni):  # compute odds-ratios for bins and frequencies
+def compute_Om1wPar(Tlist, m_max, w, fa, fbin, ni,epoch_file):  # compute odds-ratios for bins and frequencies
     # parallel version
     Om1w = np.zeros((m_max, np.size(w)), 'float')  # odds ratio matrix
     pool = mp.Pool()  # use all workers
@@ -131,15 +164,15 @@ def compute_Om1wPar(Tlist, m_max, w, fa, fbin, ni):  # compute odds-ratios for b
     return Om1w
 
 
-def compute_Om1w(Tlist, m_max, w, fa, fbin, ni):  # compute odds-ratios for bins and frequencies
+def compute_Om1w(Tlist, m_max, w, fa, fbin, ni,epoch_file):  # compute odds-ratios for bins and frequencies
     Om1w = np.zeros((m_max, np.size(w)), 'float')  # odds ratio matrix
     for m in range(0, m_max):
         for wi in range(0, np.size(w)):
-            Om1w[m, wi] = compute_Om1(w[wi], Tlist, m + 1, fa[m], fbin, ni)
+            Om1w[m, wi] = compute_Om1(w[wi], Tlist, m + 1, fa[m], fbin, ni,epoch_file=epoch_file)
     return Om1w
 
 
-def compute_GL(Tlist, m_max=20, w_range=None, ni=10, parallel=False):
+def compute_GL(Tlist, epoch_file,m_max=20, w_range=None, ni=10, parallel=False):
     # initialize output values
     O_period = None
     p_period = None
@@ -178,9 +211,9 @@ def compute_GL(Tlist, m_max=20, w_range=None, ni=10, parallel=False):
         for m in range(0, m_max):  # precompute factors for each m
             fa[m] = compute_factor(N, m + 1, v)
         if parallel:
-            Om1w = compute_Om1wPar(Tlist, m_max, w, fa, fbin, ni)
+            Om1w = compute_Om1wPar(Tlist, m_max, w, fa, fbin, ni,epoch_file)
         else:
-            Om1w = compute_Om1w(Tlist, m_max, w, fa, fbin, ni)
+            Om1w = compute_Om1w(Tlist, m_max, w, fa, fbin, ni,epoch_file)
 
         pw = 1./ (w*np.log(w_hi / w_lo))
         O1m = np.zeros(m_max)
@@ -214,102 +247,6 @@ def compute_GL(Tlist, m_max=20, w_range=None, ni=10, parallel=False):
         print("No valid arrival time array provided!\n")
         return O_period, p_period, m_opt, S, w, w_peak, w_mean, w_conf,cdf
 
-def get_T_in_mbins(epoch_file,w,m,fi):
-    T=2*np.pi/w
-    T_in_perbin = np.zeros(m)
-    # 每个bin的总积分时间
-    tbin = T/m
-    # 每个bin的时间长度
-    epoch_info = np.loadtxt(epoch_file)
-    t_start = epoch_info[:, 0]
-    t_end = epoch_info[:, 1]
-    # t_start=[epoch_info[0]]
-    # t_end = [epoch_info[1]]
-    N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
-    N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
-    intN_bin_t_start=np.floor(N_bin_t_start)+1
-    intN_bin_t_end=np.floor(N_bin_t_end)
-    intN_bin_t_start=intN_bin_t_start.astype(int)
-    intN_bin_t_end=intN_bin_t_end.astype(int)
-    for i in range(len(N_bin_t_start)):
-        if intN_bin_t_end[i]>=intN_bin_t_start[i]:
-            T_in_perbin+=int((intN_bin_t_end[i]-intN_bin_t_start[i])/m)*tbin
-            #print(intN_bin_t_start[i]-1)
-            T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(intN_bin_t_start[i]-N_bin_t_start[i])*tbin
-            T_in_perbin[np.mod(intN_bin_t_end[i],m)]+=(N_bin_t_end[i]-intN_bin_t_end[i])*tbin
-            rest=np.mod(intN_bin_t_end[i]-intN_bin_t_start[i],m)
-            for k in range(rest):
-                T_in_perbin[int(np.mod((intN_bin_t_start[i] + k), m))] += tbin
-            #print(rest)
-        else:
-            T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
-    return T_in_perbin
-path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
-#path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
-epoch_file =path + 'epoch_src_89.txt'
-# print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
-
-result_srcid=[]
-result_runtime=[]
-result_Prob=[]
-result_wpeak=[]
-result_mopt=[]
-result_wconf_lo=[]
-result_wconf_hi=[]
-def write_result(dataname):
-    path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
-    #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
-    filename=str(dataname)+'.txt'
-    time = np.loadtxt(path + str(dataname) + '.txt')[:, 0]
-    energy=np.loadtxt(path + str(dataname) + '.txt')[:, 1]
-    #time = filter_energy(time, energy, [200, 500])
-    #time=np.loadtxt(path+str(dataname)+'.txt')
-    counts=len(time)
-    w_range=2*np.pi*np.arange(1./2600,1./1000,1.e-7)
-    starttime = datetime.datetime.now()
-    GL_R=compute_GL(time,w_range=w_range,m_max=10,parallel=False)
-    endtime = datetime.datetime.now()
-    srcid=dataname
-    runtime=(endtime - starttime).seconds
-    Prob=GL_R[1]
-    wpeak=GL_R[5]
-    mopt=GL_R[2]
-    wconf_lo=GL_R[7][0]
-    wconf_hi=GL_R[7][1]
-
-    return [srcid,runtime,Prob,wpeak,mopt,wconf_lo,wconf_hi,counts]
-
-def get_result_fromid(id_range):
-    result_srcid = []
-    result_runtime = []
-    result_Prob = []
-    result_wpeak = []
-    result_mopt = []
-    result_wconf_lo = []
-    result_wconf_hi = []
-    result_counts=[]
-
-    for i in id_range:
-        res = write_result(i)
-        result_srcid.append(res[0])
-        result_runtime.append(res[1])
-        result_Prob.append(res[2])
-        result_wpeak.append(res[3])
-        result_mopt.append(res[4])
-        result_wconf_lo.append(res[5])
-        result_wconf_hi.append(res[6])
-        result_counts.append(res[7])
-    result_wpeak = np.array(result_wpeak)
-    result_period = 2 * np.pi / result_wpeak
-    # result = np.column_stack((result_srcid, result_runtime, result_Prob, result_wpeak, result_period, result_mopt,
-    #                           result_wconf_lo, result_wconf_hi))
-    result = np.column_stack((result_runtime, result_Prob, result_wpeak, result_period, result_mopt,
-                              result_wconf_lo, result_wconf_hi,result_counts))
-    print(result)
-    #np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result, fmt='%10d %10.2f %10.2f %10.5f %10.5f %10d %10.5f %10.5f')
-    np.savetxt(path+'result_1h_{0}.txt'.format(id_range[0]), result,
-               fmt='%10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
-
-get_result_fromid(['19'])
-
-#choose_id(1, 3)
+import sys
+if __name__ == '__main__':
+    compute_GL(Tlist, epoch_file,m_max=20, w_range=None, ni=10, parallel=False)

@@ -15,20 +15,23 @@ import scipy.signal as ss
 import random
 from astropy.wcs import WCS
 #path='/Users/baotong/Desktop/period/'
-path='/Users/baotong/Desktop/period_LW/'
-path='/Volumes/pulsar/CDFS/merge_data/timing/'
+# path='/Users/baotong/Desktop/period_LW/'
+path='/Volumes/pulsar/ECDFS/merge_data/timing/'
 #evt_list='LW_merged_evt.fits'
 #p90_list='SgrA_grt_2000_8000_psf90.fits'
 #p90_list='SgrA_2000_8000_psf90.fits'
-p90_list='expweighted_90_mean_e1.psfmap'
+p90_list='expweighted_90_mean_i3.psfmap'
 #srcname_list='LimWin_p50_2000_8000_src.fits'
-fitsname='LW_e1.fits'
+fitsname='ECDFS_3.fits'
 w=WCS(path+fitsname)
 # lon, lat = w.all_world2pix(266.3980091,-29.02585626,1)
 
-source_info = np.loadtxt(path+'catalog_LW.txt')
-ra = source_info[:,1]
-dec = source_info[:,2]
+# source_info = np.loadtxt(path+'catalog_LW.txt')
+# ra = source_info[:,1]
+# dec = source_info[:,2]
+ra=[52.94699]
+dec=[-27.88701]
+
 
 #print(ra)
 #print(dec)
@@ -61,5 +64,6 @@ for i in range(len(phy_x)):
     with open(path+'region_90/{0}.reg'.format(i+1),'w+') as f1:
         reg='circle('+str(phy_x[i])+','+str(phy_y[i])+','+str(src_radius[i])+')'
         f1.writelines(reg)
-    with open(path+'region_90/all.reg','a+') as f2:
-        f2.writelines(reg+'\n')
+
+    # with open(path+'region_90/all.reg','a+') as f2:
+    #     f2.writelines(reg+'\n')

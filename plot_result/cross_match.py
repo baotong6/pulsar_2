@@ -104,4 +104,28 @@ def compare_counterpart(ra_dec1,ra_dec2,seq1,seq2):
     # plt.legend(['X-ray','pulsar'])
     # print(match)
 #compare_counterpart(get_NGC6397()[0],get_NGC6397()[1],get_NGC6397()[2], get_NGC6397()[3])
-compare_counterpart(get_input('47Tuc')[0],get_input('47Tuc')[1],get_input('47Tuc')[2],get_input('47Tuc')[3])
+# compare_counterpart(get_input('47Tuc')[0],get_input('47Tuc')[1],get_input('47Tuc')[2],get_input('47Tuc')[3])
+
+def compare_counterpart_long(ra_dec1,ra_dec2,seq1,seq2):
+    offset=0.05
+    match_ID2=[[] for i in range(len(seq1))]
+    for i in range(len(seq1)):
+        ra1=ra_dec1[0][i];dec1=ra_dec1[1][i]
+        dis=((ra_dec2[0]-ra1)**2+(ra_dec2[1]-dec1)**2)**0.5
+        match=seq2[np.where(dis<offset)[0]]
+        match_ID2[i]=match
+        print(i)
+
+    return match_ID2
+
+if __name__=='__main__':
+    path='/Users/baotong/Downloads/'
+    file1=np.loadtxt(path+'test0512_02.txt')
+    file2=np.loadtxt(path+'test0512_03.txt')
+    ra_dec1=[file1[:,0],file1[:,1]]
+    ra_dec2 = [file2[:, 0], file2[:, 1]]
+    seq1=np.arange(1,len(ra_dec1[0])+1,1)
+    seq2=np.arange(1,len(ra_dec2[0])+1,1)
+    match=compare_counterpart_long(ra_dec1,ra_dec2,seq1,seq2)
+    print(seq2)
+

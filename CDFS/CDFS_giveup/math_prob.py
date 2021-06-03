@@ -83,8 +83,9 @@ def get_sim_Prob(k,threshold):
     fDR_noQPO=np.zeros(len(cts_rate_str))
     for i in range(len(cts_rate_str)):
         noQPOfile=np.loadtxt(path+'trial_out_{0}_REJ1034+396_noQPO.txt'.format(cts_rate_str[i]))
-        fp_noQPO=noQPOfile[:,0]
-        fDR_noQPO[i]=len(np.where(fp_noQPO<threshold)[0])
+        fp_noQPO=noQPOfile[:,0];period_noQPO=noQPOfile[:,1]
+        fDR_noQPO[i] = len(np.where((fp_noQPO < threshold))[0])
+        # fDR_noQPO[i]=len(np.where((fp_noQPO<threshold)&(period_noQPO>210.))[0])
         for j in range(len(period_str)):
             file=np.loadtxt(path+'trial_out_{0}_{1}_REJ1034+396.txt'.format(period_str[j],cts_rate_str[i]))
             fp = file[:,0]
@@ -95,17 +96,36 @@ def get_sim_Prob(k,threshold):
 
 def plot_sim_DR(k_num,threshold):
     figlabel = [[0, 0], [0, 1], [1, 0], [1, 1]]
-
     fig, axes = plt.subplots(2, 2,figsize=(15,10))
     for i in range(len(k_num)):
         k = k_num[i];
+        CDFS_LS_res = np.loadtxt('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/LS_result_{0}.txt'.format(k))
+        bins_CR = np.array([0, 4e-5, 7e-5, 1.5e-4, 2.5e-4, 3.5e-4, 4.5e-4, 5.5e-4]) * 2
+        plt.figure(2)
+        CRhist = plt.hist(CDFS_LS_res[:, 5], bins=bins_CR, histtype='step')
+        # print(CRhist)
+        print(len(np.where(CDFS_LS_res[:, 5] > 4e-4)[0]))
+        # 计算大于某个流量的源有多少
+        plt.close(2)
+
         ax_temp = axes[figlabel[i][0], figlabel[i][1]]
         [DR, fDR, fDR_noQPO]=get_sim_Prob(k,threshold)
+
+
         # DR/=1000;fDR/=1000
         x=np.array([4e-5,1e-4,2e-4,4e-4,6e-4,8e-4,1e-3])*1e5
         y1=DR[:,0];y2=DR[:,1];y3=DR[:,2];y4=DR[:,3]
         z1=fDR[:,0];z2=fDR[:,1];z3=fDR[:,2];z4=fDR[:,3]
+
         m=fDR_noQPO
+
+        sim_NUM_04h = np.sum(CRhist[0] * y3/ 1000)
+        print(CRhist[0] * y3/ 1000)
+        print('sim_NUM_04h={0}'.format(sim_NUM_04h))
+        sim_NUM_false=np.sum(CRhist[0] * m/ 1000)
+        print('sim_NUM_false={0}'.format(sim_NUM_false))
+        # sim_real_NUM = np.sum(CRhist[0] * DR_04hr / 1000)
+
         # ax_temp.set_yscale('log')
         ax_temp.plot(x,y1/10,marker='v', linestyle='-', color='blue')
         ax_temp.plot(x,y2/10,marker='v', linestyle='-', color='red')
@@ -132,7 +152,7 @@ def plot_sim_DR(k_num,threshold):
 
     plt.show()
 
-# plot_sim_DR([1,2,3,4],1-0.95)
+plot_sim_DR([1,2,3,4],1-0.99)
 
 def read_LS_info(k,threshold):
     path='/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/'.format(k)
@@ -222,13 +242,30 @@ def plot_LS_bootstrapFAP(k,srcid,threshold):
     # plt.text(5e-5,0.19,'99.95%',color='r',weight=2,fontsize=14)
     # plt.plot([0,20000],[0.00878,0.00878],'--')
 
-    def get_max_trial(threshold=0.9973,num_trials=10000):
+    def get_max_trial(LSP,threshold=0.9973,num_trials=10000):
         path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep{0}/simulation/{1}_LS_sim_noQPO/'.format(k,srcid)
-        maxP=np.loadtxt(path+'maxP_trial.txt')
-        sort_maxP=np.sort(maxP)
+        maxP=np.loadtxt(path+'maxP_trial_const.txt')
+        idex = np.lexsort([maxP[:,0]])
+        sorted_data = maxP[idex, :]
+        sort_maxP=sorted_data[:,0]
+        freq_sortP=sorted_data[:,1]
+        bins=np.logspace(np.log10(100),np.log10(20000),15)
+        freq_out_overLSP=freq_sortP[np.where(sort_maxP>LSP)]
+        print(len(freq_out_overLSP))
+        freq_out=freq_sortP[int(num_trials*threshold):]
+        plt.title('const Distribution of false detection: XID={0}'.format(srcid))
+        plt.hist(1/freq_out,bins=bins,histtype='step',linewidth=5,color='green')
+        plt.semilogx()
+        plt.xlabel('Period')
+        plt.ylabel('Num')
+        plt.show()
+
         return sort_maxP[int(num_trials*threshold)]*0.01
-    plt.plot([freq[0],freq[-1]],[get_max_trial(),get_max_trial()],'--',color='orange')
-    plt.text(freq[0],get_max_trial()*1.01,'99.73%')
+
+    maxP=get_max_trial(LSP=12.43)
+    print(maxP)
+    plt.plot([freq[0],freq[-1]],[maxP,maxP],'--',color='orange')
+    plt.text(freq[0],maxP*1.01,'99.73%')
 
 
     def get_hist_withbkg(t, t_bkg, len_bin):
@@ -289,10 +326,10 @@ def plot_LS_bootstrapFAP(k,srcid,threshold):
         # plt.close()
         return [FP, out_period]
 
-    lc = get_hist_withbkg(time, bkg_time, dt)
-    x = lc.time;
-    flux = lc.counts
-    (FP, out_period) = get_LS(x, flux, freq, str(srcid), k)
-    plt.savefig(figurepath+'LS_{0}_simFAP_{1}.eps'.format(srcid,threshold),bbox_inches='tight',pad_inches=0.0)
-    plt.show()
-plot_LS_bootstrapFAP('3','19',threshold=0.9999)
+    # lc = get_hist_withbkg(time, bkg_time, dt)
+    # x = lc.time;
+    # flux = lc.counts
+    # (FP, out_period) = get_LS(x, flux, freq, str(srcid), k)
+    # plt.savefig(figurepath+'LS_{0}_simFAP_{1}.eps'.format(srcid,threshold),bbox_inches='tight',pad_inches=0.0)
+    # plt.show()
+# plot_LS_bootstrapFAP('3','89',threshold=0.9999)

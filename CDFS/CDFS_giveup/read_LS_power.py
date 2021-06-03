@@ -23,7 +23,7 @@ def read_LSP(k,srcid,threshold=0.999,num_trials=10000):
     freq = np.arange(1 / T_exp, 0.5 / dt, 1 / (5 * T_exp))
     freq = freq[np.where(freq > 1 / 20000.)]
     res=[];
-    df=pd.read_table(path+'{0}_LS_simP.csv'.format(srcid),header=None)
+    df=pd.read_table(path+'{0}_LS_simP_fixpds.csv'.format(srcid),header=None)
     df=np.array(df)
     print('read success')
     for i in range(len(df)):
@@ -36,14 +36,16 @@ def read_LSP(k,srcid,threshold=0.999,num_trials=10000):
     # print('local num={0}'.format(len(np.where(res[55100]>12.431478151451798)[0])))
     # print('global num={0}'.format(len(sum(np.where(res>12.431478151451798)))))
     maxP_trial=np.max(res,axis=0)
-    np.savetxt(path + '{0}_LS_sim_noQPO/maxP_trial.txt'.format(srcid), maxP_trial, fmt='%10.2f')
+    maxP_freq=freq[np.argmax(res,axis=0)]
+    maxP_out=np.column_stack((maxP_trial,maxP_freq))
+    np.savetxt(path + '{0}_LS_sim_noQPO/maxP_trial_fixpds.txt'.format(srcid), maxP_out, fmt='%10.2f %10.10f')
 
-    power_thres_ar = np.zeros(len(freq));
-    power_thres_ar=res_sort[:,int(num_trials*threshold)]
-    smoothP=np.column_stack((freq,power_thres_ar))
-    np.savetxt(path+'{0}_LS_sim_noQPO/LSP_{1}.txt'.format(srcid,threshold),smoothP,fmt='%10.5f %10.2f')
-    plt.step(freq,power_thres_ar)
-    plt.savefig(path+'{0}_LS_sim_noQPO/LSP_{1}.eps'.format(srcid,threshold))
+    # power_thres_ar = np.zeros(len(freq));
+    # power_thres_ar=res_sort[:,int(num_trials*threshold)]
+    # smoothP=np.column_stack((freq,power_thres_ar))
+    # np.savetxt(path+'{0}_LS_sim_noQPO/LSP_{1}_fixpds.txt'.format(srcid,threshold),smoothP,fmt='%10.5f %10.2f')
+    # plt.step(freq,power_thres_ar)
+    # plt.savefig(path+'{0}_LS_sim_noQPO/LSP_{1}_fixpds.eps'.format(srcid,threshold))
     return None
 # read_LSP('3','19',threshold=0.999,num_trials=10000)
 read_LSP('3','236',threshold=0.9999,num_trials=10000)

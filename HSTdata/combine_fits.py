@@ -34,3 +34,8 @@ def combine_drc():
     combine.writeto('combine_drc.fits',overwrite=True)
 
 combine_drc()
+
+def delete_rows():
+    path='/Volumes/pulsar/xmmCDFS/merge_evt/'
+    os.chdir(path)
+    f1=fits.open('ep5_temp21_pn_filt_time.fits')

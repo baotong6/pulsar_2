@@ -20,7 +20,7 @@ font1 = {'family': 'Normal',
 figurepath='/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
 
 def plot_GL_result_of_CDFS():
-    threshold=0.99
+    threshold=0.9973
     plt.figure(1,(15,10))
     plt.ylim(0,1)
     def get_result_GL(k):
@@ -35,41 +35,47 @@ def plot_GL_result_of_CDFS():
         prob_3h=result_file_3h[:,2]
         period_3h=result_file_3h[:,4]
 
-
         prob=np.zeros(1055)
         period=np.zeros(1055)
 
-        for i in range(len(1055)):
+        for i in range(1055):
             if i in id_1h:
                 if i in id_3h:
-                    if prob_1h[np.where(id_1h)==i] >= prob_3h[np.where(id_3h==i)]:
-                        prob[i]=prob_1h[np.where(id_1h)==i]
-                        period[i]=period_3h[np.where(id_1h)==i]
+                    if prob_1h[np.where(id_1h==i)][0] > prob_3h[np.where(id_3h==i)][0]:
+                        prob[i]=prob_1h[np.where(id_1h==i)][0]
+                        period[i]=period_1h[np.where(id_1h==i)][0]
                     else:
-                        prob[i] = prob_3h[np.where(id_3h) == i]
-                        period[i] = period_3h[np.where(id_3h) == i]
+                        prob[i] = prob_3h[np.where(id_3h== i)][0]
+                        period[i] = period_3h[np.where(id_3h == i)][0]
                 else:
-                    prob[i] = prob_1h[np.where(id_1h) == i]
-                    period[i] = period_3h[np.where(id_1h) == i]
+                    prob[i] = prob_1h[np.where(id_1h== i)][0]
+                    period[i] = period_1h[np.where(id_1h == i)][0]
             else:continue
 
         prob_out=prob[np.where(prob>threshold)]
         period_out=period[np.where(prob>threshold)]
         prob_in=prob[np.where(prob<=threshold)]
         period_in=period[np.where(prob<=threshold)]
+        print(prob_out)
+        print(period_out)
 
         label=220+k
         plt.subplot(label)
         plt.title('Epoch{0}'.format(k), font1)
         plt.scatter(period_out, prob_out, marker='^',s=80, color='purple')
         plt.scatter(period_in,prob_in,marker='.',s=50,color='black')
-        plt.plot([0, 3000], [threshold, threshold], '--', color='black')
+        plt.plot([0, 20000], [threshold, threshold], '--', color='black')
         plt.plot([707, 707], [0, threshold], '--', color='r')
         plt.plot([1000, 1000], [0, threshold], '--', color='green')
         plt.plot([707 * 2, 707 * 2], [0, threshold], '--', color='r')
         plt.plot([1000 * 2, 1000 * 2], [0, threshold], '--', color='green')
         plt.plot([707 * 3, 707 * 3], [0, threshold], '--', color='r')
         plt.plot([1000 * 3, 1000 * 3], [0, threshold], '--', color='green')
+
+        if k==1: plt.text(1e4,0.9,'780',color='red',fontsize=15)
+        if k==2: plt.text(1.5e4,0.9,'780',color='red',fontsize=15)
+        if k==4:
+            plt.text(0.9e4,0.9,'330,725,780',color='red',fontsize=15)
         plt.ylabel('Probability', font1)
         plt.tick_params(labelsize=16)
         plt.semilogx()
@@ -84,7 +90,7 @@ def plot_GL_result_of_CDFS():
 
     plt.savefig(figurepath+'GL_res.eps',bbox_inches='tight',pad_inches=0.0)
     plt.show()
-plot_GL_result_of_CDFS()
+# plot_GL_result_of_CDFS()
 
 def plot_LS_result_of_CDFS():
     threshold=0.9973
@@ -97,8 +103,8 @@ def plot_LS_result_of_CDFS():
         prob=1-FP
         period = LS_result[:, 2]
 
-        prob_out=prob[np.where(((period-200)>10)&(prob>threshold))]
-        period_out=period[np.where(((period-200)>10)&(prob>threshold))]
+        prob_out=prob[np.where(((period-200)>150)&(prob>threshold))]
+        period_out=period[np.where(((period-200)>150)&(prob>threshold))]
         print(period_out)
 
         prob_in=prob[np.where(prob<=threshold)]
@@ -107,17 +113,22 @@ def plot_LS_result_of_CDFS():
         label=220+k
         plt.subplot(label)
         plt.title('Epoch{0}'.format(k), font1)
+        if k==2:
+            plt.text(1.5e4,1e-4,'780',color='red',fontsize=15)
+        if k==4:
+            plt.text(1.5e4,1e-7,'780',color='red',fontsize=15)
+        plt.scatter(period_out, 1-prob_out, marker='v',s=80, color='purple')
+        plt.scatter(period_in,1-prob_in,marker='.',s=50,color='black')
+        plt.loglog()
 
-        plt.scatter(period_out, prob_out, marker='v',s=80, color='purple')
-        plt.scatter(period_in,prob_in,marker='.',s=50,color='black')
-        plt.plot([0, 10000], [threshold, threshold], '--', color='black')
+        plt.plot([0, 20000], [1-threshold, 1-threshold], '--', color='black')
         plt.plot([707, 707], [0, threshold], '--', color='r')
         plt.plot([1000, 1000], [0, threshold], '--', color='green')
         plt.plot([707 * 2, 707 * 2], [0, threshold], '--', color='r')
         plt.plot([1000 * 2, 1000 * 2], [0, threshold], '--', color='green')
         plt.plot([707 * 3, 707 * 3], [0, threshold], '--', color='r')
         plt.plot([1000 * 3, 1000 * 3], [0, threshold], '--', color='green')
-        plt.ylabel('1-FAP', font1)
+        plt.ylabel('FAP', font1)
         plt.tick_params(labelsize=16)
         plt.semilogx()
 
@@ -132,4 +143,4 @@ def plot_LS_result_of_CDFS():
 
     plt.show()
 
-# plot_LS_result_of_CDFS()
+plot_LS_result_of_CDFS()

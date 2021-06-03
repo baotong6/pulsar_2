@@ -25,95 +25,37 @@ warnings.filterwarnings("ignore")
 #path='/Volumes/pulsar/omega_cen/merge_data/timing/'
 #path='/Volumes/pulsar/NGC6397/merge_data/timing/'
 path='/Volumes/pulsar/CDFS/merge_data/timing/'
-# obs_ID=['17239','945','14897', '17236', '17237',
-#         '18852','17240','17238','20118',
-#         '17241','20807', '20808']
-#obs_ID=['945','14897','17236','17239','17237','18852','17240','17238','20118','17241','20807','20808']
-# obs_ID=['242' ,'2943' ,'2951' ,'2952' ,'2953' ,'2954' ,'3392' ,'3393' ,'3549'
-#       ,'3663' ,'3665' ,'4683' ,'4684' ,'5360' ,'5950' ,'5951' ,'5952' ,'5953' ,'5954' \
-#       ,'6113' ,'6363' ,'6639','6640' ,'6641' ,'6642' ,'6643' ,'6644' ,'6645' ,'6646' \
-#       ,'7554' ,'7555' ,'7556' ,'7557' ,'7558' ,'7559' ,'9169' ,'9170','9171' ,'9172' \
-#       ,'9173' ,'9174' ,'10556' ,'11843' ,'15611' ,'15612' ,'13016' ,'13017' ,'14941','14942']
-#obs_ID=['5934','6362','6365','9500','9501','9502','9503','9504','9505','9854','9855','9892','9893']
-
-# obs_ID=['13838','13839','13840','13841','13842','13843','13844','13845','13846','13847' \
-#          ,'13848','13849','13850','13851','13852','13853','13854','13855','13856','13857' \
-#          ,'14392','14393','14394','14413','14414','14427','14432','14438','14439','14460' \
-#          ,'14461','14462','14463','14465','14466','14468','15568','15570']
-# obs_ID=['79','2668','2669','7460','7461']
-# obs_ID=['653','1519','13727','13726']
-# obs_ID=['78','953','954','955','956','2735',
-#         '3384','2736','3385','2737','3386',
-#         '2738','3387','16527','15747','16529',
-#         '17420','15748','16528']
-# obs_ID=['3798','10059','13225','13252','13705', '13706' ,
-#         '14339','14475' '14476' '14477' ,'14478','14479',
-#         '14625','15615','15750','16638','17779','18881']
-# obs_ID=['2684','2685','2683','9132','9133','16748','16749','16750']
 obs_ID=[581,1431,441,582,2406,2405,2312,1672,2409,2313,2239,8591,9593,9718,8593,8597,8595,8592,8596,
 9575,9578,8594,9596,12043,12123,12044,12128,12045,12129,12135,12046,12047,12137,12138,12055,12213,12048,
 12049,12050,12222,12219,12051,12218,12223,12052,12220,12053,12054,12230,12231,12227,12233,12232,12234,16183,
 16180,16456,16641,16457,16644,16463,17417,17416,16454,16176,16175,16178,16177,16620,16462,17535,17542,16184,
 16182,16181,17546,16186,16187,16188,16450,16190,16189,17556,16179,17573,17633,17634,16453,16451,16461,16191,
 16460,16459,17552,16455,16458,17677,18709,18719,16452,18730,16185]
-# epoch_file='ACIS-I_epoch.txt'
-#epoch_file='SgrA_I_epoch.txt'
-#epoch_file='SgrA_G_epoch.txt'
-# epoch_file='47Tuc_epoch.txt'
-#epoch_file='M28_epoch.txt'
-#epoch_file='omg_cen_epoch.txt'
-#epoch_file='terzan5_epoch.txt'
+
+# obs_ID=[5020,5019]
 epoch_file='CDFS_epoch.txt'
+# epoch_file='ECDFS_epoch.txt'
 obs_ID_all=np.loadtxt(path+epoch_file)[:,2]
 obs_ID_all=obs_ID_all.astype(int)
 obs_ID_all=obs_ID_all.astype(str)
 
 def make_region_each_obs():
     os.chdir(path)
-    ###for nuclear disk
-    # source_info=np.loadtxt('combineobs_info_box.txt')
-    # phy_x=source_info[:,2]
-    # phy_y=source_info[:,3]
-    #
-    # phy_x=np.rint(phy_x)
-    # phy_y=np.rint(phy_y)
-    # phy_x_int=phy_x.astype(np.int)
-    # phy_y_int=phy_y.astype(np.int)
-    #
-    # src_x=phy_x_int-2896
-    # src_y=phy_y_int-2896
-
-    #for NSC
-    # fitsname = 'SgrA_2000:8000.fits'
-    ##for NSC-grating
-    # fitsname='SgrAall_2000:8000.fits'
-
-    ## for omg_cen
     fitsname='CDFS_3.fits'
-
     w = WCS(path + fitsname)
-
     # source_info=fits.open('zhu18_3.fits')
     # ra = source_info[1].data.field(0)
     # dec = source_info[1].data.field(1)
-
     source_info=fits.open('7Ms_catalog.fit')
     ra = source_info[1].data['RAJ2000']
     dec = source_info[1].data['DEJ2000']
-
-    #srclist_file = path + 'terzan5_p50_i5_src_1_2_4_8.fits'
-    #srclist_file = path + 'xray_properties-592.fits'
-    #srclist_map = fits.open(srclist_file)
-    # ra=srclist_map[1].data['RA']
-    # dec= srclist_map[1].data['DEC']
 
     #for single source
     ##cnball
     # ra=[6.033179]
     # dec=[-72.077716]
-    ##tail for IR13E
-    ra=[53.206938]
-    dec=[-27.914979]
+    # ra=[52.94699]
+    # dec=[-27.88701]
     # phy_x=srclist_map[1].data['X']
     # phy_y=srclist_map[1].data['Y']
     # src_x=phy_x-2896
@@ -146,19 +88,19 @@ def make_region_each_obs():
         p90_data = hdul_p90[0].data
         p90_data = p90_data.T
         src_radius = p90_data[src_x, src_y]
-        #src_radius *= 2.032521*0.6
+        src_radius *= 2.032521
         # src_radius=[1.2*2.032521]
         os.chdir(path+'region_{0}'.format(obs_ID_all[i]))
         os.system('mkdir region_90')
 
         for i in range(len(phy_x)):
-            # with open('./region_90/{0}.reg'.format(i + 1), 'w+') as f1:
-            with open('./region_90/{0}.reg'.format('872_mod'), 'w+') as f1:
-                reg = 'circle(' + str(phy_x[i]) + ',' + str(phy_y[i]) + ',' + str(src_radius[i]*0.6) + ')'
+            with open('./region_90/{0}.reg'.format(i + 1), 'w+') as f1:
+            # with open('./region_90/{0}.reg'.format('XID19'), 'w+') as f1:
+                reg = 'circle(' + str(phy_x[i]) + ',' + str(phy_y[i]) + ',' + str(src_radius[i]) + ')'
                 f1.writelines(reg)
             # with open('./region_90/all.reg', 'a+') as f2:
             #     f2.writelines(reg + '\n')
-make_region_each_obs()
+
 def get_txt(obs_id):
     ##for NSC
     # source_id = np.linspace(1, 3619, 3619)
@@ -168,13 +110,13 @@ def get_txt(obs_id):
     # source_id = np.linspace(1, 847, 847)
     # source_id = source_id.astype(int)
 
-    #for single source
-    #source_id=['352_mod']
+    ##  for single source
+    # source_id=['XID19']
     ##for omg_cen
     # source_id = np.linspace(1, 379, 379)
     # source_id = source_id.astype(int)
 
-    # for CDFS
+    ## ##for CDFS
     source_id = np.linspace(1, 1055, 1055)
     source_id = source_id.astype(int)
 
@@ -250,7 +192,6 @@ def get_txt(obs_id):
         src_txt = src_txt[src_txt[:,0].argsort()]
 
         np.savetxt(path+'txt_{0}_0.5_8/'.format(obs_id)+str(item)+'.txt',src_txt,fmt="%.7f  %5.3f  %d")
-
 
 def merge_txt(src_id):
     def read_region(obs_id,regname):
@@ -335,6 +276,7 @@ def merge_txt(src_id):
     res_ID = list(_flatten(res_ID))
     result=np.column_stack((res_t,res_E,res_ID))
     epoch_info=np.column_stack((epoch_start,epoch_stop,epoch_ID,epoch_expt))
+    # os.mkdir(path+'txt_all_obs_0.5_8/')
     np.savetxt(path+'txt_all_obs_0.5_8/'+'epoch_src_'+str(src_id)+'.txt',epoch_info,fmt='%15.2f %15.2f %10d %20.2f')
     np.savetxt(path+'txt_all_obs_0.5_8/'+str(src_id)+'.txt',result,fmt="%.7f  %5.3f  %d")
 
@@ -390,6 +332,16 @@ def get_id_of_G():
             id_all.append(item)
     np.savetxt(path+'src_inG.txt',id_all,fmt='%5d')
     return id_all
+
+
+if __name__=='__main__':
+    # make_region_each_obs()
+    # for id in obs_ID:
+    #     get_txt(id)
+    source_id = np.linspace(1, 1055, 1055)
+    source_id = source_id.astype(int)
+    for srcid in source_id:
+        merge_txt(srcid)
 #get_id_of_G()
     #np.savetxt(path_out+'src_list_both.txt',src_list_both,fmt="%d")
 #merge_I_with_GRT()

@@ -34,6 +34,14 @@ def make_region_each_obs():
     source_info = fits.open('7Ms_catalog.fit')
     ra = source_info[1].data['RAJ2000']
     dec = source_info[1].data['DEJ2000']
+
+    #for single source
+    ##cnball
+    # ra=[6.033179]
+    # dec=[-72.077716]
+    ra=[52.94699]
+    dec=[-27.88701]
+
     src_x, src_y = w.all_world2pix(ra, dec, 1)
     phy_x = src_x + 2896
     phy_y = src_y + 2896
@@ -58,7 +66,7 @@ def make_region_each_obs():
         p90_data = hdul_p90[0].data
         p90_data = p90_data.T
         src_radius = p90_data[src_x, src_y]
-        # src_radius *= 2.032521*0.6
+        src_radius *= 2.032521*0.6
         # src_radius=[1.2*2.032521]
         os.chdir(path + 'region_{0}'.format(obs_ID_all[i]))
         os.system('mkdir region_90')
@@ -69,7 +77,8 @@ def make_region_each_obs():
                 f1.writelines(reg)
             with open('./region_90/all_bkg.reg', 'a+') as f2:
                 f2.writelines(reg + '\n')
-# make_region_each_obs()
+
+
 def get_txt(obs_id):
     # for CDFS
     source_id = np.linspace(1, 1055, 1055)
@@ -148,6 +157,7 @@ def get_txt(obs_id):
         p90_data = hdul_p90[0].data
         p90_data = p90_data.T
         src_radius = p90_data[src_x, src_y]
+        src_radius*=2.032521
         del_index=[]
         for i in range(len(src_radius)):
             r=((x-phy_x[i])**2+(y-phy_y[i])**2)**0.5
@@ -180,8 +190,6 @@ def get_txt(obs_id):
 
         np.savetxt(path+'txt_{0}_0.5_8/'.format(obs_id)+str(item)+'_bkg.txt',src_txt,fmt="%.7f  %5.3f  %d")
 
-# for i in range(len(obs_ID_all)):
-#     get_txt(obs_ID_all[i])
 
 def merge_txt(src_id):
     def read_region(obs_id,regname):
@@ -269,7 +277,12 @@ def merge_txt(src_id):
     np.savetxt(path+'txt_all_obs_0.5_8/'+'epoch_src_'+str(src_id)+'_bkg.txt',epoch_info,fmt='%15.2f %15.2f %10d %20.2f')
     np.savetxt(path+'txt_all_obs_0.5_8/'+str(src_id)+'_bkg.txt',result,fmt="%.7f  %5.3f  %d")
 
-source_id=np.linspace(1,1055,1055)
-source_id=source_id.astype(int)
-for item in source_id:
-    merge_txt(item)
+
+if __name__=='__main__':
+    # make_region_each_obs()
+    for i in range(len(obs_ID_all)):
+        get_txt(obs_ID_all[i])
+    source_id=np.linspace(1,1055,1055)
+    source_id=source_id.astype(int)
+    for item in source_id:
+        merge_txt(item)

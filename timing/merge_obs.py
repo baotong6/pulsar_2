@@ -23,13 +23,13 @@ from astropy.table import Table, Column
 # obsID=['6362','5934','6365','9505','9855','9502','9500','9501','9854','9503','9892','9893','9504']
 # label=['ACIS-I','ACIS-S','LW']
 
-path='/Volumes/pulsar/M28/merge_data/xdata/'
+path='/Volumes/pulsar/ECDFS/merge_data/xdata/'
 # obsID=['3798','10059','13225','13252','13705','13706' ,
 #         '14339','14475','14476','14477','14478','14479',
 #         '14625','15615','15750','16638','17779','18881']
 # label=['terzan5']
-obsID=['2684','2685','2683','9132','9133','16748','16749','16750']
-label=['M28']
+obsID=['5019','5020']
+label=['ECDFS']
 def get_epoch_file(obsID,label):
     TSTART = []
     TSTOP = []
