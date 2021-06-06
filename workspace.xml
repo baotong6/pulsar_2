@@ -20,120 +20,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="64858357-dc65-4807-81c1-e461c922919a" name="Default" comment="second test">
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/CDFS_epoch.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/CDFS_plot_epoch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/CDFS_print_plot.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/CDFS_select.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/GL_algorithm_CDFS.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/GL_algorithm_withepoch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/GL_sim_QPO.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/LS_CDFS_res.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/a.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/check_star_lc.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/color_LS_CDFS.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/combine_txt.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/figure_publish_need.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/lc_analysis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/make_txt_XMM_each_obs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/math_prob.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/pfold_CDFS.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/plot_LS_CDFS.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/plot_LS_CDFS_xmm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/qpo_singlesrc_xmm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/read_LS_power.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/run_XMMproducts_spectra.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_fast.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_sim.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_sim_pfold.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/xmm_fits_to_txt_more_obs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/LS_bright_src.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/lightcurve_amongobs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/make_src_info.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/pfold_amongobs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/plot_LS_CDFS.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/simulate_psd.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/useful_functions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/HSTdata/tess_lc.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/timing/GL_algorithm_withepoch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/timing/plot_LS_single.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_epoch.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_plot_epoch.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_print_plot.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/GL_algorithm_CDFS.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/LS_CDFS_res.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/a.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/combine_txt.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/math_prob.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/plot_LS_CDFS.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/plot_LS_CDFS的副本.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/read_LS_power.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/stingray_sim.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/stingray_sim_fuben.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/HSTdata/combine_fits.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/HSTdata/combine_fits.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/HSTdata/minus_fits.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/HSTdata/minus_fits.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/mcmcfit.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/bkg_rate.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/cal_starobs.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/calculate_datetime.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/calculate_fi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/ccccc.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/correct.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/correct_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/obs_time.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/plot.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/pulsar.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/right_time.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/sim_test_pulsar.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/sofa_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/old_astrometry/wgs84.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/plot_result/cross_match.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/plot_result/cross_match.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/plot_result/pfold.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/plot_result/pfold.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/all_result.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/all_result_3h_10h.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_1248_1206.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_1620_1767.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_1898_1464.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_1918_499.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_2361_2508.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_2731_2920.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_2741_1705.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_2979_3325.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_3021_956.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_3064_2987.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_3291_229.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_3312_2689.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_3388_287.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_3441_137.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_3514_1264.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_561_2618.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_1h_665_3475.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_1248_185.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_1307_3026.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_1620_1767.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_1622_749.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_1926_2163.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_196_1815.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_2007_2764.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_216_2729.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_2177_3255.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_2188_1634.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_2369_797.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_2391_740.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_301_2331.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_307_2618.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_3208_2372.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_33_2078.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/result/result_3h-10h_3403_1194.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/timing/GL_algorithm_single.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/timing/GL_algorithm_single.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/timing/SgrA_G_epoch.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/timing/SgrA_I_epoch.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/timing/make_bkg_txt.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/timing/make_bkg_txt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/timing/make_each_obs_txt.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/timing/make_each_obs_txt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/timing/make_region.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/timing/make_region.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/timing/merge_GLres.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/timing/merge_GLres.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/timing/merge_obs.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/timing/merge_obs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/sample_select.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_fast.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_fast.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/simulate_psd.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/simulate_psd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/useful_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/useful_functions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/mod_result/wwz_test.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/mod_result/wwz_test.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -231,27 +122,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="math_prob" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="pulsar" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/math_prob.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="pfold" type="PythonConfigurationType" factoryName="Python">
       <module name="pulsar" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -273,7 +143,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="plot_LS_CDFS" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="sample_select" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pulsar" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -281,11 +151,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.idea/CDFS/CDFS_startover" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/plot_LS_CDFS.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/sample_select.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -336,21 +206,42 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="useful_functions" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pulsar" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.idea/CDFS/CDFS_startover" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/useful_functions.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.pfold" />
-      <item itemvalue="Python.plot_LS_CDFS" />
       <item itemvalue="Python.LS_bright_src" />
-      <item itemvalue="Python.math_prob" />
       <item itemvalue="Python.simulate_psd" />
       <item itemvalue="Python.stingray_fast" />
+      <item itemvalue="Python.sample_select" />
+      <item itemvalue="Python.useful_functions" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.simulate_psd" />
+        <item itemvalue="Python.useful_functions" />
+        <item itemvalue="Python.sample_select" />
         <item itemvalue="Python.stingray_fast" />
         <item itemvalue="Python.LS_bright_src" />
-        <item itemvalue="Python.math_prob" />
-        <item itemvalue="Python.plot_LS_CDFS" />
       </list>
     </recent_temporary>
   </component>
@@ -411,69 +302,69 @@
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state x="2165" y="66" key="#read_LS_power/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1617602327273" />
-    <state width="1894" height="224" key="GridCell.Tab.0.bottom" timestamp="1622706970796">
+    <state width="1894" height="224" key="GridCell.Tab.0.bottom" timestamp="1622986996474">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="187" key="GridCell.Tab.0.bottom/0.0.1792.1120@0.0.1792.1120" timestamp="1622642810862" />
     <state width="1894" height="194" key="GridCell.Tab.0.bottom/0.25.1792.1095@0.0.1792.1120" timestamp="1617768498716" />
     <state width="1771" height="166" key="GridCell.Tab.0.bottom/0.25.1792.1095@0.25.1792.1095" timestamp="1615428114823" />
     <state width="1515" height="196" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.0.1536.960@0.0.1536.960" timestamp="1615037595141" />
-    <state width="1894" height="224" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622706970796" />
-    <state width="1894" height="224" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622706329787" />
+    <state width="1894" height="224" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622986996474" />
+    <state width="1894" height="224" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622975358891" />
     <state width="1894" height="308" key="GridCell.Tab.0.bottom/1536.25.1920.1055/0.25.1536.935@1536.25.1920.1055" timestamp="1622421637073" />
-    <state width="1894" height="224" key="GridCell.Tab.0.center" timestamp="1622706970793">
+    <state width="1894" height="224" key="GridCell.Tab.0.center" timestamp="1622986996473">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="187" key="GridCell.Tab.0.center/0.0.1792.1120@0.0.1792.1120" timestamp="1622642810861" />
     <state width="1894" height="194" key="GridCell.Tab.0.center/0.25.1792.1095@0.0.1792.1120" timestamp="1617768498716" />
     <state width="1771" height="166" key="GridCell.Tab.0.center/0.25.1792.1095@0.25.1792.1095" timestamp="1615428114822" />
     <state width="1515" height="196" key="GridCell.Tab.0.center/1536.0.1920.1080/0.0.1536.960@0.0.1536.960" timestamp="1615037595140" />
-    <state width="1894" height="224" key="GridCell.Tab.0.center/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622706970793" />
-    <state width="1894" height="224" key="GridCell.Tab.0.center/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622706329785" />
+    <state width="1894" height="224" key="GridCell.Tab.0.center/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622986996473" />
+    <state width="1894" height="224" key="GridCell.Tab.0.center/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622975358890" />
     <state width="1894" height="308" key="GridCell.Tab.0.center/1536.25.1920.1055/0.25.1536.935@1536.25.1920.1055" timestamp="1622421637069" />
-    <state width="1894" height="224" key="GridCell.Tab.0.left" timestamp="1622706970792">
+    <state width="1894" height="224" key="GridCell.Tab.0.left" timestamp="1622986996471">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="187" key="GridCell.Tab.0.left/0.0.1792.1120@0.0.1792.1120" timestamp="1622642810861" />
     <state width="1894" height="194" key="GridCell.Tab.0.left/0.25.1792.1095@0.0.1792.1120" timestamp="1617768498715" />
     <state width="1771" height="166" key="GridCell.Tab.0.left/0.25.1792.1095@0.25.1792.1095" timestamp="1615428114822" />
     <state width="1515" height="196" key="GridCell.Tab.0.left/1536.0.1920.1080/0.0.1536.960@0.0.1536.960" timestamp="1615037595140" />
-    <state width="1894" height="224" key="GridCell.Tab.0.left/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622706970792" />
-    <state width="1894" height="224" key="GridCell.Tab.0.left/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622706329784" />
+    <state width="1894" height="224" key="GridCell.Tab.0.left/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622986996471" />
+    <state width="1894" height="224" key="GridCell.Tab.0.left/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622975358888" />
     <state width="1894" height="308" key="GridCell.Tab.0.left/1536.25.1920.1055/0.25.1536.935@1536.25.1920.1055" timestamp="1622421637068" />
-    <state width="1894" height="224" key="GridCell.Tab.0.right" timestamp="1622706970795">
+    <state width="1894" height="224" key="GridCell.Tab.0.right" timestamp="1622986996473">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="187" key="GridCell.Tab.0.right/0.0.1792.1120@0.0.1792.1120" timestamp="1622642810862" />
     <state width="1894" height="194" key="GridCell.Tab.0.right/0.25.1792.1095@0.0.1792.1120" timestamp="1617768498716" />
     <state width="1771" height="166" key="GridCell.Tab.0.right/0.25.1792.1095@0.25.1792.1095" timestamp="1615428114822" />
     <state width="1515" height="196" key="GridCell.Tab.0.right/1536.0.1920.1080/0.0.1536.960@0.0.1536.960" timestamp="1615037595141" />
-    <state width="1894" height="224" key="GridCell.Tab.0.right/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622706970795" />
-    <state width="1894" height="224" key="GridCell.Tab.0.right/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622706329786" />
+    <state width="1894" height="224" key="GridCell.Tab.0.right/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622986996473" />
+    <state width="1894" height="224" key="GridCell.Tab.0.right/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622975358891" />
     <state width="1894" height="308" key="GridCell.Tab.0.right/1536.25.1920.1055/0.25.1536.935@1536.25.1920.1055" timestamp="1622421637071" />
-    <state width="1894" height="279" key="GridCell.Tab.1.bottom" timestamp="1622702394970">
+    <state width="1894" height="279" key="GridCell.Tab.1.bottom" timestamp="1622976291992">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="299" key="GridCell.Tab.1.bottom/0.0.1792.1120@0.0.1792.1120" timestamp="1618211718848" />
-    <state width="1894" height="279" key="GridCell.Tab.1.bottom/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622702394970" />
+    <state width="1894" height="279" key="GridCell.Tab.1.bottom/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622976291992" />
     <state width="1894" height="287" key="GridCell.Tab.1.bottom/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1617759742472" />
-    <state width="1894" height="279" key="GridCell.Tab.1.center" timestamp="1622702394970">
+    <state width="1894" height="279" key="GridCell.Tab.1.center" timestamp="1622976291990">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="299" key="GridCell.Tab.1.center/0.0.1792.1120@0.0.1792.1120" timestamp="1618211718847" />
-    <state width="1894" height="279" key="GridCell.Tab.1.center/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622702394970" />
+    <state width="1894" height="279" key="GridCell.Tab.1.center/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622976291990" />
     <state width="1894" height="287" key="GridCell.Tab.1.center/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1617759742470" />
-    <state width="1894" height="279" key="GridCell.Tab.1.left" timestamp="1622702394969">
+    <state width="1894" height="279" key="GridCell.Tab.1.left" timestamp="1622976291990">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="299" key="GridCell.Tab.1.left/0.0.1792.1120@0.0.1792.1120" timestamp="1618211718847" />
-    <state width="1894" height="279" key="GridCell.Tab.1.left/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622702394969" />
+    <state width="1894" height="279" key="GridCell.Tab.1.left/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622976291990" />
     <state width="1894" height="287" key="GridCell.Tab.1.left/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1617759742470" />
-    <state width="1894" height="279" key="GridCell.Tab.1.right" timestamp="1622702394970">
+    <state width="1894" height="279" key="GridCell.Tab.1.right" timestamp="1622976291991">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="299" key="GridCell.Tab.1.right/0.0.1792.1120@0.0.1792.1120" timestamp="1618211718848" />
-    <state width="1894" height="279" key="GridCell.Tab.1.right/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622702394970" />
+    <state width="1894" height="279" key="GridCell.Tab.1.right/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622976291991" />
     <state width="1894" height="287" key="GridCell.Tab.1.right/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1617759742471" />
     <state x="2118" y="143" key="SettingsEditor" timestamp="1618926081204">
       <screen x="1536" y="0" width="1920" height="1080" />

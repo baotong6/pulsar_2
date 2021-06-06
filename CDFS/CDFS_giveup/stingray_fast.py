@@ -46,6 +46,8 @@ def get_hist(t, len_bin):
         a[int(t_test[i] / len_bin)] += 1
     a = np.array(a)
     return a
+
+
 def bending_po(x,p):
     """
     Parameters

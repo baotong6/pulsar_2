@@ -31,10 +31,10 @@ def bending_po(x,p):
     :param x:numpy.ndarray
         non-zero frequencies
     :param p:
-    p[0] = bending frequency
+    p[0] = bending frequency,delta
     p[1] = alpha,即 power law index、
-    p[2] = constant
-    p[3] = normalization N
+    p[2] = constant,gamma
+    p[3] = normalization N or beta
     :return:
     """
     return p[3]*x**(-1)*(1+(x/p[0])**(p[1]-1))**(-1)+ p[2]
@@ -80,6 +80,15 @@ def smoothbknpo(x, p):
         generalized smooth broken power law psd model
     """
     return p[0] * x**(-p[1]) / (1. + (x / p[3])**2)**(-(p[1] - p[2]) / 2)
+
+def sim_evtlist(lc):
+    num_evt_bin=np.random.poisson(lc.counts)
+    evt_all=[]
+    i=0
+    while i < len(num_evt_bin):
+        evt_all=np.concatenate((evt_all,(np.random.uniform(lc.time[i]-lc.dt/2,lc.time[i]+lc.dt/2,num_evt_bin[i]))))
+        i+=1
+    return evt_all
 
 def filter_energy(time,energy,band):
     T=time
@@ -137,6 +146,7 @@ def get_LS(time, flux,freq):
     LS = LombScargle(x, y,normalization = 'standard')
     # LS = LombScargle(x, y, normalization='psd')
     power = LS.power(freq)
+    max_NormLSP=np.max(power)
     FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='baluev')
     FP_99 = LS.false_alarm_level(0.01,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     FP_95 = LS.false_alarm_level(0.05, minimum_frequency=freq[0],
@@ -149,7 +159,7 @@ def get_LS(time, flux,freq):
     # plt.semilogx()
     plt.plot(freq, power)
     plt.semilogx()
-    out_period=1./freq[np.where(power==np.max(power))]
+    out_period=1./freq[np.where(power==np.max(power))][0]
     plt.plot([freq[0], freq[-1]], [FP_99, FP_99], '--')
     plt.plot([freq[0], freq[-1]], [FP_95, FP_95], '--')
     plt.plot([freq[0], freq[-1]], [FP_68, FP_68], '--')
@@ -162,7 +172,7 @@ def get_LS(time, flux,freq):
     # plt.show()
     # plt.savefig('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/{1}.eps'.format(k,dataname))
     plt.close()
-    return [FP,out_period]
+    return [FP,out_period,max_NormLSP]
 
 def get_T_in_mbins(epoch_file,w,m,fi):
     T=2*np.pi/w
