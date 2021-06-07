@@ -98,7 +98,7 @@ def get_LS(time, flux,freq,dataname,k):
     # LS = LombScargle(x, y, normalization='psd')
     power = LS.power(freq)
     # print(power.max())
-    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='bootstrap')
+    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='baluev')
     FP_99 = LS.false_alarm_level(0.01,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     FP_95 = LS.false_alarm_level(0.05, minimum_frequency=freq[0],
                                  maximum_frequency=freq[-1], method='baluev')
@@ -140,6 +140,7 @@ def plot_CDFS_ep_LS(k_num):
         bkg_cts = [];
         cts_rate = []
         path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep{0}/'.format(k)
+        print(source_id)
         # path='/Users/baotong/Desktop/CDFS/xmm_txt/'
         for i in range(len(source_id)):
             srcevt=np.loadtxt(path+'{0}.txt'.format(source_id[i]))
@@ -180,37 +181,18 @@ def plot_CDFS_ep_LS(k_num):
                 src_cts.append(len(time));bkg_cts.append(len(bkg_time))
                 # print('src_counts={0}'.format(src_cts))
                 # print('bkg_counts={0}'.format(bkg_cts))
-                T_tot=time[-1]-time[0]
-                # freq = get_freq_unsamp(exptime)
-                freq=np.arange(1/T_tot,0.5/bin_len-0.0002,1/(5*T_tot))
-                freq=freq[np.where(freq > 1 / 20000.)]
                 # print(freq[100]-freq[99])
                 lc = get_hist_withbkg(time, bkg_time, bin_len, time[0], time[-1])
-                # lc=get_hist_withbkg(time,bkg_time,bin_len,epoch[:,0][0],epoch[:,1][-1])
-                # lc=get_hist(time,bin_len)
-
-                # ps = Powerspectrum(lc, norm='leahy')
-                # fig, ax1 = plt.subplots(1, 1, figsize=(9, 6), sharex=True)
-                # ax1.loglog()
-                # ax1.step(ps.freq, ps.power, lw=2, color='blue')
-                # # ax1.plot([1 / 950.73, 1 / 950.73], [0, np.max(ps.power)], '--', linewidth=1)
-                # ax1.set_ylabel("Frequency (Hz)", fontproperties=font1)
-                # ax1.set_ylabel("Power (raw)", fontproperties=font1)
-                # ax1.set_yscale('log')
-                # ax1.tick_params(axis='x', labelsize=16)
-                # ax1.tick_params(axis='y', labelsize=16)
-                # ax1.tick_params(which='major', width=1.5, length=7)
-                # ax1.tick_params(which='minor', width=1.5, length=4)
-                # for axis in ['top', 'bottom', 'left', 'right']:
-                #     ax1.spines[axis].set_linewidth(1.5)
-                # plt.show()
-
                 counts=np.sum(lc.counts)
-
                 cts_rate.append(counts/exptime)
                 # flux=get_hist(time,bin_len)
                 x=lc.time;flux=lc.counts
                 print('k={0}'.format(k))
+
+                T_tot=lc.time[-1]-lc.time[0]
+                # freq = get_freq_unsamp(exptime)
+                freq=np.arange(1/T_tot,0.5/bin_len-0.0002,1/(5*T_tot))
+                freq=freq[np.where(freq > 1 / 20000.)]
                 (FP, out_period) = get_LS(x, flux, freq, str(source_id[i]), k)
                 FP_print.append(FP);out_period_print.append(out_period);source_name.append(source_id[i])
         result = np.column_stack((source_name,FP_print, out_period_print,src_cts,bkg_cts,cts_rate))

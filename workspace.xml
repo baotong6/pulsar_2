@@ -20,11 +20,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="64858357-dc65-4807-81c1-e461c922919a" name="Default" comment="second test">
-      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/sample_select.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_fast.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_fast.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/plot_sim.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/plot_LS_CDFS.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/plot_LS_CDFS.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_sim.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_sim.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/simulate_psd.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/simulate_psd.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/useful_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/useful_functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/mod_result/wwz_test.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/mod_result/wwz_test.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -101,27 +100,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.simulate_psd">
-    <configuration name="LS_bright_src" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="pulsar" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.idea/CDFS/CDFS_startover" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/LS_bright_src.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="pfold" type="PythonConfigurationType" factoryName="Python">
       <module name="pulsar" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -143,7 +121,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="sample_select" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="plot_LS_CDFS" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="pulsar" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/plot_LS_CDFS.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="plot_sim" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pulsar" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -155,7 +154,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/sample_select.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_startover/plot_sim.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -185,7 +184,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="stingray_fast" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="stingray_sim" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="pulsar" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -197,7 +196,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_fast.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.idea/CDFS/CDFS_giveup/stingray_sim.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -229,19 +228,19 @@
     </configuration>
     <list>
       <item itemvalue="Python.pfold" />
-      <item itemvalue="Python.LS_bright_src" />
       <item itemvalue="Python.simulate_psd" />
-      <item itemvalue="Python.stingray_fast" />
-      <item itemvalue="Python.sample_select" />
       <item itemvalue="Python.useful_functions" />
+      <item itemvalue="Python.plot_sim" />
+      <item itemvalue="Python.stingray_sim" />
+      <item itemvalue="Python.plot_LS_CDFS" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.simulate_psd" />
+        <item itemvalue="Python.plot_sim" />
+        <item itemvalue="Python.plot_LS_CDFS" />
+        <item itemvalue="Python.stingray_sim" />
         <item itemvalue="Python.useful_functions" />
-        <item itemvalue="Python.sample_select" />
-        <item itemvalue="Python.stingray_fast" />
-        <item itemvalue="Python.LS_bright_src" />
       </list>
     </recent_temporary>
   </component>
@@ -302,69 +301,69 @@
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state x="2165" y="66" key="#read_LS_power/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1617602327273" />
-    <state width="1894" height="224" key="GridCell.Tab.0.bottom" timestamp="1622986996474">
+    <state width="1894" height="261" key="GridCell.Tab.0.bottom" timestamp="1623073027532">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="187" key="GridCell.Tab.0.bottom/0.0.1792.1120@0.0.1792.1120" timestamp="1622642810862" />
     <state width="1894" height="194" key="GridCell.Tab.0.bottom/0.25.1792.1095@0.0.1792.1120" timestamp="1617768498716" />
     <state width="1771" height="166" key="GridCell.Tab.0.bottom/0.25.1792.1095@0.25.1792.1095" timestamp="1615428114823" />
     <state width="1515" height="196" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.0.1536.960@0.0.1536.960" timestamp="1615037595141" />
-    <state width="1894" height="224" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622986996474" />
-    <state width="1894" height="224" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622975358891" />
+    <state width="1894" height="261" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1623073027532" />
+    <state width="1894" height="261" key="GridCell.Tab.0.bottom/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1623070040828" />
     <state width="1894" height="308" key="GridCell.Tab.0.bottom/1536.25.1920.1055/0.25.1536.935@1536.25.1920.1055" timestamp="1622421637073" />
-    <state width="1894" height="224" key="GridCell.Tab.0.center" timestamp="1622986996473">
+    <state width="1894" height="261" key="GridCell.Tab.0.center" timestamp="1623073027530">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="187" key="GridCell.Tab.0.center/0.0.1792.1120@0.0.1792.1120" timestamp="1622642810861" />
     <state width="1894" height="194" key="GridCell.Tab.0.center/0.25.1792.1095@0.0.1792.1120" timestamp="1617768498716" />
     <state width="1771" height="166" key="GridCell.Tab.0.center/0.25.1792.1095@0.25.1792.1095" timestamp="1615428114822" />
     <state width="1515" height="196" key="GridCell.Tab.0.center/1536.0.1920.1080/0.0.1536.960@0.0.1536.960" timestamp="1615037595140" />
-    <state width="1894" height="224" key="GridCell.Tab.0.center/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622986996473" />
-    <state width="1894" height="224" key="GridCell.Tab.0.center/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622975358890" />
+    <state width="1894" height="261" key="GridCell.Tab.0.center/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1623073027530" />
+    <state width="1894" height="261" key="GridCell.Tab.0.center/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1623070040826" />
     <state width="1894" height="308" key="GridCell.Tab.0.center/1536.25.1920.1055/0.25.1536.935@1536.25.1920.1055" timestamp="1622421637069" />
-    <state width="1894" height="224" key="GridCell.Tab.0.left" timestamp="1622986996471">
+    <state width="1894" height="261" key="GridCell.Tab.0.left" timestamp="1623073027529">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="187" key="GridCell.Tab.0.left/0.0.1792.1120@0.0.1792.1120" timestamp="1622642810861" />
     <state width="1894" height="194" key="GridCell.Tab.0.left/0.25.1792.1095@0.0.1792.1120" timestamp="1617768498715" />
     <state width="1771" height="166" key="GridCell.Tab.0.left/0.25.1792.1095@0.25.1792.1095" timestamp="1615428114822" />
     <state width="1515" height="196" key="GridCell.Tab.0.left/1536.0.1920.1080/0.0.1536.960@0.0.1536.960" timestamp="1615037595140" />
-    <state width="1894" height="224" key="GridCell.Tab.0.left/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622986996471" />
-    <state width="1894" height="224" key="GridCell.Tab.0.left/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622975358888" />
+    <state width="1894" height="261" key="GridCell.Tab.0.left/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1623073027529" />
+    <state width="1894" height="261" key="GridCell.Tab.0.left/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1623070040826" />
     <state width="1894" height="308" key="GridCell.Tab.0.left/1536.25.1920.1055/0.25.1536.935@1536.25.1920.1055" timestamp="1622421637068" />
-    <state width="1894" height="224" key="GridCell.Tab.0.right" timestamp="1622986996473">
+    <state width="1894" height="261" key="GridCell.Tab.0.right" timestamp="1623073027531">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="187" key="GridCell.Tab.0.right/0.0.1792.1120@0.0.1792.1120" timestamp="1622642810862" />
     <state width="1894" height="194" key="GridCell.Tab.0.right/0.25.1792.1095@0.0.1792.1120" timestamp="1617768498716" />
     <state width="1771" height="166" key="GridCell.Tab.0.right/0.25.1792.1095@0.25.1792.1095" timestamp="1615428114822" />
     <state width="1515" height="196" key="GridCell.Tab.0.right/1536.0.1920.1080/0.0.1536.960@0.0.1536.960" timestamp="1615037595141" />
-    <state width="1894" height="224" key="GridCell.Tab.0.right/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622986996473" />
-    <state width="1894" height="224" key="GridCell.Tab.0.right/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1622975358891" />
+    <state width="1894" height="261" key="GridCell.Tab.0.right/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1623073027531" />
+    <state width="1894" height="261" key="GridCell.Tab.0.right/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1623070040827" />
     <state width="1894" height="308" key="GridCell.Tab.0.right/1536.25.1920.1055/0.25.1536.935@1536.25.1920.1055" timestamp="1622421637071" />
-    <state width="1894" height="279" key="GridCell.Tab.1.bottom" timestamp="1622976291992">
+    <state width="1894" height="279" key="GridCell.Tab.1.bottom" timestamp="1623067716705">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="299" key="GridCell.Tab.1.bottom/0.0.1792.1120@0.0.1792.1120" timestamp="1618211718848" />
-    <state width="1894" height="279" key="GridCell.Tab.1.bottom/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622976291992" />
+    <state width="1894" height="279" key="GridCell.Tab.1.bottom/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1623067716705" />
     <state width="1894" height="287" key="GridCell.Tab.1.bottom/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1617759742472" />
-    <state width="1894" height="279" key="GridCell.Tab.1.center" timestamp="1622976291990">
+    <state width="1894" height="279" key="GridCell.Tab.1.center" timestamp="1623067716703">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="299" key="GridCell.Tab.1.center/0.0.1792.1120@0.0.1792.1120" timestamp="1618211718847" />
-    <state width="1894" height="279" key="GridCell.Tab.1.center/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622976291990" />
+    <state width="1894" height="279" key="GridCell.Tab.1.center/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1623067716703" />
     <state width="1894" height="287" key="GridCell.Tab.1.center/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1617759742470" />
-    <state width="1894" height="279" key="GridCell.Tab.1.left" timestamp="1622976291990">
+    <state width="1894" height="279" key="GridCell.Tab.1.left" timestamp="1623067716702">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="299" key="GridCell.Tab.1.left/0.0.1792.1120@0.0.1792.1120" timestamp="1618211718847" />
-    <state width="1894" height="279" key="GridCell.Tab.1.left/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622976291990" />
+    <state width="1894" height="279" key="GridCell.Tab.1.left/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1623067716702" />
     <state width="1894" height="287" key="GridCell.Tab.1.left/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1617759742470" />
-    <state width="1894" height="279" key="GridCell.Tab.1.right" timestamp="1622976291991">
+    <state width="1894" height="279" key="GridCell.Tab.1.right" timestamp="1623067716704">
       <screen x="1536" y="0" width="1920" height="1080" />
     </state>
     <state width="1766" height="299" key="GridCell.Tab.1.right/0.0.1792.1120@0.0.1792.1120" timestamp="1618211718848" />
-    <state width="1894" height="279" key="GridCell.Tab.1.right/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1622976291991" />
+    <state width="1894" height="279" key="GridCell.Tab.1.right/1536.0.1920.1080/0.0.1536.960@1536.0.1920.1080" timestamp="1623067716704" />
     <state width="1894" height="287" key="GridCell.Tab.1.right/1536.0.1920.1080/0.25.1536.935@1536.0.1920.1080" timestamp="1617759742471" />
     <state x="2118" y="143" key="SettingsEditor" timestamp="1618926081204">
       <screen x="1536" y="0" width="1920" height="1080" />

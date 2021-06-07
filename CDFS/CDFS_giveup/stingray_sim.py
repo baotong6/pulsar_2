@@ -123,7 +123,7 @@ def get_LS(time, flux,freq,trial=1):
     # res=res[::smooth]
     # np.savetxt(path+'LS_simres_{0}.txt'.format(trial+1),res,fmt='%10.5f')
 
-    return [1. / freq[np.where(power == np.max(power))],np.max(power),res]
+    return [FP,1. / freq[np.where(power == np.max(power))],np.max(power),res]
 
 def sim_evtlist(lc):
     num_evt_bin=np.random.poisson(lc.counts)
@@ -290,64 +290,20 @@ def get_lc_byspec_1hr(k,j,num_trials=1000):
             # spectrum = smoothbknpo(w, [0.01, 2, 1e-2, 1e-3])
             # spectrum = bending_po(w, [2.3e-3, 3.4, 0.40, 4.3e-4]) ## 这是RE J1034+396 的参数
             # spectrum = bending_po(w, [2.3e-3, 3.4, 0.40, 4.3e-4]) + generalized_lorentzian(w, [6.68e-4 ,6.68e-4 /16,200,2])
-            spectrum = bending_po(w, [2.3e-3, 3.4, 0.40, 4.3e-4]) + generalized_lorentzian(w,[2.7e-4, 2.7e-4 / 16, 200,2])
+            spectrum = bending_po(w, [2.3e-3, 3.4, 0., 4.3e-4]) + generalized_lorentzian(w,[5.6e-4, 5.6e-4 / 16, 200,2])
             # spectrum =powerlaw + generalized_lorentzian(w, [1 / 1000., 1 / 10000., 0.5*np.max(powerlaw), 2])
             lc = sim.simulate(spectrum)
             lc.counts += cts_rate
             lc.counts[np.where(lc.counts<0)]=0
-            # plt.plot(w,spectrum)
-            # plt.loglog()
-            # plt.xlabel("Frequency (Hz)", fontproperties=font_prop)
-            # plt.ylabel("Power (abs)", fontproperties=font_prop)
-            # plt.show()
             ps=Powerspectrum(lc,norm='abs')
-            # fig, ax1 = plt.subplots(1, 1, figsize=(9, 6), sharex=True)
-            # ax1.plot(ps.freq, ps.power, lw=2, color='blue')
-            # ax1.set_ylabel("Frequency (Hz)", fontproperties=font_prop)
-            # ax1.set_ylabel("Power (raw)", fontproperties=font_prop)
-            # # ax1.set_yscale('log')
-            # ax1.tick_params(axis='x', labelsize=16)
-            # ax1.tick_params(axis='y', labelsize=16)
-            # ax1.tick_params(which='major', width=1.5, length=7)
-            # ax1.tick_params(which='minor', width=1.5, length=4)
-            # for axis in ['top', 'bottom', 'left', 'right']:
-            #     ax1.spines[axis].set_linewidth(1.5)
-            # plt.loglog()
-            # plt.show()
             ev = EventList()
             # ev.simulate_times(use_spline=False,lc=lc,bin_time=dt)
             # ev.time+=tstart[i]
             ev.time=sim_evtlist(lc)+tstart[i]
             # print(ev.time)RX J1301.9+2747
             ev_all=ev_all.join(ev)
-            # lc_temp = ev.to_lc(dt=dt, tstart=ev.time[0]-0.5*dt, tseg=ev.time[-1]-ev.time[0])
-            # ps_temp=Powerspectrum(lc_temp,norm='abs')
-            # fig2, ax2 = plt.subplots(1, 1, figsize=(9, 6), sharex=True)
-            # ax2.plot(ps_temp.freq, ps_temp.power, lw=2, color='blue')
-            # ax2.set_ylabel("Frequency (Hz)", fontproperties=font_prop)
-            # ax2.set_ylabel("Power (raw)", fontproperties=font_prop)
-            # # ax1.set_yscale('log')
-            # ax2.tick_params(axis='x', labelsize=16)
-            # ax2.tick_params(axis='y', labelsize=16)
-            # ax2.tick_params(which='major', width=1.5, length=7)
-            # ax2.tick_params(which='minor', width=1.5, length=4)
-            # for axis in ['top', 'bottom', 'left', 'right']:
-            #     ax2.spines[axis].set_linewidth(1.5)
-            # plt.loglog()
-            # plt.show()
-            #
-            # plt.figure(2)
-            # plt.plot(lc.time,lc.counts,c='green')
-            # plt.plot(lc_temp.time,lc_temp.counts,c='r')
-            # plt.show()
-            # plt.figure(3)
-            # get_LS(lc.time,lc.counts,w)
-        # print('cts={0}'.format(len(ev_all.time)))
+        print('cts={0}'.format(len(ev_all.time)))
         lc_new = ev_all.to_lc(dt=dt, tstart=ev_all.time[0]-0.5*dt, tseg=ev_all.time[-1]-ev_all.time[0])
-        # plt.figure(2)
-        # plt.plot(lc_new.time,lc_new.counts,c='r')
-        # plt.show()
-        # plt.figure(3)
         T_exp=lc_new.time[-1]-lc_new.time[0]
         freq = np.arange(1 / T_exp, 0.5 / dt, 1 / (5 * T_exp))
         freq=freq[np.where(freq > 1 / 20000.)]
@@ -356,8 +312,10 @@ def get_lc_byspec_1hr(k,j,num_trials=1000):
         FP.append(temp[0]);period.append(temp[1])
         k_trial+=1
     result=np.column_stack((FP,period))
-    np.savetxt(path+'simulation/'+'trial_out_1hr_{0}_REJ1034+396.txt'.format(cr_str[j]),result,fmt="%10.5f %10.5f")
+    np.savetxt(path+'simulation/'+'trial_out_1hr_{0}_REJ1034+396_test_noC.txt'.format(cr_str[j]),result,fmt="%10.5f %10.5f")
     return ev_all
+get_lc_byspec_1hr(3,6)
+
 def get_lc_onesource(k,src_index,num_trials=2):
     k_trial =0
     FP = [];
@@ -707,7 +665,7 @@ def plot_result_DR(k,threshold):
     print(sim_real_NUM)
     return [sim_NUM,det_NUM,sim_real_NUM]
 
-plot_result_DR(4,0.9)
+# plot_result_DR(4,0.9)
 
 def plot_LS_sim_det(k):
     x=[];y1=[];y2=[];y3=[]
