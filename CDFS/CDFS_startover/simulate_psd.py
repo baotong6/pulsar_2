@@ -109,12 +109,14 @@ def sim_bunch_lc(CR,dt,period,epoch_file,outpath,num_trials=100):
     lenbin=dt
     # epoch_89 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/epoch_src_89.txt'
     w = make_freq_range(dt=lenbin, epoch_file=epoch_file)
-    qpo_f=1./period
-    psd_model = build_psd(x=w, p=[2.3e-3, 3.4, 0., 4.3e-4], x_2=w, p_2=[qpo_f, qpo_f/ 16, 200, 2],
-                          type='bendp+lorentz')
+    # qpo_f=1./period
+    # psd_model = build_psd(x=w, p=[2.3e-3, 3.4, 0., 4.3e-4], x_2=w, p_2=[qpo_f, qpo_f/ 16, 200, 2],
+    #                       type='bendp+lorentz')
+    psd_model = build_psd(x=w, p=[2.3e-3, 3.4, 0., 4.3e-4],
+                          type='bendp')
     k_trial=0
     (TSTART, TSTOP, OBSID, exptime) = epoch_file
-    with open(outpath+'CR_{0}_P_{1}_REJ1034.txt'.format("%.0e"%CR,str(int(period))),'a+') as f:
+    with open(outpath+'CR_{0}_noQPO_REJ1034.txt'.format("%.0e"%CR),'a+') as f:
         while k_trial < num_trials:
             lc = make_lc_from_psd(psd=psd_model, cts_rate=CR / 2 * lenbin, dt=lenbin, epoch_file=epoch_file)
             print('trial'+':  '+str(k_trial))
@@ -157,8 +159,10 @@ def sim_bunch_lc_evt(CR,dt,period,epoch_file,outpath,num_trials=100):
                 num_bins = int(exptime[i] / dt)
                 sim = simulator.Simulator(N=num_bins, mean=cts_rate, dt=lenbin)
                 w = np.arange(1 / exptime[i], 0.5 / lenbin, 1 / exptime[i])
-                psd_model = build_psd(x=w, p=[2.3e-3, 3.4, 0., 4.3e-4], x_2=w, p_2=[qpo_f, qpo_f / 16, 100, 2],
-                                      type='bendp+lorentz')
+                # psd_model = build_psd(x=w, p=[2.3e-3, 3.4, 0., 4.3e-4], x_2=w, p_2=[qpo_f, qpo_f / 16, 100, 2],
+                #                       type='bendp+lorentz')
+                psd_model = build_psd(x=w, p=[2.3e-3, 3.4, 0., 4.3e-4],
+                                      type='bendp')
                 spectrum=psd_model
                 lc_cut = sim.simulate(spectrum)
                 lc_cut.counts += cts_rate
@@ -187,13 +191,26 @@ def run_many_sim():
     epoch_all=[epoch1,epoch2,epoch3,epoch4]
     CR_all=[5e-4,6e-4,7e-4,8e-4,9e-4,1e-3]
     period_all=[1800,3600,7200]
-    ep=2;i=0;j=0
+
+    # ep=3;i=1;j=0
+    # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
+    # sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
+    #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
+    #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
+    #              num_trials=1000)
+    # ep=3;i=2;j=0
+    # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
+    # sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
+    #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
+    #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
+    #              num_trials=1000)
+
+    ep=0;i=5;j=0
     (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
     sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
                  epoch_file=(TSTART, TSTOP, OBSID, exptime),
                  outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
                  num_trials=1000)
-
     # for ep in range(len(epoch_all)):
     #     (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
     # #     sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],

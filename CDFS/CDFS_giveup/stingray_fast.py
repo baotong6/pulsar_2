@@ -247,7 +247,6 @@ def slow_sim_fixpds_qpo_chandra(src_index,num_trials=2,dt=100):
     with open(path + 'simulation/{0}_LSP_FP_qpo_nofix.txt'.format(src_index), 'a+') as f:
         while k_trial < num_trials:
 
-
             ev_all = EventList();ev_all_bkg=EventList()
             for i in range(len(ID)):
 

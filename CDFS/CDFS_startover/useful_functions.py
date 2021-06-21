@@ -24,6 +24,9 @@ from stingray.simulator import simulator, models
 font1 = {'family': 'Normal',
          'weight': 'normal',
          'size': 18, }
+font2 = {'family': 'Normal',
+         'weight': 'normal',
+         'size': 16, }
 def bending_po(x,p):
     """
     Parameters

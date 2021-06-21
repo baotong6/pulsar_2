@@ -24,7 +24,7 @@ def phase_fold(data_file,bkg_file,epoch_file,p_test,bin,shift,label):
     src_evt=np.loadtxt(data_file)
     bkg_evt=np.loadtxt(bkg_file)
     epoch=np.loadtxt(epoch_file)
-    use_id=epoch[:,2][6:14]
+    use_id=epoch[:,2]
     (src_evt,bkg_evt)=func.filter_obs(src_evt,bkg_evt,use_id)
     time=src_evt[:,0];energy=src_evt[:,1]
     time_bkg= bkg_evt[:, 0];energy_bkg= bkg_evt[:, 1]
@@ -82,10 +82,10 @@ def phase_fold(data_file,bkg_file,epoch_file,p_test,bin,shift,label):
     plt.show()
     #plt.close()
 if __name__=='__main__':
-    path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
-    id='485'
+    path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
+    id='210'
     data_file=path+'{0}.txt'.format(id)
     bkg_file=path+'{0}_bkg.txt'.format(id)
     epoch_file=path+'epoch_src_{0}.txt'.format(id)
-    p_test=5064.53884016
-    phase_fold(data_file, bkg_file, epoch_file, p_test, bin=15, shift=0.4,label=id)
+    p_test=1614.96326
+    phase_fold(data_file, bkg_file, epoch_file, p_test, bin=20, shift=0.4,label=id)

@@ -215,15 +215,15 @@ path_terzan='/Users/baotong/Desktop/period_terzan5/txt_all_obs_0.5_8/'
 path_M28='/Users/baotong/Desktop/period_M28/txt_all_obs_0.5_8/'
 path_NGC6397='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
 path_NGC6752='/Users/baotong/Desktop/period_NGC6752/txt_all_obs_0.5_8/'
-path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/'
+path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
 path_xmmCDFS='/Users/baotong/Desktop/CDFS/xmm_txt/'
 
 figurepath='/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
 if __name__=='__main__':
     path=path_CDFS
-    period=1/4.36e-4
+    period=1614.96326
 
-    dataname='XID19_06.txt'
+    dataname='210.txt'
     net_p=0.9
     epoch_file = path + 'epoch_src_' + dataname
     phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.9, label =dataname[0:-4],pathout=figurepath)

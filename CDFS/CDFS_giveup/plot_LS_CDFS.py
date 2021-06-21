@@ -80,8 +80,8 @@ def get_hist_withbkg(t,t_bkg, len_bin,tstart=0,tstop=0):
     lc_new = ev.to_lc(dt=dt, tstart=tstart-0.5*dt, tseg=tseg+0.5*dt)
     lc_bkg = ev_bkg.to_lc(dt=dt, tstart=tstart-0.5*dt, tseg=tseg+0.5*dt)
     lc_out=lc_new
-    lc_out.counts=lc_new.counts-(1/12.)*lc_bkg.counts
-    # lc_out.counts = lc_new.counts
+    # lc_out.counts=lc_new.counts-(1/12.)*lc_bkg.counts
+    lc_out.counts = lc_new.counts
     # print(lc_bkg.counts)
     return lc_out
 # def get_LS_myself(time,flux,freq):
@@ -95,6 +95,7 @@ def get_LS(time, flux,freq,dataname,k):
     # plt.show()
     FP=1.0
     LS = LombScargle(x, y,dy=None,normalization = 'standard')
+    # print(len(freq))
     # LS = LombScargle(x, y, normalization='psd')
     power = LS.power(freq)
     # print(power.max())
@@ -152,7 +153,8 @@ def plot_CDFS_ep_LS(k_num):
             # srcevt=np.loadtxt(path+'XID{0}_pn_all_obs.txt'.format(source_id[i]))
             # bkgevt=np.loadtxt(path+'bkg_XID{0}_pn_all_obs.txt'.format(source_id[i]))
             # epoch = np.loadtxt(path + 'epoch_XID{0}_pn_all_obs.txt'.format(source_id[i]))
-            useid=epoch[:,2][13:23]
+            # useid=epoch[:,2][13:23]
+            useid=epoch[:,2]
             # (srcevt,bkgevt)=filter_obs(srcevt,bkgevt,useid)
             if len(epoch)==0:continue
             if len(np.shape(epoch)) == 1:
@@ -183,15 +185,17 @@ def plot_CDFS_ep_LS(k_num):
                 # print('bkg_counts={0}'.format(bkg_cts))
                 # print(freq[100]-freq[99])
                 lc = get_hist_withbkg(time, bkg_time, bin_len, time[0], time[-1])
+                # lc=get_hist_withbkg(time, bkg_time, bin_len, epoch[:,0][0], epoch[:,1][-1])
                 counts=np.sum(lc.counts)
                 cts_rate.append(counts/exptime)
                 # flux=get_hist(time,bin_len)
                 x=lc.time;flux=lc.counts
+                print(np.sum(flux))
                 print('k={0}'.format(k))
-
+                # flux+=1000
                 T_tot=lc.time[-1]-lc.time[0]
                 # freq = get_freq_unsamp(exptime)
-                freq=np.arange(1/T_tot,0.5/bin_len-0.0002,1/(5*T_tot))
+                freq=np.arange(1/T_tot,0.5/bin_len-0.00002,1/(5*T_tot))
                 freq=freq[np.where(freq > 1 / 20000.)]
                 (FP, out_period) = get_LS(x, flux, freq, str(source_id[i]), k)
                 FP_print.append(FP);out_period_print.append(out_period);source_name.append(source_id[i])
@@ -202,12 +206,12 @@ def plot_CDFS_ep_LS(k_num):
 
 if __name__=='__main__':
     bin_len = 100
-    high_id_ep3 = ['643']
+    high_id_ep3 = ['210']
     # source_id=np.arange(1,500,1)
     source_id = high_id_ep3
 
     figurepath = '/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
-    plot_CDFS_ep_LS([4])
+    plot_CDFS_ep_LS([3])
     # plt.figure(1, (8, 8))
     # plt.subplot(211)
     # plot_CDFS_ep_LS([2])

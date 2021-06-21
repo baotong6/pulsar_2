@@ -98,13 +98,14 @@ def plot_LS_result_of_CDFS():
     plt.ylim(0,1)
     def get_result_LS(k):
         path = '/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/'.format(k)
-        LS_result = np.loadtxt(path + 'LS_result_{0}.txt'.format(k))
+        LS_result = np.loadtxt(path + 'LS_result_{0}_new_psf90.txt'.format(k))
         FP = LS_result[:, 1]
         prob=1-FP
         period = LS_result[:, 2]
 
         prob_out=prob[np.where(((period-200)>150)&(prob>threshold))]
         period_out=period[np.where(((period-200)>150)&(prob>threshold))]
+        prob_out[np.where(prob_out>(1-1e-6))]=1-1e-6
         print(period_out)
 
         prob_in=prob[np.where(prob<=threshold)]
@@ -114,14 +115,15 @@ def plot_LS_result_of_CDFS():
         plt.subplot(label)
         plt.title('Epoch{0}'.format(k), font1)
         if k==2:
-            plt.text(1.5e4,1e-4,'780',color='red',fontsize=15)
+            plt.text(1.5e4,4e-4,'780',color='red',fontsize=15)
         if k==4:
-            plt.text(1.5e4,1e-7,'780',color='red',fontsize=15)
+            plt.text(1.5e4,5e-5,'780',color='red',fontsize=15)
+            plt.text(1.5e4, 2e-6, '330', color='red', fontsize=15)
         plt.scatter(period_out, 1-prob_out, marker='v',s=80, color='purple')
         plt.scatter(period_in,1-prob_in,marker='.',s=50,color='black')
         plt.loglog()
-
         plt.plot([0, 20000], [1-threshold, 1-threshold], '--', color='black')
+        plt.plot([707*0.5, 707*0.5], [0, threshold], '--', color='r')
         plt.plot([707, 707], [0, threshold], '--', color='r')
         plt.plot([1000, 1000], [0, threshold], '--', color='green')
         plt.plot([707 * 2, 707 * 2], [0, threshold], '--', color='r')
