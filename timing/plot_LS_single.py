@@ -86,15 +86,16 @@ def read_txt():
     # file=np.loadtxt(path+'XID19.txt')
     # epoch_file=np.loadtxt(path+'epoch_src_XID19.txt')
 
-    path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
-    file=np.loadtxt(path+'210.txt')
-    epoch_file=np.loadtxt(path+'epoch_src_210.txt')
+    # path='/Users/baotong/eSASS/data/47_Tuc/txt/'
+    path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
+    file=np.loadtxt(path+'872_flare.txt')
+    epoch_file=np.loadtxt(path+'epoch_src_872_flare.txt')
 
     time=file[:,0]
-    tstart=epoch_file[:,0];tstop=epoch_file[:,1]
-    # tstart=[epoch_file[0]];tstop=[epoch_file[1]]
+    # tstart=epoch_file[:,0];tstop=epoch_file[:,1]
+    tstart=[epoch_file[0]];tstop=[epoch_file[1]]
 
-    T_TOT = 2004251.6621800959;dt=100
+    T_TOT =tstop[-1]-tstart[0];dt=50
     lc=get_hist(time,dt,tstart[0],tstop[-1])
     # lc_cut0=lc.truncate(tstart[0],tstop[0],method='time')
     lc_all=lc
@@ -110,41 +111,11 @@ def read_txt():
             P.append(P[-1] + dP)
         return np.array(P)
 
-    freq=np.arange(1/T_TOT,1/200,1/(5*T_TOT))
+    freq=np.arange(1/T_TOT,1/200,1/(1*T_TOT))
     freq=freq[np.where(freq>1/20000.)]
     print(np.sum(lc_all.counts))
 
     # ps = Powerspectrum(lc_all,norm='leahy')
-    # fig, ax1 = plt.subplots(1, 1, figsize=(9, 6), sharex=True)
-    # ax1.loglog()
-    # ax1.step(ps.freq, ps.power, lw=2, color='blue')
-    # # ax1.plot([1 / 950.7, 1 / 950.7], [0, np.max(ps.power)], '--', linewidth=1)
-    # ax1.set_ylabel("Frequency (Hz)", fontproperties=font1)
-    # ax1.set_ylabel("Power (raw)", fontproperties=font1)
-    # ax1.set_yscale('log')
-    # ax1.tick_params(axis='x', labelsize=16)
-    # ax1.tick_params(axis='y', labelsize=16)
-    # ax1.tick_params(which='major', width=1.5, length=7)
-    # ax1.tick_params(which='minor', width=1.5, length=4)
-    # for axis in ['top', 'bottom', 'left', 'right']:
-    #     ax1.spines[axis].set_linewidth(1.5)
-    # plt.show()
-
-    # avg_ps = AveragedPowerspectrum(lc_all, 60000,dt=lc_all.time[1]-lc_all.time[0],norm='leahy')
-    # print("Number of segments: %d" % avg_ps.m)
-    # fig, ax1 = plt.subplots(1, 1, figsize=(9, 6))
-    # ax1.loglog()
-    # ax1.step(avg_ps.freq, avg_ps.power, lw=2, color='blue')
-    # ax1.set_xlabel("Frequency (Hz)", fontproperties=font1)
-    # ax1.set_ylabel("Power (raw)", fontproperties=font1)
-    # ax1.set_yscale('log')
-    # ax1.tick_params(axis='x', labelsize=16)
-    # ax1.tick_params(axis='y', labelsize=16)
-    # ax1.tick_params(which='major', width=1.5, length=7)
-    # ax1.tick_params(which='minor', width=1.5, length=4)
-    # for axis in ['top', 'bottom', 'left', 'right']:
-    #     ax1.spines[axis].set_linewidth(1.5)
-    # plt.show()
 
 
 

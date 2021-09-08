@@ -56,7 +56,7 @@ def LSP_band(srcevt,bkgevt,epoch,band,epochnum=[0,31]):
         counts=np.sum(lc.counts)
         # cts_rate=(counts/exptime)
         x=lc.time;flux=lc.counts
-        (FP, out_period) = func.get_LS(x, flux, freq)
+        (FP, out_period,max_NormLSP) = func.get_LS(x, flux, freq)
     return (FP,out_period)
 def LS_source_among_obs(source_id,k_num):
     path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep{0}/'.format(k_num)
@@ -81,12 +81,23 @@ def plot_color_obs_src(source_id,k_num):
         FP = np.loadtxt(FP_file)
         epoch_id_num = len(FP)
         period = np.loadtxt(Period_file)
-        im=plt.contourf(np.linspace(1,epoch_id_num,epoch_id_num),np.linspace(1,epoch_id_num,epoch_id_num),FP.T,levels=np.linspace(0,0.01,11),cmap="OrRd_r")
+        im=plt.contourf(np.linspace(1,epoch_id_num,epoch_id_num),np.linspace(1,epoch_id_num,epoch_id_num)
+                        ,FP.T,levels=np.linspace(0,0.5,51),cmap="OrRd_r")
+        plt.gca().add_patch(plt.Rectangle((7-0.5,8-0.5),1,1,fill=False,edgecolor='green', linewidth=2))
         cand_id=np.where(FP<0.01)
         print(FP[cand_id])
         print(period[cand_id])
-        plt.title('XID {0}'.format(source_id))
-        plt.colorbar(im)
+        plt.figure(1,(9,6))
+        plt.title('XID {0}; Epoch {1}'.format(source_id,k_num),func.font2)
+        cbar=plt.colorbar(im)
+        cbar.set_label('FAP',rotation=270,size=12)
+        cbar.ax.tick_params(labelsize=12)
+        LINE=[[0,epoch_id_num],[0,epoch_id_num]]
+        plt.xlabel('Start Obs',func.font2)
+        plt.ylabel('End Obs',func.font2)
+        plt.tick_params(labelsize=16)
+        plt.fill_between([0,epoch_id_num],[0,0],[0,epoch_id_num],facecolor = 'grey', alpha = 0.5)
+        plt.savefig(func.figurepath+'color_{0}_{1}.pdf'.format(source_id,k_num),bbox_inches='tight',pad_inches=0.0)
         plt.show()
     else:
         return None
@@ -99,7 +110,7 @@ def plot_candidate_info(source_id,k_num):
         FP = np.loadtxt(FP_file)
         epoch_id_num = len(FP)
         period = np.loadtxt(Period_file)
-        cand_id=np.where(FP<0.01)
+        cand_id=np.where(FP<0.05)
         start=cand_id[0];stop=cand_id[1]
         for i in range(len(start)):
             plt.scatter(start[i],FP[start[i]][stop[i]],color='r')
@@ -109,8 +120,8 @@ def plot_candidate_info(source_id,k_num):
         plt.semilogy()
         plt.xlim(0,epoch_id_num)
         plt.tick_params(labelsize=16)
-        plt.ylabel('FAP',font1)
-        plt.xlabel('Obs',font1)
+        plt.ylabel('FAP',func.font2)
+        plt.xlabel('Obs',func.font2)
         plt.show()
 
 
@@ -123,12 +134,14 @@ def select_candidata():
         period=np.loadtxt(Period_file)
 
 if __name__=='__main__':
-    # LS_source_among_obs(str(source_id[1]), '4')
+    # LS_source_among_obs('643', '4')
     # for id in source_id:
     #     for k in [1,2,3]:
     #         LS_source_among_obs(str(id), str(k))
-    # LS_source_among_obs('643', '4')
     # for id in source_id:
-    #     plot_color_obs_src(id, 4)
-    # plot_color_obs_src('89', '3')
-    plot_candidate_info('643','4')
+    #     plot_color_obs_src(id, 2)
+
+    # plot_candidate_info('876','2')
+    # plot_candidate_info('643', '4')
+    # plot_color_obs_src('643', '4')
+    plot_color_obs_src('876', '2')

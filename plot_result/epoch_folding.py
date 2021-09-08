@@ -37,19 +37,13 @@ def get_T_in_mbins(epoch_file,w,m,fi=0.0):
     tbin = T/m
     # 每个bin的时间长度
     epoch_info = np.loadtxt(epoch_file)
-    #epoch_info=[epoch_info]
-    #t_start=epoch_info[0]
-    #t_end=epoch_info[1]
-    # t_start = epoch_info[:, 0]
-    # t_end = epoch_info[:, 1]
+    if epoch_info.ndim==2:
+        t_start = epoch_info[:, 0]
+        t_end = epoch_info[:, 1]
+    if epoch_info.ndim == 1:
+        t_start=np.array([epoch_info[0]])
+        t_end = np.array([epoch_info[1]])
 
-    epoch_info = np.loadtxt(epoch_file)
-    #epoch_info = [epoch_info]
-    # t_start = epoch_info[:, 0]
-    # t_end = epoch_info[:, 1]
-    # ID = epoch_info[:, 2]
-    t_start=np.array([epoch_info[0]])
-    t_end = np.array([epoch_info[1]])
 
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
     N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
@@ -94,14 +88,16 @@ def compute_bin(Tlist, m, w, fi=0):
 #         5166.1152,17457.984,5159.1168,21202.56,13020.48,
 #         14420.16,5512.32,19344.96,21833.0208]
 # i=16
-path='/Volumes/pulsar/WR/0802410101/txt/'
-dataname='WR1_pn.txt'
-epoch_file=path+'epoch_'+dataname
-period=28153.90195
+path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
+dataname='872_flare.txt'
+# epoch_file=path+'epoch_'+dataname
+epoch_file = path + 'epoch_src_872_flare.txt'
+period=5000.
+
 time=np.loadtxt(path+dataname)[:,0]
 p_test=period
-P_all=np.linspace(0.5*p_test,1.5*p_test,5000)
-bin=20
+P_all=np.linspace(0.5*p_test,1.5*p_test,1000)
+bin=30
 S=[]
 for i in range(len(P_all)):
     w=2*np.pi/P_all[i]

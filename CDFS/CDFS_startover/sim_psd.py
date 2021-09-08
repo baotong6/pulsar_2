@@ -119,13 +119,15 @@ def sim_bunch_lc(CR,dt,period,epoch_file,outpath,num_trials=100):
 
     psd_model=build_psd(x=w,p=[4.3e-4, 3.4, 0., 2.3e-3],x_2=w,
                         p_2=[qpo_f, 16, 0.05, 2],type='bendp+lorentz')
-    # psd_model = build_psd(x=w, p=[4.3e-4, 3.4, 0., 2.3e-3],
+    # psd_model=build_psd(x=w,p=[4.3e-4, 3.4, 0., 2.e-2],x_2=w,
+    #                     p_2=[qpo_f, 16, 0.15, 2],type='bendp+lorentz')
+    # psd_model = build_psd(x=w, p=[2.3e-3, 3.4, 0., 4.3e-4],
     #                       type='bendp')
     k_trial=0
     (TSTART, TSTOP, OBSID, exptime) = epoch_file
-    # with open(outpath+'CR_{0}_P_{1}_A002_R15_fake4.txt'.format("%.0e" %CR ,"%.0d" %period),'a+') as f:
-    # with open(outpath + 'CR_{0}_P_{1}_REJ1034_fake3.txt'.format("%.0e" % CR, "%.0d" % period), 'a+') as f:
-    with open(outpath+'CR_{0}_P_{1}_REJ1034.txt'.format("%.0e" %CR ,"%.0d" %period),'a+') as f:
+    # with open(outpath+'CR_{0}_P_{1}_A002_R15.txt'.format("%.0e" %CR ,"%.0d" %period),'a+') as f:
+    with open(outpath + 'CR_{0}_P_{1}_REJ1034_const1Ms.txt'.format("%.0e" % CR, "%.0d" % period), 'a+') as f:
+    # with open(outpath+'CR_{0}_noQPO_REJ1034_R50.txt'.format("%.0e"%CR),'a+') as f:
         while k_trial < num_trials:
             lc = make_lc_from_psd(psd=psd_model, cts_rate=CR* lenbin, dt=lenbin, epoch_file=epoch_file)
             print('trial'+':  '+str(k_trial))
@@ -202,12 +204,35 @@ def run_many_sim():
     epoch2 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/CDFS_epoch_ep2.txt'
     epoch3 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/CDFS_epoch_ep3.txt'
     epoch4 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/CDFS_epoch_ep4.txt'
+    epoch2 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/CDFS_epoch_ep2_con.txt'
+    epoch4 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/CDFS_epoch_ep4_con.txt'
+
     epoch_all=[epoch1,epoch2,epoch3,epoch4]
-    CR_all=np.array([5e-4,6e-4,7e-4,8e-4,9e-4,1e-3])
-    # period_all=[1800,3600,7200]
+    # CR_all=np.array([5e-4,6e-4,7e-4,8e-4,9e-4,1e-3])
+    CR_all=np.array([1e-4,2e-4,3e-4,4e-4])
     period_all=[3600,5400,7200]
 
-    ep=2;i=5;j=2
+    # ep=3;i=5;j=0
+    #
+    # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
+    # # id=5  ##前id次观测
+    # # TSTART=TSTART[0:id];TSTOP=TSTOP[0:id];OBSID=OBSID[0:id];exptime=exptime[0:id]
+    #
+    # sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
+    #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
+    #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
+    #              num_trials=1000)
+    # ep=3;i=5;j=1
+    #
+    # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
+    # # id=5  ##前id次观测
+    # # TSTART=TSTART[0:id];TSTOP=TSTOP[0:id];OBSID=OBSID[0:id];exptime=exptime[0:id]
+    #
+    # sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
+    #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
+    #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
+    #              num_trials=1000)
+    ep=3;i=0;j=2
 
     (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
     # id=5  ##前id次观测
@@ -218,28 +243,19 @@ def run_many_sim():
                  outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
                  num_trials=1000)
 
-
-    # ep=1;i=5;j=1
-    #
+    # ep=0;i=3;j=1
     # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
-    # # id=5  ##前id次观测
-    # # TSTART=TSTART[0:id];TSTOP=TSTOP[0:id];OBSID=OBSID[0:id];exptime=exptime[0:id]
-    #
     # sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
     #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
     #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
     #              num_trials=1000)
-    # ep=1;i=5;j=2
-    #
+    # ep=0;i=3;j=2
     # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
-    # # id=5  ##前id次观测
-    # # TSTART=TSTART[0:id];TSTOP=TSTOP[0:id];OBSID=OBSID[0:id];exptime=exptime[0:id]
-    #
+    # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
     # sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
     #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
     #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
     #              num_trials=1000)
-
     ##内存有限，别用循环一次性做啦##
     # for ep in range(len(epoch_all)):
     #     (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])

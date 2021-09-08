@@ -61,22 +61,23 @@ def plot_GL_result_of_CDFS():
 
         label=220+k
         plt.subplot(label)
-        plt.title('Epoch{0}'.format(k), font1)
+        plt.title('Epoch {0}'.format(k), font1)
         plt.scatter(period_out, prob_out, marker='^',s=80, color='purple')
         plt.scatter(period_in,prob_in,marker='.',s=50,color='black')
         plt.plot([0, 20000], [threshold, threshold], '--', color='black')
+        # plt.plot([707 * 0.5, 707 * 0.5], [0, threshold], '--', color='r')
         plt.plot([707, 707], [0, threshold], '--', color='r')
         plt.plot([1000, 1000], [0, threshold], '--', color='green')
         plt.plot([707 * 2, 707 * 2], [0, threshold], '--', color='r')
-        plt.plot([1000 * 2, 1000 * 2], [0, threshold], '--', color='green')
-        plt.plot([707 * 3, 707 * 3], [0, threshold], '--', color='r')
-        plt.plot([1000 * 3, 1000 * 3], [0, threshold], '--', color='green')
+        # plt.plot([1000 * 2, 1000 * 2], [0, threshold], '--', color='green')
+        # plt.plot([707 * 3, 707 * 3], [0, threshold], '--', color='r')
+        # plt.plot([1000 * 3, 1000 * 3], [0, threshold], '--', color='green')
 
         if k==1: plt.text(1e4,0.9,'780',color='red',fontsize=15)
         if k==2: plt.text(1.5e4,0.9,'780',color='red',fontsize=15)
         if k==4:
             plt.text(0.9e4,0.9,'330,725,780',color='red',fontsize=15)
-        plt.ylabel('Probability', font1)
+        plt.ylabel('GL Probability', font1)
         plt.tick_params(labelsize=16)
         plt.semilogx()
 
@@ -89,8 +90,9 @@ def plot_GL_result_of_CDFS():
     get_result_GL(4)
 
     plt.savefig(figurepath+'GL_res.eps',bbox_inches='tight',pad_inches=0.0)
+    plt.savefig(figurepath + 'GL_res.pdf', bbox_inches='tight', pad_inches=0.0)
     plt.show()
-# plot_GL_result_of_CDFS()
+plot_GL_result_of_CDFS()
 
 def plot_LS_result_of_CDFS():
     threshold=0.9973
@@ -98,14 +100,15 @@ def plot_LS_result_of_CDFS():
     plt.ylim(0,1)
     def get_result_LS(k):
         path = '/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/'.format(k)
-        LS_result = np.loadtxt(path + 'LS_result_{0}_new_psf90.txt'.format(k))
+        # LS_result = np.loadtxt(path + 'LS_result_{0}_new_psf90.txt'.format(k))
+        LS_result = np.loadtxt(path + 'LS_result_{0}_05_2_psf90.txt'.format(k))
         FP = LS_result[:, 1]
         prob=1-FP
         period = LS_result[:, 2]
 
         prob_out=prob[np.where(((period-200)>150)&(prob>threshold))]
         period_out=period[np.where(((period-200)>150)&(prob>threshold))]
-        prob_out[np.where(prob_out>(1-1e-6))]=1-1e-6
+        prob_out[np.where(prob_out>(1-1e-6))]=1-5e-6
         print(period_out)
 
         prob_in=prob[np.where(prob<=threshold)]
@@ -113,7 +116,7 @@ def plot_LS_result_of_CDFS():
 
         label=220+k
         plt.subplot(label)
-        plt.title('Epoch{0}'.format(k), font1)
+        plt.title('Epoch {0}'.format(k), font1)
         if k==2:
             plt.text(1.5e4,4e-4,'780',color='red',fontsize=15)
         if k==4:
@@ -122,14 +125,15 @@ def plot_LS_result_of_CDFS():
         plt.scatter(period_out, 1-prob_out, marker='v',s=80, color='purple')
         plt.scatter(period_in,1-prob_in,marker='.',s=50,color='black')
         plt.loglog()
+        plt.ylim(1e-6,1)
         plt.plot([0, 20000], [1-threshold, 1-threshold], '--', color='black')
         plt.plot([707*0.5, 707*0.5], [0, threshold], '--', color='r')
         plt.plot([707, 707], [0, threshold], '--', color='r')
+        # plt.plot([707 * 2, 707 * 2], [0, threshold], '--', color='r')
         plt.plot([1000, 1000], [0, threshold], '--', color='green')
-        plt.plot([707 * 2, 707 * 2], [0, threshold], '--', color='r')
-        plt.plot([1000 * 2, 1000 * 2], [0, threshold], '--', color='green')
-        plt.plot([707 * 3, 707 * 3], [0, threshold], '--', color='r')
-        plt.plot([1000 * 3, 1000 * 3], [0, threshold], '--', color='green')
+        # plt.plot([1000 * 2, 1000 * 2], [0, threshold], '--', color='green')
+        # plt.plot([707 * 3, 707 * 3], [0, threshold], '--', color='r')
+        # plt.plot([1000 * 3, 1000 * 3], [0, threshold], '--', color='green')
         plt.ylabel('FAP', font1)
         plt.tick_params(labelsize=16)
         plt.semilogx()
@@ -141,8 +145,8 @@ def plot_LS_result_of_CDFS():
     get_result_LS(3)
     get_result_LS(4)
 
-    plt.savefig(figurepath+'LS_res.eps',bbox_inches='tight',pad_inches=0.0)
-
+    # plt.savefig(figurepath+'LS_res.eps',bbox_inches='tight',pad_inches=0.0)
+    # plt.savefig(figurepath + 'LS_res.pdf', bbox_inches='tight', pad_inches=0.0)
     plt.show()
 
-plot_LS_result_of_CDFS()
+# plot_LS_result_of_CDFS()

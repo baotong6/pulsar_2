@@ -26,7 +26,7 @@ path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
 p99_Z2 = 67.74654931
 p90_Z2 = 61.35167033
 
-dataname='89'
+dataname='872_flare'
 # evt_list_name=['WR1']
 def get_Z2(dataname,freq):
     time=   np.loadtxt(path + dataname + '.txt')[:,0]
@@ -51,9 +51,9 @@ def get_Z2(dataname,freq):
         Z2.append((2.0 / N)*(sum(np.cos(turns(time,fi)))**2+sum(np.sin(turns(time,fi))**2)))
     cts=len(time)
     return [Z2,cts]
-T_tot=1e8
-freq=np.arange(1/T_tot,0.5/5000,1/(5*T_tot))
-freq=freq[np.where(freq>1/100000)]
+T_tot=1e5
+freq=np.arange(1/T_tot,0.5/100,1/(5*T_tot))
+freq=freq[np.where(freq>1/10000)]
 [Z2,cts]=get_Z2(dataname,freq)
 Z2=np.array(Z2)
 plt.figure(1,(7,7))
@@ -97,19 +97,19 @@ def make_period_range(pmin, pmax, expT):
 #                'src6pn','src7pn','src8pn','src9pn','src10pn',
 #                'src11pn','src12pn','src14pn','src15pn','src15pn','src16pn']
 
-for i in range(len(evt_list_name)):
-    dataname=evt_list_name[i]
-    Z2=get_Z2(dataname,freq)[0]
-    cts=get_Z2(dataname,freq)[1]
-    Z2=np.array(Z2)
-    plt.figure(1,(7,7))
-    plt.title(dataname+',cts={0}'.format(cts))
-    plt.semilogx(freq,[p99_Z2 for i in range(len(Z2))],'--',color='black')
-    plt.semilogx(freq,[p90_Z2 for i in range(len(Z2))],'--',color='red')
-    plt.step(freq,Z2,color='black')
-    plt.text(0.0005,p99_Z2+1,"99%")
-    plt.text(0.0005,p90_Z2+1,"90%")
-    plt.show()
+# for i in range(len(evt_list_name)):
+#     dataname=evt_list_name[i]
+#     Z2=get_Z2(dataname,freq)[0]
+#     cts=get_Z2(dataname,freq)[1]
+#     Z2=np.array(Z2)
+#     plt.figure(1,(7,7))
+#     plt.title(dataname+',cts={0}'.format(cts))
+#     plt.semilogx(freq,[p99_Z2 for i in range(len(Z2))],'--',color='black')
+#     plt.semilogx(freq,[p90_Z2 for i in range(len(Z2))],'--',color='red')
+#     plt.step(freq,Z2,color='black')
+#     plt.text(0.0005,p99_Z2+1,"99%")
+#     plt.text(0.0005,p90_Z2+1,"90%")
+#     plt.show()
     #plt.savefig(path + 'fig_Z/' + dataname + '.eps')
     #plt.close()
 #

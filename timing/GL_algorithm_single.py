@@ -221,8 +221,12 @@ def get_T_in_mbins(epoch_file,w,m,fi):
     tbin = T/m
     # 每个bin的时间长度
     epoch_info = np.loadtxt(epoch_file)
-    t_start = epoch_info[:, 0]
-    t_end = epoch_info[:, 1]
+    if epoch_info.ndim==2:
+        t_start = epoch_info[:, 0]
+        t_end = epoch_info[:, 1]
+    if epoch_info.ndim == 1:
+        t_start=np.array([epoch_info[0]])
+        t_end = np.array([epoch_info[1]])
     # t_start=[epoch_info[0]]
     # t_end = [epoch_info[1]]
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
@@ -244,9 +248,9 @@ def get_T_in_mbins(epoch_file,w,m,fi):
         else:
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
-path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
+path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
-epoch_file =path + 'epoch_src_89.txt'
+epoch_file =path + 'epoch_src_643_qpo.txt'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
 
 result_srcid=[]
@@ -257,7 +261,7 @@ result_mopt=[]
 result_wconf_lo=[]
 result_wconf_hi=[]
 def write_result(dataname):
-    path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
+    path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
     #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
     filename=str(dataname)+'.txt'
     time = np.loadtxt(path + str(dataname) + '.txt')[:, 0]
@@ -265,7 +269,7 @@ def write_result(dataname):
     #time = filter_energy(time, energy, [200, 500])
     #time=np.loadtxt(path+str(dataname)+'.txt')
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./2600,1./1000,1.e-7)
+    w_range=2*np.pi*np.arange(1./14000,1./13000,1.e-9)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,w_range=w_range,m_max=10,parallel=False)
     endtime = datetime.datetime.now()
@@ -310,6 +314,6 @@ def get_result_fromid(id_range):
     np.savetxt(path+'result_1h_{0}.txt'.format(id_range[0]), result,
                fmt='%10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
-get_result_fromid(['19'])
+get_result_fromid(['643_qpo'])
 
 #choose_id(1, 3)

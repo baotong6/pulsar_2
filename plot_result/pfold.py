@@ -70,11 +70,12 @@ def get_T_in_mbins(epoch_file,w,m,fi):
     tbin = T/m
     # 每个bin的时间长度
     epoch_info = np.loadtxt(epoch_file)
-    t_start = epoch_info[:, 0]
-    t_end = epoch_info[:, 1]
-
-    # t_start=np.array([epoch_info[0]])
-    # t_end = np.array([epoch_info[1]])
+    if epoch_info.ndim==2:
+        t_start = epoch_info[:, 0]
+        t_end = epoch_info[:, 1]
+    if epoch_info.ndim == 1:
+        t_start=np.array([epoch_info[0]])
+        t_end = np.array([epoch_info[1]])
 
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
     N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
@@ -118,8 +119,13 @@ def plot_longT_V(data_file,bkg_file,epoch_file):
 def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
     time=np.loadtxt(data_file)[:,0]
     energy=np.loadtxt(data_file)[:,1]
-    # plt.hist(time,bins=100,histtype='step')
-    # plt.show()
+    # time-=time[0]
+    plt.hist(time,bins=100,histtype='step')
+    # plt.plot([0,0],[0,50],'--')
+    # plt.plot([0+5122, 0+5122], [0, 50], '--')
+    # plt.plot([0 + 5122*2, 0 + 5122*2], [0, 50], '--')
+    # plt.plot([0 + 5122*3, 0 + 5122*3], [0, 50], '--')
+    plt.show()
     # time=filter_energy(time,energy,[500,2000])
     # T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, shift*2*np.pi)
     #print(T_in_perbin)
@@ -198,7 +204,7 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
     ax2.set_ylim([0,yhigh])
     ax2.tick_params(labelsize=18)
 
-    plt.savefig(pathout+'pfold_lc_{0}.eps'.format(label))
+    # plt.savefig(pathout+'pfold_lc_{0}.eps'.format(label))
     plt.show()
     #plt.close()
 # phase_fold('513_bkg.txt','LW_epoch.txt',5334.75593,bin = 30, net_percent = 0.9, shift = 0.2, label = 12)
@@ -217,13 +223,14 @@ path_NGC6397='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
 path_NGC6752='/Users/baotong/Desktop/period_NGC6752/txt_all_obs_0.5_8/'
 path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
 path_xmmCDFS='/Users/baotong/Desktop/CDFS/xmm_txt/'
-
+path_eSASS='/Users/baotong/eSASS/data/47_Tuc/txt/'
 figurepath='/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
 if __name__=='__main__':
-    path=path_CDFS
-    period=1614.96326
+    path=path_Tuc
+    period=15232.63368
 
-    dataname='210.txt'
+    dataname='364.txt'
     net_p=0.9
     epoch_file = path + 'epoch_src_' + dataname
-    phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.9, label =dataname[0:-4],pathout=figurepath)
+    # epoch_file=path+'epoch_47Tuc.txt'
+    phase_fold(path + dataname, epoch_file, period, bin = 50, net_percent = net_p, shift = 0.5, label =dataname[0:-4],pathout=figurepath)

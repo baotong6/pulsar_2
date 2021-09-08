@@ -21,6 +21,8 @@ from stingray.lightcurve import Lightcurve
 from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,AveragedPowerspectrum
 from stingray.simulator import simulator, models
 
+figurepath = '/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
+
 font1 = {'family': 'Normal',
          'weight': 'normal',
          'size': 18, }
@@ -41,6 +43,23 @@ def bending_po(x,p):
     :return:
     """
     return p[3]*x**(-1)*(1+(x/p[0])**(p[1]-1))**(-1)+ p[2]
+def standard_lorentzian(x,p):
+    """
+    standard Lorentzian function.
+
+    Parameters
+    ----------
+    x: numpy.ndarray
+        non-zero frequencies
+
+    p: iterable
+        p[0] = peak centeral frequency
+        p[1] = Q=f/df
+        p[2] = R （should represent fractional RMS)
+        p[3] = 2, by default
+    """
+    if p[3]!=2: print("warning for the index")
+    return p[2]**2*2*p[1]*p[0]/(np.pi*(p[0]**2+(2*p[1])**2*(x-p[0])**2))
 
 def generalized_lorentzian(x, p):
     """
@@ -150,12 +169,12 @@ def get_LS(time, flux,freq):
     # LS = LombScargle(x, y, normalization='psd')
     power = LS.power(freq)
     max_NormLSP=np.max(power)
-    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='baluev')
-    FP_99 = LS.false_alarm_level(0.01,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
+    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='naive')
+    FP_99 = LS.false_alarm_level(0.01,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='naive')
     FP_95 = LS.false_alarm_level(0.05, minimum_frequency=freq[0],
-                                 maximum_frequency=freq[-1], method='baluev')
+                                 maximum_frequency=freq[-1], method='naive')
     FP_68 = LS.false_alarm_level(0.32,minimum_frequency=freq[0],
-                                 maximum_frequency=freq[-1], method='baluev')
+                                 maximum_frequency=freq[-1], method='naive')
 
     # if FP<0.01:print(dataname)
     # plt.title('Epoch {2}: XID={0},FAP={1}'.format(dataname,np.round(FP,4),k),font1)
@@ -184,11 +203,12 @@ def get_T_in_mbins(epoch_file,w,m,fi):
     tbin = T/m
     # 每个bin的时间长度
     epoch_info = np.loadtxt(epoch_file)
-    t_start = epoch_info[:, 0]
-    t_end = epoch_info[:, 1]
-
-    # t_start=np.array([epoch_info[0]])
-    # t_end = np.array([epoch_info[1]])
+    if epoch_info.ndim==2:
+        t_start = epoch_info[:, 0]
+        t_end = epoch_info[:, 1]
+    if epoch_info.ndim == 1:
+        t_start=np.array([epoch_info[0]])
+        t_end = np.array([epoch_info[1]])
 
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
     N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
@@ -226,7 +246,8 @@ def filter_obs(src_evt,bkg_evt,useid):
 def read_epoch(epoch_file):
     epoch=np.loadtxt(epoch_file)
     if epoch.ndim==1:
-        epoch=[epoch]
+        epoch=np.array([epoch])
+    # print(epoch)
     TSTART=epoch[:,0]
     TSTOP=epoch[:,1]
     OBSID=epoch[:,2]
