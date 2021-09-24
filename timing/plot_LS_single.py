@@ -88,10 +88,12 @@ def read_txt():
 
     # path='/Users/baotong/eSASS/data/47_Tuc/txt/'
     path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
-    file=np.loadtxt(path+'872_flare.txt')
-    epoch_file=np.loadtxt(path+'epoch_src_872_flare.txt')
+    path = '/Users/baotong/Downloads/'
+    file=np.loadtxt(path+'time3.txt')
+    epoch_file=np.loadtxt(path+'epoch_time3.txt')
 
-    time=file[:,0]
+    # time=file[:,0]
+    time=file
     # tstart=epoch_file[:,0];tstop=epoch_file[:,1]
     tstart=[epoch_file[0]];tstop=[epoch_file[1]]
 

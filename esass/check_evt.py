@@ -22,16 +22,18 @@ for i in range(51,57):
 # print(GTI_START_all-np.sort(GTI_START_all))
 
 for i in (1,2,4,5,6,7):
-    GTI_START=fits.open(path+file)['FLAREGTI'+str(i)].data['START']
-    GTI_STOP=fits.open(path+file)['FLAREGTI'+str(i)].data['STOP']
+    GTI_START=fits.open(path+file)['GTI'+str(i)].data['START']
+    GTI_STOP=fits.open(path+file)['GTI'+str(i)].data['STOP']
+    expT=np.sum(GTI_STOP-GTI_START)
     TIME_i=evt[np.where(TM_NR==i)]
     goodtime=0
     for j in range(len(GTI_START)):
         identify=(TIME_i-GTI_START[j])*(GTI_STOP[j]-TIME_i)
         rightevt=len(np.where(identify>0)[0])
         goodtime+=rightevt
-    print(len(TIME_i))
-    print(goodtime)
+    print('EVT IN NR {0}='.format(i)+str(len(TIME_i)))
+    print('GOODEVT IN NR {0}='.format(i)+str(goodtime))
+    print('EXPTIME {0}='.format(i)+str(expT))
 
 
 # plt.hist(evt,bins=1000)

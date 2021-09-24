@@ -63,20 +63,13 @@ def filter_energy(time,energy,band):
 
     return T
 
-def get_T_in_mbins(epoch_file,w,m,fi):
+def get_T_in_mbins(epoch_info,w,m,fi):
     T=2*np.pi/w
     T_in_perbin = np.zeros(m)
     # 每个bin的总积分时间
     tbin = T/m
     # 每个bin的时间长度
-    epoch_info = np.loadtxt(epoch_file)
-    if epoch_info.ndim==2:
-        t_start = epoch_info[:, 0]
-        t_end = epoch_info[:, 1]
-    if epoch_info.ndim == 1:
-        t_start=np.array([epoch_info[0]])
-        t_end = np.array([epoch_info[1]])
-
+    t_start=epoch_info[:,0];t_end = epoch_info[:, 1]
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
     N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
     intN_bin_t_start=np.floor(N_bin_t_start)+1
@@ -98,6 +91,8 @@ def get_T_in_mbins(epoch_file,w,m,fi):
     return T_in_perbin
 def plot_longT_V(data_file,bkg_file,epoch_file):
     epoch_info = np.loadtxt(epoch_file)
+    if epoch_info.ndim == 1:
+        epoch_info=np.array([epoch_info])
     t_start = epoch_info[:, 0]
     t_end = epoch_info[:, 1]
     obsID = epoch_info[:, 2]
@@ -116,19 +111,33 @@ def plot_longT_V(data_file,bkg_file,epoch_file):
     plt.errorbar(t_start,CR,CR_ERR,fmt='o',capsize=3, elinewidth=1, ecolor='red')
     plt.show()
 
+def filter_obs(src_evt,useid):
+    src_evt_use = src_evt[np.where(src_evt[:-1] == useid[0])[0]]
+    i=1
+    while i < len(useid):
+        id=useid[i]
+        src_evt_use_temp=src_evt[np.where(src_evt[:-1]==id)[0]]
+        src_evt_use = np.concatenate((src_evt_use, src_evt_use_temp))
+        i+=1
+    return src_evt_use
 def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
-    time=np.loadtxt(data_file)[:,0]
-    energy=np.loadtxt(data_file)[:,1]
+    epoch_info=np.loadtxt(epoch_file)
+    if epoch_info.ndim == 1:
+        epoch_info=np.array([epoch_info])
+    epoch_info=epoch_info##这里随意改
+
+    # useid =np.concatenate((epoch_info[:, 2][0:1],epoch_info[:, 2][3:4]))
+    useid = epoch_info[:, 2][0:4]
+    src_evt=np.loadtxt(data_file)
+    src_evt=filter_obs(src_evt,useid)
+    time=src_evt[:,0]
+    energy=src_evt[:,1]
+    # use_id=epoch[:,2][13:23]
+    # exptime=np.sum(epoch[:,3][13:23])
     # time-=time[0]
     plt.hist(time,bins=100,histtype='step')
-    # plt.plot([0,0],[0,50],'--')
-    # plt.plot([0+5122, 0+5122], [0, 50], '--')
-    # plt.plot([0 + 5122*2, 0 + 5122*2], [0, 50], '--')
-    # plt.plot([0 + 5122*3, 0 + 5122*3], [0, 50], '--')
     plt.show()
-    # time=filter_energy(time,energy,[500,2000])
-    # T_in_perbin = get_T_in_mbins(epoch_file, 2 * np.pi / p_test, bin, shift*2*np.pi)
-    #print(T_in_perbin)
+
     def trans(t,p_test,shift):
         ti =t
         v = 1.0 /p_test
@@ -138,7 +147,6 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
         for i in range(len(turns)):
             turns[i] = turns[i] - int(turns[i])
         return turns
-
     turns=trans(time,p_test,shift)
     # turns_b=trans(time_bkg,p_test,shift)
     loc=np.zeros(bin)
@@ -147,7 +155,6 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
         loc[int(index*bin)] += 1
     # for index in turns_b:
     #     loc_b[int(index * bin)] += 1
-
 
     x = np.array([(i / bin + 0.5 / bin) for i in range(bin)])
     AM=1-min(loc)/max(loc)
@@ -176,8 +183,11 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
 
     x2=np.concatenate((x,x+1))
     y2=np.concatenate((loc,loc))
-    # correct_gap = T_in_perbin / (sum(T_in_perbin) / len(T_in_perbin))
-    # y2 /= np.concatenate((correct_gap, correct_gap))
+    T_in_perbin = get_T_in_mbins(epoch_info, 2 * np.pi / p_test, bin, shift * 2 * np.pi)
+
+    correct_gap = T_in_perbin / (sum(T_in_perbin) / len(T_in_perbin))
+    print(correct_gap)
+    y2 /= np.concatenate((correct_gap, correct_gap))
     y2_err=np.array(poisson_conf_interval(y2,interval='frequentist-confidence'))
     y2_err[0]=y2-y2_err[0]
     y2_err[1]=y2_err[1]-y2
@@ -223,14 +233,13 @@ path_NGC6397='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
 path_NGC6752='/Users/baotong/Desktop/period_NGC6752/txt_all_obs_0.5_8/'
 path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/'
 path_xmmCDFS='/Users/baotong/Desktop/CDFS/xmm_txt/'
-path_eSASS='/Users/baotong/eSASS/data/47_Tuc/txt/'
+path_eSASS='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.5_5/'
 figurepath='/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
 if __name__=='__main__':
-    path=path_Tuc
-    period=15232.63368
-
-    dataname='364.txt'
+    path=path_eSASS
+    period=5420.0542
+    dataname='192.txt'
     net_p=0.9
     epoch_file = path + 'epoch_src_' + dataname
     # epoch_file=path+'epoch_47Tuc.txt'
-    phase_fold(path + dataname, epoch_file, period, bin = 50, net_percent = net_p, shift = 0.5, label =dataname[0:-4],pathout=figurepath)
+    phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.3, label =dataname[0:-4],pathout=figurepath)

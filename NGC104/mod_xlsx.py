@@ -74,10 +74,6 @@ def print_MJD():
     print(time)
 #print_MJD()
 
-
-# In[80]:
-
-
 def plot_profile_distb():
     # label_all=['47Tuc','terzan5','M28','omg_cen']
     label_all=['47Tuc','terzan5','M28','omg_cen','NGC6397','NGC6752']
@@ -207,7 +203,8 @@ def plot_profile_distb():
         plt.xlabel('Period(h)',font1)
         plt.ylabel('Distance (/half-light radius)',font1)
         plt.tick_params(labelsize=15)
-
+        figurepath='/Users/baotong/Desktop/aas/pCV_GC/figure/'
+        plt.savefig(figurepath+'L_PandR_P.eps')
         plt.show()
 
     plot_P_Lum()

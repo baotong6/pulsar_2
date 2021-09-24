@@ -7,13 +7,16 @@ import sys
 import os
 from tkinter import _flatten
 import funcs_fits2txt as funcs
+from funcs_fits2txt import Circle
 from scipy import interpolate
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+from bisect import bisect_left,bisect_right
 
 def read_erosita_cat(filename):
     cat=pd.read_excel(filename,header=0)
     srcid=cat['NAME']
+    srcid=np.array(srcid)
     ra_hms=cat['RA']
     dec_hms=cat['DEC']
     ra=[];dec=[]
@@ -32,20 +35,24 @@ def make_epochfile(path,ID,outpath):
         TSTART.append(fits.open(path+evtfile)[1].header['TSTART'])
         TSTOP.append(fits.open(path+evtfile)[1].header['TSTOP'])
     exptime=np.array(TSTOP)-np.array(TSTART)
-    res=np.column_stack((TSTART,TSTOP,exptime,ID))
+    res=np.column_stack((TSTART,TSTOP,ID,exptime))
     np.savetxt(outpath+'epoch_47Tuc.txt',res,fmt="%20.2f  %20.2f  %20.2f %10d")
 
-def get_singlesrc_evt(evtfile,obsid,ra,dec,radius,outpath,outname):
+def get_singlesrc_evt(evtfile,imgname,obsid,ra,dec,emin,emax,radius,outpath,outname):
     evtall=fits.open(evtfile)[1]
     time_all=evtall.data['TIME']
     energy_all=evtall.data['PI']
     RA_all=evtall.data['RA']
     DEC_all=evtall.data['DEC']
-    reg=[ra,dec,radius]
-    index_out=funcs.where_region(RA_all,DEC_all,reg)
+    X_all=evtall.data['X']
+    Y_all=evtall.data['Y']
+    (phy_x,phy_y)=funcs.trans_radec2xy(imgname,ra,dec)
+    reg=[phy_x,phy_y,radius]
+
+    index_out=funcs.where_region(X_all,Y_all,reg)
     time=time_all[index_out];energy=energy_all[index_out]
     obsID=np.array([obsid for i in range(len(time))])
-    [src_t, src_E, src_ID] = funcs.delete_photon_ID(time, energy, obsID,emin=500,emax=8000)
+    [src_t, src_E, src_ID] = funcs.delete_photon_ID(time, energy, obsID,emin=emin,emax=emax)
 
     src_t = src_t.astype('float')
     src_E = src_E.astype('float')
@@ -54,13 +61,36 @@ def get_singlesrc_evt(evtfile,obsid,ra,dec,radius,outpath,outname):
     src_txt = src_txt[src_txt[:, 0].argsort()]
     np.savetxt(outpath + outname +'_'+str(obsid)+ '.txt', src_txt, fmt="%.7f  %10.3f  %10d")
 
-def merge_txt(ID,outpath,outname):
+def merge_txt(obsIDlist,inpath,outpath,outname,epoch_file):
     res_t=[];res_E=[];res_ID=[]
-    for obsid in ID:
-        res_temp=np.loadtxt(outpath+outname+'_'+str(obsid)+'.txt')
-        res_t.append(list(res_temp[:, 0]))
-        res_E.append(list(res_temp[:, 1]))
-        res_ID.append(list((res_temp[:, 2])))
+    epoch_ID=[];epoch_start=[];epoch_stop=[];epoch_expt=[]
+
+    epoch_all = np.loadtxt(inpath + epoch_file)
+    obs_tstart=epoch_all[:,0]
+    obs_tstop = epoch_all[:,1]
+    obs_ID_all=epoch_all[:,2]
+    obs_expt=epoch_all[:,3]
+    obs_ID_all = obs_ID_all.astype(int)
+
+    for i in range(len(obs_ID_all)):
+        obsid=obs_ID_all[i]
+        txt_filename=inpath+'txt_psf50_{0}/'.format(obsid)+outname+'_'+str(obsid)+'.txt'
+        if os.path.exists(txt_filename):
+            res_temp=np.loadtxt(txt_filename)
+            if res_temp.size==0:
+                print('Empty')
+                continue
+            if res_temp.ndim == 1:
+                res_temp=np.array([res_temp])
+            if res_temp.ndim == 2:
+                res_t.append(list(res_temp[:, 0]))
+                res_E.append(list(res_temp[:, 1]))
+                res_ID.append(list((res_temp[:, 2])))
+
+                epoch_ID.append(obs_ID_all[i])
+                epoch_start.append(obs_tstart[i])
+                epoch_stop.append(obs_tstop[i])
+                epoch_expt.append(obs_expt[i])
 
     res_t = list(_flatten(res_t))
     res_E = list(_flatten(res_E))
@@ -68,9 +98,12 @@ def merge_txt(ID,outpath,outname):
     result = np.column_stack((res_t, res_E, res_ID))
     result = result[result[:, 0].argsort()]
 
-    np.savetxt(outpath + outname+ '_merge.txt', result, fmt="%.7f  %10.3f  %10d")
+    epoch_info = np.column_stack((epoch_start, epoch_stop, epoch_ID, epoch_expt))
+    np.savetxt(outpath + 'epoch_src_' + str(outname) + '.txt', epoch_info,
+               fmt='%15.2f %15.2f %10d %20.2f')
+    np.savetxt(outpath + outname+ '.txt', result, fmt="%.7f  %10.3f  %10d")
 
-def get_psfradius(ra,dec,obsid,inpath,outpath,ecf=0.5,if_SN_radius=False,evtname=None):
+def get_psfradius(srcID,ra,dec,obsid,inpath,outpath,ecf=0.5,if_SN_radius=False):
     ## ra and dec should be array
     ##注意这里的数字位置都是从0开始计数##
     ##erosita现在的psfmap大小都是21x21，注意手动换算##
@@ -80,73 +113,200 @@ def get_psfradius(ra,dec,obsid,inpath,outpath,ecf=0.5,if_SN_radius=False,evtname
     (xbin,ybin)=image.shape
     w = WCS(path + image_file)
     src_x, src_y = w.all_world2pix(ra, dec, 1)
-    img_x=src_x/1024*21;img_y=src_y/1024*21
+    # print(src_x,src_y)
+    img_x=src_x/xbin*21;img_y=src_y/ybin*21
+
+    ##先筛掉不在图像中的
+    expmap_file='expmap_05_5_{0}.fits'.format(obsid)
+    expmap=fits.open(inpath+expmap_file)[0].data
+    not_include_index=np.zeros(len(srcID))+1
+    for i in range(len(ra)):
+        if src_x[i]<=0 or src_x[i]>=xbin-1 or src_y[i]<=0 or src_y[i]>=xbin-1:
+            not_include_index[i]=0
+            src_x[i]=0;img_x[i]=0;src_y[i]=0;img_y[i]=0
+        elif expmap[int(src_x[i]),int(src_y[i])]==0:
+            not_include_index[i]=0
+
     psf_x=img_x.astype('int');psf_y=img_y.astype('int')
 
     psf_filename = 'psfmap_{0}.fits'.format(obsid)
     psffile = fits.open(inpath + psf_filename)
     psfmap_all = psffile[0].data
-    ecflist=np.array([0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95])
-    def output_psf_intervalue(ecf,psf_x,psf_y,img_x,img_y):
-        indexpsf=np.where(ecflist==ecf)[0][0]
-        psfmap_ecf=psfmap_all[indexpsf]
-        psfmap_ecf=psfmap_ecf.T
-        psfmap_ecf[np.where(psfmap_ecf==0.)]+=np.max(psfmap_ecf)
-        psf_value=psfmap_ecf[psf_x,psf_y]  ##不太准，所以不用
 
-        psf_bettervalue=[]
-        f = interpolate.interp2d(np.arange(0.5,21.5,1),np.arange(0.5,21.5,1),psfmap_ecf,kind='cubic')
-        for i in range(len(img_x)):
-            psf_bettervalue.append(f(img_x[i],img_y[i])[0])
-        psf_bettervalue=np.array(psf_bettervalue)
-        return psf_bettervalue
+    ecflist=np.array([0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95])
+
+    def output_psf_intervalue(ecf,psf_x,psf_y,img_x,img_y,if_ecflist=False):
+        if if_ecflist==False:
+            indexpsf=np.where(ecflist==ecf)[0][0]
+            psfmap_ecf = psfmap_all[indexpsf]
+            psfmap_ecf = psfmap_ecf.T
+            psfmap_ecf[np.where(psfmap_ecf == 0.)] += np.max(psfmap_ecf)
+            psf_value = psfmap_ecf[psf_x, psf_y]  ##不太准，所以不用
+
+            psf_bettervalue = []
+            f = interpolate.interp2d(np.arange(0.5, 21.5, 1), np.arange(0.5, 21.5, 1), psfmap_ecf, kind='cubic')
+            for i in range(len(img_x)):
+                psf_bettervalue.append(f(img_x[i], img_y[i])[0])
+            psf_bettervalue = np.array(psf_bettervalue)*80
+
+            return psf_bettervalue
+        else:
+            psf_bettervalue_list=[]
+            for i in range(len(ecflist)):
+                psfmap_ecf=psfmap_all[i]
+                psfmap_ecf=psfmap_ecf.T
+                psfmap_ecf[np.where(psfmap_ecf==0.)]+=np.max(psfmap_ecf)
+                psf_value=psfmap_ecf[psf_x,psf_y]  ##不太准，所以不用
+
+                psf_bettervalue=[]
+                f = interpolate.interp2d(np.arange(0.5,21.5,1),np.arange(0.5,21.5,1),psfmap_ecf,kind='cubic')
+                for i in range(len(img_x)):
+                    psf_bettervalue.append(f(img_x[i],img_y[i])[0])
+                # psf_bettervalue=np.array(psf_bettervalue)
+                psf_bettervalue_list.append(psf_bettervalue)
+            psf_bettervalue_list=np.array(psf_bettervalue_list)*80
+
+            return psf_bettervalue_list
+    if not if_SN_radius:
+        psf_bettervalue = output_psf_intervalue(ecf, psf_x, psf_y, img_x, img_y, if_ecflist=False)
+        return (psf_bettervalue,not_include_index)
 
     if if_SN_radius:
+        ##此时输入参数ecf是无用的
         evtname = 'pm00_{0}_020_EventList_c001_bary.fits'.format(obsid)
-        for i in range(len(ra)):
-            src_reg=[ra,dec,psf_value]
+        imgname = '{0}_05_5_img.fits'.format(obsid)
+        psf_bv_list=output_psf_intervalue(ecf,psf_x,psf_y,img_x,img_y,if_ecflist=True)
+        psf_bestSNR_no_overlap=[];ECF_allsrc=[];SNR_allsrc=[]
+        (phy_x,phy_y)=funcs.trans_radec2xy(inpath+imgname,ra,dec)
+        for i in range(len(phy_x)):
+            dist=np.sqrt((phy_x-phy_x[i])**2+(phy_y-phy_y[i])**2)
+            close_dist=np.sort(dist)[1]
 
-    return (psf_value,psf_bettervalue)
+            SNR=[]
+            bkg_reg = [phy_x[i], phy_y[i], 2 * psf_bv_list[:, i][10], 4 * psf_bv_list[:, i][10]]
+            ##默认annulus用2-4倍psf90
+            [bkg_t, bkg_E, bkg_ID, bkg_area] = funcs.get_evt_bkgreg(inpath + evtname,inpath+ imgname,obsid, bkg_reg,
+                                                                    ra_list=ra, dec_list=dec,
+                                                                    radius_list=psf_bv_list[10],
+                                                                    emin=500, emax=5000)
+            # print(len(bkg_t), bkg_area)
+            if bkg_area == 0:
+                SNR.append(0)
+                continue
 
+            overlap_ecf=[]
+            for j in range(len(ecflist)):
+                src_reg=[phy_x[i],phy_y[i],psf_bv_list[:,i][j]]
+                [src_t, src_E, src_ID] = funcs.get_evt_srcreg(inpath+evtname,obsid,src_reg,emin=500,emax=5000)
 
-def make_region(ra,dec,radius,obsIDlist,outpath):
-    radius=np.array(radius)*4/3600
+                src_cts=len(src_t)
+                bkg_cts=len(bkg_t)
+                src_area=np.pi*src_reg[2]**2
+                SNR.append((src_cts-bkg_cts*src_area/bkg_area)/np.sqrt(src_cts))
+
+            src_bestSNR_psf_radius = psf_bv_list[:, i][np.argmax(SNR)]  ##用不到，先留着
+            ##根据overlap的值再缩小半径##
+            if close_dist < 2 * psf_bv_list[:, i][10]:
+                #按照2倍psf75半径为overlap
+                overlap_dist=2 * psf_bv_list[:, i]-close_dist
+                overlap_index=funcs.find_last_negative(overlap_dist)
+
+            else:
+                overlap_index=np.argmax(SNR)
+                if overlap_index==11:overlap_index=0
+            src_final_SNR_no_overlap=psf_bv_list[:,i][overlap_index]
+
+            print(src_bestSNR_psf_radius,src_final_SNR_no_overlap,ecflist[overlap_index],SNR[overlap_index])
+
+            psf_bestSNR_no_overlap.append(src_final_SNR_no_overlap)
+            ECF_allsrc.append(ecflist[overlap_index])
+            SNR_allsrc.append(SNR[overlap_index])
+        psf_bestSNR_no_overlap=np.array(psf_bestSNR_no_overlap)
+        ECF_allsrc=np.array(ECF_allsrc);SNR_allsrc=np.array(SNR_allsrc)
+
+        return (psf_bestSNR_no_overlap,ECF_allsrc,SNR_allsrc,not_include_index)
+
+def make_region(srcID,ra,dec,radius,ecf,obsIDlist,outpath):
+    if ecf=='SNR':
+        ecfstr='SNRpsf'
+    else:
+        ecfstr=str(int(ecf*100))
+    radius=np.array(radius)/20/3600
     for obsid in obsIDlist:
         os.chdir(outpath)
-        if os.path.exists('reg_{0}'.format(obsid)):
-            os.chdir('reg_{0}/'.format(obsid))
+        if os.path.exists('reg_{0}/region_{1}'.format(obsid,ecfstr)):
+            os.chdir('reg_{0}/region_{1}'.format(obsid,ecfstr))
         else:
-            os.mkdir('reg_{0}/'.format(obsid))
-            os.chdir('reg_{0}/'.format(obsid))
+            os.mkdir('reg_{0}/region_{1}'.format(obsid,ecfstr))
+            os.chdir('reg_{0}/region_{1}'.format(obsid,ecfstr))
         with open('./all.reg', 'a+') as f2:
             f2.writelines('fk5' + '\n')
         for i in range(len(ra)):
-            with open('./{0}.reg'.format(i + 1), 'w+') as f1:
+            with open('./{0}.reg'.format(srcID[i]), 'w+') as f1:
                 f1.writelines('fk5'+'\n')
                 reg = 'circle(' + str(ra[i]) + ',' + str(dec[i]) + ',' + str(radius[i]) + ')'
                 f1.writelines(reg)
             with open('./all.reg', 'a+') as f2:
-                f2.writelines(reg + '\n')
+                f2.writelines(reg +' # text={'+str(srcID[i])+'}'+ '\n')
 
+def write_cat_psfinfo(srcID,ra,dec,radius,ecf,SNR,not_include_index,obsIDlist,outpath):
+    ##输入的radius单位统一为image的pixel，乘4才是角秒##
+    os.chdir(outpath)
+    for obsid in obsIDlist:
+        if os.path.exists('reg_{0}/region_SNRpsf'.format(obsid)):
+            print('OK')
+        else:
+            os.mkdir('reg_{0}/region_SNRpsf'.format(obsid))
+        info=np.column_stack((srcID,ra,dec,radius/20.,ecf,SNR,not_include_index))
+        np.savetxt('reg_{0}/region_SNRpsf/src_info_{0}.txt'.format(obsid),info,fmt='%8d %10.5f %10.5f %10.5f %10.2f %10.5f %5d')
 
-def get_all_src_txt(catalog_file,obsIDlist,inpath,outpath):
+def get_all_src_txt(catalog_file,obsIDlist,inpath):
     ###------read catalog file, need modification---##
-    (ra_list,dec_list,id_list)=read_erosita_cat('/Users/baotong/Desktop/period_Tuc/erosita_cat_coord.xlsx')
+    (ra_list,dec_list,srcIDlist)=read_erosita_cat('/Users/baotong/Desktop/period_Tuc/erosita_cat_coord.xlsx')
     ###-------------------------------------------##
-    if len(ra_list)!=len(id_list) or len(dec_list)!=len(id_list):
+    if len(ra_list)!=len(srcIDlist) or len(dec_list)!=len(srcIDlist):
         print('ERROR!')
         return None
+    for j in range(len(obsIDlist)):
+        (psf_bettervalue, not_include_index) = get_psfradius(srcID=srcIDlist, ra=ra, dec=dec, obsid=obsIDlist[j], inpath=path,
+                                                             outpath=path, ecf=0.75, if_SN_radius=False)
+        outpath = inpath + 'txt/txt_psf75_{0}/'.format(obsIDlist[j])
+        evtfile = inpath + 'pm00_{0}_020_EventList_c001_bary.fits'.format(obsIDlist[j])
+        imgfilename =inpath+ '{0}_05_5_img.fits'.format(obsIDlist[j])
+        for i in range(len(ra_list)):
+            evtfile=inpath+'pm00_{0}_020_EventList_c001_bary.fits'.format(obsIDlist[j])
+            get_singlesrc_evt(evtfile=evtfile,imgname=imgfilename,obsid=obsIDlist[j],ra=ra_list[i],dec=dec_list[i],
+                              radius=psf_bettervalue[i], emin=500,emax=5000,outpath=outpath,outname=str(srcIDlist[i]))
     for i in range(len(ra_list)):
-        for j in range(obsid):
-            evtfile=inpath+'pm00_{0}_020_EventList_c001_bary.fits'.format(obsIDlist[i])
-            get_singlesrc_evt(evtfile=evtfile,obsid=obsIDlist[i],ra=ra_list[i],dec=dec_list[i],
-                              radius=radius_list[i],outpath=outpath,outname=id_list[i])
-        merge_txt(ID=obsIDlist,outpath=outpath,outname=id_list[i])
+        merge_txt(obsIDlist=obsIDlist,inpath=inpath+'txt/',outpath=inpath+'txt/txt_merge_psf75_0.5_5/',outname=str(srcIDlist[i]),epoch_file='epoch_47Tuc.txt')
+
+def get_all_src_txt_SNRpsf(catalog_file,obsIDlist,inpath):
+    (ra_list, dec_list, srcIDlist) = read_erosita_cat(catalog_file)
+    if len(ra_list)!=len(srcIDlist) or len(dec_list)!=len(srcIDlist):
+        print('ERROR!')
+        return None
+    # for j in range(len(obsIDlist)):
+    #     print(obsIDlist[j])
+    #     evtfile = inpath + 'pm00_{0}_020_EventList_c001_bary.fits'.format(obsIDlist[j])
+    #     imgfilename =inpath+ '{0}_05_5_img.fits'.format(obsIDlist[j])
+    #     src_info=np.loadtxt(inpath+'reg_{0}/region_SNRpsf/src_info_{0}.txt'.format(obsIDlist[j]))
+    #     radius_list=src_info[:,3];not_include_index=src_info[:,6]
+    #     radius_list*=20.
+    #     outpath=inpath+'txt/txt_SNR_{0}/'.format(obsIDlist[j])
+    #     for i in range(len(ra_list)):
+    #         if not_include_index[i]==1:
+    #             get_singlesrc_evt(evtfile=evtfile,imgname=imgfilename, obsid=obsIDlist[j], ra=ra_list[i], dec=dec_list[i],
+    #                               radius=radius_list[i], emin=500,emax=5000,outpath=outpath, outname=str(srcIDlist[i]))
+
+    for i in range(len(ra_list)):
+        merge_txt(obsIDlist=obsIDlist[0:4],inpath=inpath+'txt/',outpath=inpath+'txt/txt_merge04_psf50_0.5_5/',outname=str(srcIDlist[i]),epoch_file='epoch_47Tuc.txt')
+
 
 if __name__=='__main__':
     # path = '/Users/baotong/eSASS/data/47_Tuc/'
     path='/Users/baotong/eSASS/data/raw_data/47_Tuc/'
     ID=[700011,700013,700014,700163,700173,700174,700175]
+    catalog_file='/Users/baotong/Desktop/period_Tuc/erosita_cat_coord.xlsx'
     # make_epochfile(path=path,ID=ID,outpath=path+'txt/')
 
     # for obsid in ID:
@@ -157,7 +317,20 @@ if __name__=='__main__':
     # merge_txt(ID,outpath='/Users/baotong/eSASS/data/47_Tuc/txt/',outname='402')
 
     # get_psfradius(ra=np.array([6.0178,6.1078]),dec=np.array([-72.08281,-72.18281]),obsid=700011,inpath=path,outpath=path)
-    (ra,dec,srcID)=read_erosita_cat('/Users/baotong/Desktop/period_Tuc/erosita_cat_coord.xlsx')
-    (psf_value,psf_bettervalue)=get_psfradius(ra=ra, dec=dec, obsid=700011, inpath=path,
-                  outpath=path,ecf=0.9)
-    make_region(ra,dec,radius=psf_bettervalue,obsIDlist=ID,outpath=path)
+    (ra,dec,srcIDlist)=read_erosita_cat(catalog_file)
+    get_all_src_txt(catalog_file, obsIDlist=ID, inpath=path)
+    # get_all_src_txt_SNRpsf(catalog_file, obsIDlist=ID, inpath=path)
+
+    # for obsID in ID[0:]:
+    #     (psf_bestSNR_no_overlap,ECF_allsrc,SNR_allsrc,not_include_index)=get_psfradius(srcID=srcIDlist[0:],ra=ra[0:], dec=dec[0:], obsid=obsID, inpath=path,
+    #                   outpath=path, ecf=0.9,if_SN_radius=True)
+    #     write_cat_psfinfo(srcID=srcIDlist[0:],ra=ra[0:],dec=dec[0:],radius=psf_bestSNR_no_overlap,
+    #                       ecf=ECF_allsrc,SNR=SNR_allsrc,not_include_index=not_include_index,obsIDlist=[obsID],outpath=path)
+    #     make_region(srcID=srcIDlist[0:],ra=ra[0:],dec=dec[0:],ecf='SNR',radius=psf_bestSNR_no_overlap,obsIDlist=[obsID],outpath=path)
+
+    ## ##make all region## ##
+    # for obsID in ID:
+    #     (psf_bettervalue,not_include_index)=get_psfradius(srcID=srcIDlist,ra=ra, dec=dec, obsid=obsID, inpath=path,
+    #                   outpath=path, ecf=0.75,if_SN_radius=False)
+    #
+    #     make_region(srcID=srcIDlist,ra=ra,dec=dec,ecf=0.75,radius=psf_bettervalue,obsIDlist=[obsID],outpath=path)

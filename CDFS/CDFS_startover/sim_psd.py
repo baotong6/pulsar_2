@@ -22,7 +22,7 @@ import csv
 import useful_functions as func
 
 font1=func.font1
-
+font2=func.font2
 def build_psd(x,p,x_2=1,p_2=1,type='bendp'):
     ##
     if type=='bendp':
@@ -71,8 +71,8 @@ def plot_psd(lc):
 
 def test_somefunc():
     lenbin=100
-    T_exp=59000
-    CR=5e-4
+    T_exp=590000
+    CR=5e-3
     epoch_89='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/epoch_src_test_single.txt'
     (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_89)
     epoch_89=(TSTART, TSTOP, OBSID, exptime)
@@ -84,6 +84,9 @@ def test_somefunc():
 
     plt.loglog()
     plt.plot(w,psd_model)
+    plt.xlabel('Frequency (Hz)',font2)
+    plt.ylabel('Power',font2)
+    plt.tick_params(labelsize=16)
     plt.show()
     lc=make_lc_from_psd(psd=psd_model,cts_rate=CR*lenbin,dt=lenbin,epoch_file=epoch_89)
     ps_org=plot_psd(lc)
@@ -99,13 +102,18 @@ def test_somefunc():
     freq = freq[np.where(freq > 1 / 10000.)]
     temp = func.get_LS(lc_evt.time, lc_evt.counts, freq=freq)
 
-    plt.subplot(211)
+    # plt.subplot(121)
+    plt.xlabel('Time',font2)
+    plt.ylabel('Counts/bin',font2)
+    plt.tick_params(labelsize=16)
     plt.plot(lc.time,lc.counts,color='red')
-    plt.subplot(212)
-    plt.plot(lc_evt.time,lc_evt.counts-lc.counts,color='green')
+    # plt.subplot(122)
+    plt.show()
+    plt.plot(lc_evt.time,lc_evt.counts,color='green')
     print('counts={0}'.format(np.sum(lc_evt.counts)))
-    plt.xlabel('Time')
-    plt.ylabel('Counts/bin')
+    plt.xlabel('Time',font2)
+    plt.ylabel('Counts/bin',font2)
+    plt.tick_params(labelsize=16)
     plt.show()
     evt=EventList()
     EventList.simulate_times(evt,lc=lc)
@@ -270,7 +278,8 @@ def run_many_sim():
     #                              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep+1)),
     #                              num_trials=1000)
     ## ---------------------##
+
 if __name__=='__main__':
     # run_many_sim()
-    # test_somefunc()
-    run_many_sim()
+    test_somefunc()
+    # run_many_sim()
