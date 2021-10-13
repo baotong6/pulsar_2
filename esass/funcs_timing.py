@@ -28,7 +28,7 @@ font2 = {'family': 'Normal',
          'weight': 'normal',
          'size': 16, }
 
-def get_LS(time, flux,freq,outpath,outname):
+def get_LS(time, flux,freq,outpath,outname,save=False,show=True):
     x = time
     y = flux
     LS = LombScargle(x, y,normalization = 'standard')
@@ -52,31 +52,29 @@ def get_LS(time, flux,freq,outpath,outname):
     plt.plot([freq[0], freq[-1]], [FP_99, FP_99], '--')
     plt.plot([freq[0], freq[-1]], [FP_95, FP_95], '--')
     plt.plot([freq[0], freq[-1]], [FP_68, FP_68], '--')
-    plt.text(freq[0], FP_99, 'FAP 99.73%',font1)
+    plt.text(freq[0], FP_99, '1-FAP 99.73%',font1)
     plt.text(freq[0], FP_95, '95%',font1)
     plt.text(freq[0], FP_68, '68%',font1)
     plt.xlabel('Frequency (Hz)',font1)
     plt.ylabel('Normalized LS Periodogram',font1)
     plt.tick_params(labelsize=16)
     # plt.show()
-    plt.savefig(outpath+outname+'.eps')
-    plt.close()
+    if save:
+        plt.savefig(outpath + outname + '.eps')
+    if show:
+        plt.show()
+    else:
+        plt.close()
     return [FP,out_period,max_NormLSP]
 
-def get_T_in_mbins(epoch_file,w,m,fi):
+def get_T_in_mbins(epoch_info,w,m,fi):
     T=2*np.pi/w
     T_in_perbin = np.zeros(m)
     # 每个bin的总积分时间
     tbin = T/m
     # 每个bin的时间长度
-    epoch_info = np.loadtxt(epoch_file)
-    if epoch_info.ndim==2:
-        t_start = epoch_info[:, 0]
-        t_end = epoch_info[:, 1]
-    if epoch_info.ndim == 1:
-        t_start=np.array([epoch_info[0]])
-        t_end = np.array([epoch_info[1]])
-
+    if epoch_info.ndim==1:epoch_info=np.array([epoch_info])
+    t_start=epoch_info[:,0];t_end = epoch_info[:, 1]
     N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
     N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
     intN_bin_t_start=np.floor(N_bin_t_start)+1
@@ -124,7 +122,7 @@ def get_hist(t, len_bin,tstart=0,tstop=0):
     lc_new = ev.to_lc(dt=dt, tstart=tstart, tseg=tseg)
     return lc_new
 
-def get_hist_withbkg(t,t_bkg, len_bin,tstart=0,tstop=0):
+def get_hist_withbkg(t,t_bkg, len_bin,bkgscale=0.,tstart=0,tstop=0):
     ###将输入的time信息，按照len_bin的长度输出为lc
     if tstart==0 and tstop==0:
         tstart=t[0]
@@ -140,7 +138,7 @@ def get_hist_withbkg(t,t_bkg, len_bin,tstart=0,tstop=0):
     lc_new = ev.to_lc(dt=dt, tstart=tstart, tseg=tseg)
     lc_bkg = ev_bkg.to_lc(dt=dt, tstart=tstart, tseg=tseg)
     lc_out=lc_new
-    lc_out.counts=lc_new.counts-(1/12.)*lc_bkg.counts
+    lc_out.counts=lc_new.counts-bkgscale*lc_bkg.counts
     # lc_out.counts = lc_new.counts
     # print(lc_bkg.counts)
     return lc_out

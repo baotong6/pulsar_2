@@ -22,8 +22,8 @@ class Circle:
     def coord(self):
         return self.x, self.y
 
-
 def read_region(regname):
+    reg_file=[]
     with open(regname, 'r') as file_to_read:
         while True:
             lines = file_to_read.readline()  # 整行读取数据
@@ -97,7 +97,6 @@ def get_evt_bkgreg(evtname,imgname,obsid,bkg_reg,ra_list,dec_list,radius_list,em
     Y_evt=Y_all[index_out]
     time = time_all[index_out];
     energy = energy_all[index_out]
-    obsID = np.array([obsid for i in range(len(time))])
     ##去掉其他源的overlap##
     del_index=[];overlap_area=0
     (phy_x,phy_y)=trans_radec2xy(imgname,ra_list,dec_list)
@@ -111,26 +110,39 @@ def get_evt_bkgreg(evtname,imgname,obsid,bkg_reg,ra_list,dec_list,radius_list,em
         del_index_single = np.where(dist < 2 * radius_list[i])[0]
         del_index = np.union1d(del_index, del_index_single)
         if len(del_index_single)>0:
-            cir3=Circle(phy_x[i],phy_y[i],2*radius_list[i])
-
+            cir3=Circle(phy_x[i],phy_y[i],radius_list[i])
             overlap_area_single=find_intersection(cir2,cir3)-find_intersection(cir1,cir3)
         else:
             overlap_area_single=0
         overlap_area+=overlap_area_single
-
 
     del_index = del_index.astype('int64')
     X_evt = np.delete(X_evt, del_index);
     Y_evt = np.delete(Y_evt, del_index)
     time=np.delete(time,del_index)
     energy=np.delete(energy,del_index)
+    obsID = np.array([obsid for i in range(len(time))])
 
     bkg_area=np.pi*(bkg_reg[3]**2-bkg_reg[2]**2)-overlap_area
 
     [bkg_t, bkg_E, bkg_ID] = delete_photon_ID(time, energy, obsID, emin=emin, emax=emax)
 
-
     return [bkg_t, bkg_E, bkg_ID,bkg_area]
+
+def read_erosita_cat(filename):
+    cat=pd.read_excel(filename,header=0)
+    srcid=cat['NAME']
+    srcid=np.array(srcid)
+    ra_hms=cat['RA']
+    dec_hms=cat['DEC']
+    ra=[];dec=[]
+    for i in range(len(dec_hms)):
+        skycoord=ra_hms[i]+dec_hms[i]
+        c = SkyCoord(skycoord, unit=(u.hourangle, u.deg))
+        ra.append(c.ra.value)
+        dec.append(c.dec.value)
+
+    return (ra,dec,srcid)
 
 def find_intersection(c1: Circle, c2: Circle)-> float:
     """Finds intersection area of two circles.

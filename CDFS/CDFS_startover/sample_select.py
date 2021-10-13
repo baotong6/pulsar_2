@@ -9,8 +9,8 @@ from scipy.optimize import curve_fit
 import astropy.units as u
 import astropy.constants as c
 import warnings
-import useful_functions as func
-
+from CDFS.CDFS_startover import useful_functions as func
+from CDFS.CDFS_startover import sim_psd as sim
 
 def read_catalog(fitsname):
     ra_center=53.1166667

@@ -85,12 +85,11 @@ def read_txt():
     # path='/Volumes/pulsar/CDFS/merge_data/timing/txt_all_obs_0.5_8/'
     # file=np.loadtxt(path+'XID19.txt')
     # epoch_file=np.loadtxt(path+'epoch_src_XID19.txt')
-
+    path='/Users/baotong/Downloads/'
     # path='/Users/baotong/eSASS/data/47_Tuc/txt/'
-    path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
-    path = '/Users/baotong/Downloads/'
-    file=np.loadtxt(path+'time3.txt')
-    epoch_file=np.loadtxt(path+'epoch_time3.txt')
+    # path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
+    file=np.loadtxt(path+'testdither.txt')
+    epoch_file=np.loadtxt(path+'epoch_testdither.txt')
 
     # time=file[:,0]
     time=file
@@ -114,7 +113,7 @@ def read_txt():
         return np.array(P)
 
     freq=np.arange(1/T_TOT,1/200,1/(1*T_TOT))
-    freq=freq[np.where(freq>1/20000.)]
+    freq=freq[np.where(freq>1/10000.)]
     print(np.sum(lc_all.counts))
 
     # ps = Powerspectrum(lc_all,norm='leahy')

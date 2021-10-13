@@ -152,7 +152,7 @@ def plot_sim_DR(k_num,threshold):
 
     plt.show()
 
-plot_sim_DR([1,2,3,4],1-0.99)
+# plot_sim_DR([1,2,3,4],1-0.99)
 
 def read_LS_info(k,threshold):
     path='/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/'.format(k)
@@ -332,4 +332,4 @@ def plot_LS_bootstrapFAP(k,srcid,threshold):
     # (FP, out_period) = get_LS(x, flux, freq, str(srcid), k)
     # plt.savefig(figurepath+'LS_{0}_simFAP_{1}.eps'.format(srcid,threshold),bbox_inches='tight',pad_inches=0.0)
     # plt.show()
-# plot_LS_bootstrapFAP('3','89',threshold=0.9999)
+plot_LS_bootstrapFAP('3','89',threshold=0.9999)

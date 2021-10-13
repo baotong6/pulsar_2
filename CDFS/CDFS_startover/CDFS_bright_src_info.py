@@ -10,7 +10,8 @@ import astropy.units as u
 import astropy.constants as c
 from scipy import interpolate
 import stingray as sr
-import useful_functions as func
+from CDFS.CDFS_startover import useful_functions as func
+from CDFS.CDFS_startover import sim_psd as sim
 
 bright_source_id=np.array([495,175,716,479,949,855,291,730,711,938,567,208,220,242,
                     200,19,856,168,979,557,996,89,13,785,485,941,306,643,100,

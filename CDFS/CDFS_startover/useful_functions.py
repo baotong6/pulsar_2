@@ -21,7 +21,7 @@ from stingray.lightcurve import Lightcurve
 from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,AveragedPowerspectrum
 from stingray.simulator import simulator, models
 
-figurepath = '/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
+figurepath = '/Users/baotong/Desktop/aas/AGN_CDFS_mod1/figure/'
 
 font1 = {'family': 'Normal',
          'weight': 'normal',
@@ -43,6 +43,7 @@ def bending_po(x,p):
     :return:
     """
     return p[3]*x**(-1)*(1+(x/p[0])**(p[1]-1))**(-1)+ p[2]
+
 def standard_lorentzian(x,p):
     """
     standard Lorentzian function.
@@ -60,6 +61,11 @@ def standard_lorentzian(x,p):
     """
     if p[3]!=2: print("warning for the index")
     return p[2]**2*2*p[1]*p[0]/(np.pi*(p[0]**2+(2*p[1])**2*(x-p[0])**2))
+
+def bendp_lorentz(x,p_1,p_2):
+
+    return p_1[3]*x**(-1)*(1+(x/p_1[0])**(p_1[1]-1))**(-1)+ \
+           p_1[2]+p_2[2]**2*2*p_2[1]*p_2[0]/(np.pi*(p_2[0]**2+(2*p_2[1])**2*(x-p_2[0])**2))
 
 def generalized_lorentzian(x, p):
     """
@@ -141,6 +147,7 @@ def get_hist(t, len_bin,tstart=0,tstop=0):
     ev.time = t_test
     lc_new = ev.to_lc(dt=dt, tstart=tstart, tseg=tseg)
     return lc_new
+
 def get_hist_withbkg(t,t_bkg, len_bin,tstart=0,tstop=0):
     ###将输入的time信息，按照len_bin的长度输出为lc
     if tstart==0 and tstop==0:
@@ -169,12 +176,12 @@ def get_LS(time, flux,freq):
     # LS = LombScargle(x, y, normalization='psd')
     power = LS.power(freq)
     max_NormLSP=np.max(power)
-    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='naive')
-    FP_99 = LS.false_alarm_level(0.01,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='naive')
+    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='baluev')
+    FP_99 = LS.false_alarm_level(0.0027,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     FP_95 = LS.false_alarm_level(0.05, minimum_frequency=freq[0],
-                                 maximum_frequency=freq[-1], method='naive')
+                                 maximum_frequency=freq[-1], method='baluev')
     FP_68 = LS.false_alarm_level(0.32,minimum_frequency=freq[0],
-                                 maximum_frequency=freq[-1], method='naive')
+                                 maximum_frequency=freq[-1], method='baluev')
 
     # if FP<0.01:print(dataname)
     # plt.title('Epoch {2}: XID={0},FAP={1}'.format(dataname,np.round(FP,4),k),font1)
@@ -185,7 +192,7 @@ def get_LS(time, flux,freq):
     plt.plot([freq[0], freq[-1]], [FP_99, FP_99], '--')
     plt.plot([freq[0], freq[-1]], [FP_95, FP_95], '--')
     plt.plot([freq[0], freq[-1]], [FP_68, FP_68], '--')
-    plt.text(freq[0], FP_99, 'FAP 99%',font1)
+    plt.text(freq[0], FP_99, '1-FAP 99%',font1)
     plt.text(freq[0], FP_95, '95%',font1)
     plt.text(freq[0], FP_68, '68%',font1)
     plt.xlabel('Frequency (Hz)',font1)

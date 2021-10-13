@@ -19,7 +19,8 @@ from astropy.timeseries import LombScargle
 import warnings
 from functools import reduce
 import csv
-import useful_functions as func
+from CDFS.CDFS_startover import useful_functions as func
+from CDFS.CDFS_startover import sim_psd as sim
 
 font1=func.font1
 

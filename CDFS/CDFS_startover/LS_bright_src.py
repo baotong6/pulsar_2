@@ -17,7 +17,8 @@ from stingray.events import EventList
 from stingray.lightcurve import Lightcurve
 from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,AveragedPowerspectrum
 from stingray.simulator import simulator, models
-import useful_functions as func
+from CDFS.CDFS_startover import useful_functions as func
+from CDFS.CDFS_startover import sim_psd as sim
 
 font1 = {'family': 'Normal',
          'weight': 'normal',

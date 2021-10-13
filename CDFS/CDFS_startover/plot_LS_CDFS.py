@@ -20,7 +20,9 @@ from stingray.events import EventList
 from stingray.lightcurve import Lightcurve
 from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,AveragedPowerspectrum
 from stingray.simulator import simulator, models
-import useful_functions as func
+from CDFS.CDFS_startover import useful_functions as func
+from CDFS.CDFS_startover import sim_psd as sim
+
 
 font1 = {'family': 'Normal',
          'weight': 'normal',
@@ -66,6 +68,7 @@ def get_hist(t, len_bin,tstart=0,tstop=0):
     ev.time = t_test
     lc_new = ev.to_lc(dt=dt, tstart=tstart-0.5*dt, tseg=tseg+0.5*dt)
     return lc_new
+
 def get_hist_withbkg(t,t_bkg, len_bin,tstart=0,tstop=0):
     ###将输入的time信息，按照len_bin的长度输出为lc
     if tstart==0 and tstop==0:
@@ -87,8 +90,7 @@ def get_hist_withbkg(t,t_bkg, len_bin,tstart=0,tstop=0):
     return lc_out
 # def get_LS_myself(time,flux,freq):
 
-
-def get_LS(time, flux,freq,dataname,k):
+def get_LS(time, flux,freq,dataname,k,save=0,show=0):
     x = time
     y = flux
     # dy=np.sqrt(y)
@@ -100,17 +102,17 @@ def get_LS(time, flux,freq,dataname,k):
     # LS = LombScargle(x, y, normalization='psd')
     power = LS.power(freq)
     # print(power.max())
-    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='baluev')
-    FP_99 = LS.false_alarm_level(0.0027,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
+    FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='naive')
+    FP_99 = LS.false_alarm_level(0.0027,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='naive')
     FP_95 = LS.false_alarm_level(0.05, minimum_frequency=freq[0],
-                                 maximum_frequency=freq[-1], method='baluev')
+                                 maximum_frequency=freq[-1], method='naive')
     FP_68 = LS.false_alarm_level(0.32,minimum_frequency=freq[0],
-                                 maximum_frequency=freq[-1], method='baluev')
+                                 maximum_frequency=freq[-1], method='naive')
 
     # if FP<0.01:print(dataname)
     plt.figure(1, (10, 8))
     # plt.title('Epoch {2}: XID={0},FAP={1}'.format(dataname,np.round(FP,4),k),font1)
-    # plt.title('Epoch {1}: XID={0}'.format(dataname, k), font1)
+    plt.title('Epoch {1}: XID={0}'.format(dataname, k), font1)
     # plt.title('XID={0},FAP={1}'.format(dataname, np.round(FP, 4)), font1)
     # plt.semilogx()
     plt.plot(freq, power)
@@ -124,18 +126,23 @@ def get_LS(time, flux,freq,dataname,k):
     plt.plot([freq[0], freq[-1]], [FP_99, FP_99], '--')
     plt.plot([freq[0], freq[-1]], [FP_95, FP_95], '--')
     plt.plot([freq[0], freq[-1]], [FP_68, FP_68], '--')
-    plt.text(freq[0], FP_99, 'FAP 99.73%',font1)
+    plt.text(freq[0], FP_99, '1-FAP 99.73%',font1)
     plt.text(freq[0], FP_95, '95%',font1)
     plt.text(freq[0], FP_68, '68%',font1)
     plt.xlabel('Frequency (Hz)',font1)
     plt.ylabel('Normalized LS Periodogram',font1)
     plt.tick_params(labelsize=16)
-    # plt.savefig(func.figurepath+'{0}_epoch{1}.pdf'.format(dataname,k),bbox_inches='tight', pad_inches=0.0)
-    # plt.show()
+    # plt.savefig(func.figurepath + '643_epoch4.pdf', bbox_inches='tight', pad_inches=0.0)
+    if save:
+        plt.savefig(func.figurepath+'{0}_epoch{1}.pdf'.format(dataname,k),bbox_inches='tight', pad_inches=0.0)
+    if show:
+        plt.show()
+    else:
+        plt.close()
 
-    plt.savefig('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/{1}_bin250.eps'.format(k,dataname))
+    # plt.savefig('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/{1}_bin250.eps'.format(k,dataname))
     # plt.savefig('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_samp_1_baluev/{1}_bin250.eps'.format(k,dataname))
-    plt.close()
+    # plt.close()
     return [FP,out_period]
 
 def plot_CDFS_ep_LS(k_num):
@@ -206,25 +213,24 @@ def plot_CDFS_ep_LS(k_num):
                 # freq = get_freq_unsamp(exptime)
                 freq=np.arange(1/T_tot,0.5/bin_len-0.00002,1/(5*T_tot))
                 freq=freq[np.where(freq > 1 / 20000.)]
-                (FP, out_period) = get_LS(x, flux, freq, str(source_id[i]), k)
+                (FP, out_period) = get_LS(x, flux, freq, str(source_id[i]), k,save=0,show=1)
                 FP_print.append(FP);out_period_print.append(out_period);source_name.append(source_id[i])
         result = np.column_stack((source_name,FP_print, out_period_print,src_cts,bkg_cts,cts_rate))
-        np.savetxt('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/LS_result_{0}_bin250_psf90.txt'.format(k),result,fmt='%10d %15.10f %15.5f %10d %10d %15.10f')
+        # np.savetxt('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_ovsamp_5_baluev/LS_result_{0}_bin250_psf90.txt'.format(k),result,fmt='%10d %15.10f %15.5f %10d %10d %15.10f')
         # np.savetxt('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}_samp_1_baluev/LS_result_{0}_new_psf90.txt'.format(k),
         #            result, fmt='%10d %15.10f %15.5f %10d %10d %15.10f')
 
 if __name__=='__main__':
-    bin_len = 250
-    # high_id_ep3 = ['876']
-    source_id=np.arange(1,1056,1)
-    # source_id = high_id_ep3
+    bin_len = 100
+    high_id_ep3 = ['948']
+    # source_id=np.arange(1,1056,1)
+    source_id = high_id_ep3
 
     figurepath = '/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
-    plot_CDFS_ep_LS([3])
+    plot_CDFS_ep_LS([2])
     # plt.figure(1, (8, 8))
     # plt.subplot(211)
     # plot_CDFS_ep_LS([2])
     # plt.subplot(212)
     # plot_CDFS_ep_LS([3])
-    # plt.savefig(figurepath+'XID19.eps',bbox_inches='tight',pad_inches=0.0)
-    plt.show()
+    # plt.show()

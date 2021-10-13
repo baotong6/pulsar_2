@@ -14,7 +14,8 @@ from scipy.optimize import curve_fit
 import pandas as pd
 from astropy.stats import poisson_conf_interval
 import scipy
-import useful_functions as func
+from CDFS.CDFS_startover import useful_functions as func
+from CDFS.CDFS_startover import sim_psd as sim
 
 font1 = {'family': 'Normal',
          'weight': 'normal',

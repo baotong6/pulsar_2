@@ -354,7 +354,7 @@ def get_lc_onesource(k,src_index,num_trials=2):
                 spectrum = bending_po(w, [2.3e-3, 3.4, 0.40, 4.3e-4])
                 # spectrum = bending_po(w, [2.3e-3, 3.4, 0.40, 4.3e-4]) + generalized_lorentzian(w, [1.0518215e-3,1.0518215e-3/16,200,2])
                 lc = sim.simulate(spectrum)
-                lc.counts += cts_rate
+                # lc.counts += cts_rate
                 lc.counts[np.where(lc.counts<0)]=0
                 ps = Powerspectrum(lc, norm='abs')
                 ev = EventList()

@@ -33,10 +33,9 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 import functools
 import datetime
-#import read_data as data
-#import read_data_gc as data
+
 starttime = datetime.datetime.now()
-#T = 1618692.94
+
 def compute_bin(Tlist, m, w, fi):
     n = np.zeros(m, 'int')
     j = np.floor(m * np.mod(w * Tlist + fi, 2 * np.pi) / (2 * np.pi))
@@ -244,18 +243,10 @@ def get_T_in_mbins(epoch_info,w,m,fi):
     return T_in_perbin
 
 #
-path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.5_5/'
+path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
 path = path_eSASS
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
-
-result_srcid=[]
-result_runtime=[]
-result_Prob=[]
-result_wpeak=[]
-result_mopt=[]
-result_wconf_lo=[]
-result_wconf_hi=[]
 def filter_obs(src_evt,useid):
     src_evt_use = src_evt[np.where(src_evt[:-1] == useid[0])[0]]
     i=1
@@ -273,20 +264,20 @@ def write_result(dataname):
     epoch_file = path + 'epoch_src_'+str(dataname)+'.txt'
 
     epoch_info=np.loadtxt(epoch_file)
+    epoch_info=epoch_info
     if epoch_info.ndim == 1:
         epoch_info=np.array([epoch_info])
-    epoch_info=epoch_info##这里随意改
+    epoch_info=epoch_info[0:4] ##这里随意改
 
     # useid =np.concatenate((epoch_info[:, 2][0:1],epoch_info[:, 2][3:4]))
-    useid = epoch_info[:, 2][4:5]
+    useid = epoch_info[:, 2]
     src_evt=np.loadtxt(data_file)
     src_evt=filter_obs(src_evt,useid)
     time=src_evt[:,0]
     energy=src_evt[:,1]
     #time = filter_energy(time, energy, [200, 500])
-    #time=np.loadtxt(path+str(dataname)+'.txt')
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./8000,1./3000,5.e-7)
+    w_range=2*np.pi*np.arange(1./1000,1./500,1.e-5)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info,w_range=w_range,m_max=10,parallel=False)
     endtime = datetime.datetime.now()
@@ -332,6 +323,6 @@ def get_result_fromid(id_range):
     np.savetxt(path+'result_1h_{0}.txt'.format(id_range[0]), result,
                fmt='%10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
-get_result_fromid(['186'])
+get_result_fromid(['587'])
 
 #choose_id(1, 3)

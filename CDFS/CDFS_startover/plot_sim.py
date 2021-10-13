@@ -12,11 +12,13 @@ import astropy.units as u
 import astropy.constants as c
 from scipy import interpolate
 import stingray as sr
-import useful_functions as func
+from CDFS.CDFS_startover import useful_functions as func
+from CDFS.CDFS_startover import sim_psd as sim
+
 
 import matplotlib.patches as mpatches
 font1=func.font1
-figurepath='/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
+figurepath='/Users/baotong/Desktop/aas/AGN_CDFS_mod1/figure/'
 
 def plot_scatter_single(filename,qpo_P,threshold=0.0027):
     temp=np.loadtxt(filename)
@@ -87,8 +89,8 @@ def read_one_ep_noqpo(CR_all,ep,threshold=0.01,label='REJ1034'):
         fDR[i]=len(id)
     return fDR
 
-def plot_sim_one_ep(ep,CR_all,period_all,threshold=0.01):
-    DR=read_one_ep(CR_all,period_all,ep,threshold)
+def plot_sim_one_ep(ep,CR_all,period_all,threshold=0.01,label='REJ1034'):
+    DR=read_one_ep(CR_all,period_all,ep,threshold,label=label)
     for j in range(len(period_all)):
         #用百分制
         plt.plot(CR_all*1e5,DR[:,j]/10,marker='v', linestyle='-')
@@ -139,8 +141,8 @@ def compute_expect_Det(CR_all,period_all,k_num,threshold):
     path='/Users/baotong/Desktop/CDFS/'
     info = pd.read_excel(path + 'source_infomation.xlsx')
     for k in k_num:
-        # DR = read_one_ep(CR_all, period_all, k, threshold,label='REJ1034')
-        DR = read_one_ep(CR_all, period_all, k, threshold, label='A002_R15')
+        DR = read_one_ep(CR_all, period_all, k, threshold,label='REJ1034')
+        # DR = read_one_ep(CR_all, period_all, k, threshold, label='A002_R15')
         DR=DR/1000.
         # DR_meanP = DR.mean(axis=1) ##取了三个周期的平均
         DR_meanP=DR[:,0]
@@ -207,25 +209,26 @@ def plot_all_ep_two_model(CR_all,period_all,k_num,threshold):
         fDR_A=read_one_ep_noqpo(CR_all, k, threshold, label='REJ1034')
         ax_temp = axes[figlabel[i][0], figlabel[i][1]]
         x = CR_all * 1e4
-        ax_temp.text(2.8, 35, 'Epoch {0}'.format(k), font1)
+        ax_temp.text(2.8, 60, 'Epoch {0}'.format(k), font1)
         ##==for legend==**
-        colorlist=['red','dodgerblue','green']
+        colorlist=['red','dodgerblue','green','orange']
         if i==3:
             ax_temp.plot([5, 5], [0, 0], linestyle='-', color=colorlist[0])
             ax_temp.plot([5, 5], [0, 0], linestyle='-', color=colorlist[1])
             ax_temp.plot([5, 5], [0, 0], linestyle='-', color=colorlist[2])
+            ax_temp.plot([5, 5], [0, 0], linestyle='-', color=colorlist[3])
             ax_temp.plot([5, 5], [5, 5], marker='v', linestyle='-', color='black')
             ax_temp.plot([5, 5], [5, 5], marker='s', linestyle='-.', color='black')
             ax_temp.plot([5, 5], [5, 5], linestyle='dotted', color='grey')
-            ax_temp.legend(['P=1h','P=1.5h','P=2h','Model A','Model B','fDR'], loc='center left')
+            ax_temp.legend(['P=1h', 'P=1.5h', 'P=2h', 'P=5h','Model A','Model B','fDR'], loc='center left')
 
         ax_temp.plot(x, fDR_A/10, linestyle='dotted', color='grey')
 
         # axins = inset_axes(ax_temp, width="40%", height="30%", loc='lower left',
         #                    bbox_to_anchor=(0.3, 0.1, 1, 1),
         #                    bbox_transform=ax_temp.transAxes)
-        axins = ax_temp.inset_axes((0.3, 0.6, 0.4, 0.3))
-        (xlim0,xlim1,ylim0,ylim1)=(2.8,4.2,0.05,3)
+        axins = ax_temp.inset_axes((0.3, 0.67, 0.4, 0.3))
+        (xlim0,xlim1,ylim0,ylim1)=(2.8,4.2,0.05,4)
         axins.plot(x, fDR_A/10, linestyle='dotted', color='grey')
         axins.set_yscale('log')
         # axins.set_yticks(np.log10([0.1,0.5,1,2,3]))
@@ -246,7 +249,7 @@ def plot_all_ep_two_model(CR_all,period_all,k_num,threshold):
             axins.plot(x, y1+0.1, marker='v', linestyle='-',color=colorlist[j])
             axins.plot(x, y2+0.1, marker='s', linestyle='-.',color=colorlist[j])
 
-        ax_temp.set_ylim(-5,40)
+        ax_temp.set_ylim(-5,65)
         ax_temp.set_xlim(2.5, 10.5)
         # if i < 2: ax_temp.legend_.remove()
         # ax_temp.set_title('Epoch {0}: LS detection results'.format(k),font1)
@@ -285,15 +288,15 @@ if __name__=='__main__':
     # read_source_info()
     CR_all=np.array([3e-4,4e-4,5e-4,6e-4,7e-4,8e-4,9e-4,1e-3])
     # period_all=np.array([1800,3600,7200])
-    period_all = np.array([3600,5400,7200])
+    period_all = np.array([3600,5400,7200,18000])
     # fDR = read_one_ep_noqpo(CR_all, ep=2, threshold=0.0027, label='REJ1034_R5')
     # print(fDR)
-    # compute_expect_Det(CR_all, period_all, k_num=[1,2,3,4], threshold=0.0027)
+    compute_expect_Det(CR_all, [18000.], k_num=[1,2,3,4], threshold=0.0027)
     # plot_fDR_confirm([5e-4,6e-4,7e-4,8e-4,9e-4,1e-3],ep=4)
     # plot_all_ep(CR_all, period_all, k_num=[1,2,3,4], threshold=0.0027)
-    plot_all_ep_two_model(CR_all, period_all, k_num=[1,2,3,4], threshold=0.0027)
-    # plot_sim_one_ep(ep=2, CR_all=np.array([6e-4]),period_all=period_all,threshold=0.0027)
-    # plot_sim_one_ep(ep=1,CR_all=CR_all,period_all=period_all,threshold=0.0027)
+    # plot_all_ep_two_model(CR_all, period_all, k_num=[1,2,3,4], threshold=0.0027)
+    # plot_sim_one_ep(ep=2, CR_all=np.array([8e-4]),period_all=np.array([18000]),threshold=0.0027,label='A002_R15')
+    # plot_sim_one_ep(ep=2,CR_all=np.array([3e-4,4e-4,5e-4,6e-4,7e-4,8e-4,9e-4,1e-3]),period_all=np.array([1800]),threshold=0.0027,label='REJ1034')
     # plot_sim_one_ep(2,threshold=0.0027)
     # plot_sim_one_ep(4, CR_all=CR_all,period_all=period_all,threshold=0.0027)
     # plot_sim_one_ep(4, threshold=0.0027)

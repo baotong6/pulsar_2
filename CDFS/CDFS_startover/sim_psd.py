@@ -18,8 +18,9 @@ import matplotlib.font_manager as font_manager
 from astropy.timeseries import LombScargle
 import warnings
 from functools import reduce
-import csv
-import useful_functions as func
+from CDFS.CDFS_startover import useful_functions as func
+from CDFS.CDFS_startover import sim_psd as sim
+from scipy import integrate
 
 font1=func.font1
 font2=func.font2
@@ -39,16 +40,13 @@ def make_freq_range(dt,epoch_file):
     w = np.arange(1 / T_tot, 0.5 / dt, 1 / T_tot)
     return w
 
-def make_lc_from_psd(psd,cts_rate,dt,epoch_file):
+def make_lc_from_psd(psd,cts_rate,dt,epoch_file,frms=1):
     (TSTART, TSTOP, OBSID, exptime)=epoch_file
     T_tot=TSTOP[-1]-TSTART[0]
     num_bins=int(T_tot/dt)
-    sim = simulator.Simulator(N=num_bins + 1, mean=cts_rate,dt=dt)
+    sim = simulator.Simulator(N=num_bins + 1, mean=cts_rate,dt=dt,rms=frms)
     lc=sim.simulate(psd)
     lc.time=lc.time+TSTART[0]
-    # plt.plot(lc.time,lc.counts)
-    # plt.show()
-    # lc.counts += cts_rate
     lc.counts[np.where(lc.counts < 0)] = 0
     lc.gti=[[lc.time[0],lc.time[-1]]]
     return lc
@@ -79,8 +77,11 @@ def test_somefunc():
     w=make_freq_range(dt=lenbin,epoch_file=epoch_89)
     # psd_model=build_psd(x=w,p=[2.3e-3, 3.4, 0., 4.3e-4],x_2=w,
     #                     p_2=[4.01e-4, 4.01e-4 / 16, 100, 2],type='bendp+lorentz')
-    psd_model=build_psd(x=w,p=[4.3e-4, 3.4, 0., 2e-2],x_2=w,
-                        p_2=[2.67e-4, 16, 0.15, 2],type='bendp+lorentz')
+    p_1=[4.3e-4, 3.4, 0., 2e-2];p_2=[2.67e-4, 16, 0.15, 2]
+    psd_model=sim.build_psd(x=w,p=p_1,x_2=w,p_2=p_2,type='bendp+lorentz')
+
+    frms=integrate.quad(func.bendp_lorentz,w[0],w[-1],args=(p_1,p_2))[0]
+    frms=np.sqrt(frms)
 
     plt.loglog()
     plt.plot(w,psd_model)
@@ -88,7 +89,7 @@ def test_somefunc():
     plt.ylabel('Power',font2)
     plt.tick_params(labelsize=16)
     plt.show()
-    lc=make_lc_from_psd(psd=psd_model,cts_rate=CR*lenbin,dt=lenbin,epoch_file=epoch_89)
+    lc=make_lc_from_psd(psd=psd_model,cts_rate=CR*lenbin,dt=lenbin,epoch_file=epoch_89,frms=frms)
     ps_org=plot_psd(lc)
     print('counts={0}'.format(np.sum(lc.counts)))
     lc_evt=Lightcurve(time=lc.time,counts=lc.counts,dt=lc.dt,gti=lc.gti)
@@ -125,16 +126,21 @@ def sim_bunch_lc(CR,dt,period,epoch_file,outpath,num_trials=100):
     w = make_freq_range(dt=lenbin, epoch_file=epoch_file)
     qpo_f=1./period
 
-    psd_model=build_psd(x=w,p=[4.3e-4, 3.4, 0., 2.3e-3],x_2=w,
-                        p_2=[qpo_f, 16, 0.05, 2],type='bendp+lorentz')
+    p_1=[4.3e-4, 3.4, 0., 2.3e-3]
+    p_2=[qpo_f, 16, 0.05, 2]
+    psd_model=build_psd(x=w,p=p_1,x_2=w,p_2=p_2,type='bendp+lorentz')
+
+    # frms=integrate.quad(func.bendp_lorentz,w[0],w[-1],args=(p_1,p_2))[0]
+    # frms=np.sqrt(frms)
     # psd_model=build_psd(x=w,p=[4.3e-4, 3.4, 0., 2.e-2],x_2=w,
     #                     p_2=[qpo_f, 16, 0.15, 2],type='bendp+lorentz')
     # psd_model = build_psd(x=w, p=[2.3e-3, 3.4, 0., 4.3e-4],
     #                       type='bendp')
     k_trial=0
     (TSTART, TSTOP, OBSID, exptime) = epoch_file
-    # with open(outpath+'CR_{0}_P_{1}_A002_R15.txt'.format("%.0e" %CR ,"%.0d" %period),'a+') as f:
-    with open(outpath + 'CR_{0}_P_{1}_REJ1034_const1Ms.txt'.format("%.0e" % CR, "%.0d" % period), 'a+') as f:
+    with open(outpath+'CR_{0}_P_{1}_REJ1034.txt'.format("%.0e" %CR ,"%.0d" %period),'a+') as f:
+    # with open(outpath+'CR_{0}_P_{1}_REJ1034_fake4.txt'.format("%.0e" %CR ,"%.0d" %period),'a+') as f:
+    # with open(outpath + 'CR_{0}_P_{1}_A002_R15_fake4.txt'.format("%.0e" % CR, "%.0d" % period), 'a+') as f:
     # with open(outpath+'CR_{0}_noQPO_REJ1034_R50.txt'.format("%.0e"%CR),'a+') as f:
         while k_trial < num_trials:
             lc = make_lc_from_psd(psd=psd_model, cts_rate=CR* lenbin, dt=lenbin, epoch_file=epoch_file)
@@ -172,7 +178,6 @@ def sim_bunch_lc_evt(CR,dt,period,epoch_file,outpath,num_trials=100):
         k_trial = 0
         while k_trial < num_trials:
             ev_all = EventList()
-            # lc = make_lc_from_psd(psd=psd_model, cts_rate=CR / 2 * lenbin, dt=lenbin, epoch_file=epoch_file)
             print('trial'+':  '+str(k_trial))
             # lc_evt = Lightcurve(time=lc.time, counts=lc.counts, dt=lc.dt, gti=lc.gti)
             # lc_evt.counts = np.random.poisson(lc_evt.counts)
@@ -212,44 +217,27 @@ def run_many_sim():
     epoch2 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/CDFS_epoch_ep2.txt'
     epoch3 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep3/CDFS_epoch_ep3.txt'
     epoch4 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/CDFS_epoch_ep4.txt'
-    epoch2 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/CDFS_epoch_ep2_con.txt'
-    epoch4 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/CDFS_epoch_ep4_con.txt'
+    # epoch2 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/CDFS_epoch_ep2_con.txt'
+    # epoch4 = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/CDFS_epoch_ep4_con.txt'
 
     epoch_all=[epoch1,epoch2,epoch3,epoch4]
-    # CR_all=np.array([5e-4,6e-4,7e-4,8e-4,9e-4,1e-3])
-    CR_all=np.array([1e-4,2e-4,3e-4,4e-4])
-    period_all=[3600,5400,7200]
+    # CR_all=np.array([4e-4,5e-4,6e-4,7e-4,8e-4,9e-4,1e-3])
+    CR_all=np.array([3e-4,4e-4,5e-4,6e-4,7e-4,8e-4,9e-4,1e-3])
+    # period_all=[3600,5400,7200]
+    period_all = [1800]
+    ep=1
+    for i in [5,6,7]:
+        for j in [0]:
+            (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
+            # id=5  ##前id次观测
+            # TSTART=TSTART[0:id];TSTOP=TSTOP[0:id];OBSID=OBSID[0:id];exptime=exptime[0:id]
 
-    # ep=3;i=5;j=0
-    #
-    # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
-    # # id=5  ##前id次观测
-    # # TSTART=TSTART[0:id];TSTOP=TSTOP[0:id];OBSID=OBSID[0:id];exptime=exptime[0:id]
-    #
-    # sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
-    #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
-    #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
-    #              num_trials=1000)
-    # ep=3;i=5;j=1
-    #
-    # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
-    # # id=5  ##前id次观测
-    # # TSTART=TSTART[0:id];TSTOP=TSTOP[0:id];OBSID=OBSID[0:id];exptime=exptime[0:id]
-    #
-    # sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
-    #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
-    #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
-    #              num_trials=1000)
-    ep=3;i=0;j=2
+            sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
+                         epoch_file=(TSTART, TSTOP, OBSID, exptime),
+                         outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
+                         num_trials=1000)
 
-    (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
-    # id=5  ##前id次观测
-    # TSTART=TSTART[0:id];TSTOP=TSTOP[0:id];OBSID=OBSID[0:id];exptime=exptime[0:id]
 
-    sim_bunch_lc(CR=CR_all[i], dt=100, period=period_all[j],
-                 epoch_file=(TSTART, TSTOP, OBSID, exptime),
-                 outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
-                 num_trials=1000)
 
     # ep=0;i=3;j=1
     # (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
@@ -264,6 +252,7 @@ def run_many_sim():
     #              epoch_file=(TSTART, TSTOP, OBSID, exptime),
     #              outpath='/Users/baotong/Desktop/CDFS/simulation/EP{0}/'.format(int(ep + 1)),
     #              num_trials=1000)
+
     ##内存有限，别用循环一次性做啦##
     # for ep in range(len(epoch_all)):
     #     (TSTART, TSTOP, OBSID, exptime) = func.read_epoch(epoch_all[ep])
@@ -280,6 +269,6 @@ def run_many_sim():
     ## ---------------------##
 
 if __name__=='__main__':
-    # run_many_sim()
-    test_somefunc()
+    run_many_sim()
+    # test_somefunc()
     # run_many_sim()

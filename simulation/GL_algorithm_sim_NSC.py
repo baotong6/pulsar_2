@@ -37,12 +37,12 @@ from astropy.io import fits
 import sys
 import os
 import string
-#import correct as correct
 import random
 from scipy import optimize
 from sympy import *
 from scipy.optimize import fsolve
 from itertools import chain
+
 def get_time_series(T_START,N_cts,T_stop,period,amp, model,eqw=0.1):
     #N_cts为总光子数
     #T为总观测时间
@@ -389,8 +389,6 @@ def get_result_fromid(dataname,cts_num,amp_num):
     #np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result, fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f %10.5f %10.5f')
     np.savetxt(path_out+'result_{0}_{1}/result_sim_{2}.txt'.format(str(cts_num),str(amp_num),str(dataname)), result,
                fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f %10d')
-
-
 
 
 import sys
