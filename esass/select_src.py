@@ -6,8 +6,8 @@ import pandas as pd
 import sys
 import os
 from tkinter import _flatten
-import funcs_fits2txt as funcs
-from funcs_fits2txt import Circle
+import esass.funcs_fits2txt as funcs
+from esass.funcs_fits2txt import Circle
 from scipy import interpolate
 from astropy.coordinates import SkyCoord
 from astropy import units as u

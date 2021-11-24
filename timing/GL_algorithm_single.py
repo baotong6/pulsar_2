@@ -211,7 +211,7 @@ def compute_GL(Tlist,epoch_info, m_max=20, w_range=None, ni=10, parallel=False):
     else:
         # throw an error
         print("No valid arrival time array provided!\n")
-        return O_period, p_period, m_opt, S, w, w_peak, w_mean, w_conf,cdf
+        return O_period, p_period, m_opt, S, w, w_peak, w_mean, w_conf, cdf
 
 def get_T_in_mbins(epoch_info,w,m,fi):
     T=2*np.pi/w
@@ -243,7 +243,8 @@ def get_T_in_mbins(epoch_info,w,m,fi):
     return T_in_perbin
 
 #
-path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
+path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700011/'
+path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_0.5_8/'
 path = path_eSASS
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
@@ -261,13 +262,14 @@ def write_result(dataname):
     #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
     filename=str(dataname)+'.txt'
     data_file=path + str(dataname) + '.txt'
-    epoch_file = path + 'epoch_src_'+str(dataname)+'.txt'
+    epoch_file = path + 'epoch_47Tuc_700011.txt'
+    # epoch_file = path + 'epoch_src_' + str(dataname) + '.txt'
 
     epoch_info=np.loadtxt(epoch_file)
     epoch_info=epoch_info
     if epoch_info.ndim == 1:
         epoch_info=np.array([epoch_info])
-    epoch_info=epoch_info[0:4] ##这里随意改
+    epoch_info=epoch_info##这里随意改
 
     # useid =np.concatenate((epoch_info[:, 2][0:1],epoch_info[:, 2][3:4]))
     useid = epoch_info[:, 2]
@@ -277,7 +279,7 @@ def write_result(dataname):
     energy=src_evt[:,1]
     #time = filter_energy(time, energy, [200, 500])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./1000,1./500,1.e-5)
+    w_range=2*np.pi*np.arange(1./100,1./30,1.e-5)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info,w_range=w_range,m_max=10,parallel=False)
     endtime = datetime.datetime.now()
@@ -323,6 +325,6 @@ def get_result_fromid(id_range):
     np.savetxt(path+'result_1h_{0}.txt'.format(id_range[0]), result,
                fmt='%10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
-get_result_fromid(['587'])
+get_result_fromid(['293_700011'])
 
 #choose_id(1, 3)

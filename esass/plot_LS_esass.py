@@ -13,7 +13,7 @@ from scipy.optimize import curve_fit
 import pandas as pd
 import linecache
 from astropy.timeseries import LombScargle
-import funcs_timing as funcs
+import esass.funcs_timing as funcs
 import stingray as sr
 from stingray.events import EventList
 from stingray.lightcurve import Lightcurve
@@ -21,15 +21,17 @@ from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,Average
 from stingray.simulator import simulator, models
 from astropy.stats import poisson_conf_interval
 
-def plot_LS_all_single_obs():
+def plot_LS_all_single_obs(ifnet=False):
     bin_len=100
-    # obsid='700011'
-    obsIDlist=[700011,700013,700014,700163,700173,700174,700175]
+    # obsIDlist=[700011,700013,700014,700163,700173,700174,700175]
+    obsIDlist=[700011]
     for obsid in obsIDlist:
         obsid=str(obsid)
-    # path='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_0.5_5/'
         path='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_{0}/'.format(obsid)
         figurepath='/Users/baotong/eSASS/data/raw_data/47_Tuc/fig_LS/LS_psf75_{0}_bin{1}/'.format(obsid,bin_len)
+        src_info=np.loadtxt(path+'src_info.txt')
+        src_cts=src_info[:,1]
+        bkg_cts=src_info[:,2]
         if not os.path.exists(figurepath):os.mkdir(figurepath)
         srcID=np.arange(1,889,1)
         FP_all=[];out_period_all=[];srcID_output=[];counts_all=[]
@@ -43,18 +45,26 @@ def plot_LS_all_single_obs():
             # (TSTART, TSTOP, OBSID, exptime) = funcs.read_epoch(path + 'epoch_src_{0}.txt'.format(srcID[i]))
             # lc=funcs.get_hist(time,len_bin=bin_len,tstart=TSTART[0], tstop=TSTOP[-1])
             lc=funcs.get_hist(time,len_bin=bin_len)
-            x = lc.time;flux = lc.counts
-
+            lc_net=lc
+            lc_net.counts=lc_net.counts-bkg_cts[i]/len(lc_net.time)
+            if ifnet:
+                x=lc_net.time;flux=lc_net.counts*np.random.random(len(lc_net.time))
+                outname=str(srcID[i])+'_net'
+            else:
+                print('no')
+                x = lc.time;flux = lc.counts
+                outname = str(srcID[i])
             print(i)
             T_tot = lc.time[-1] - lc.time[0]
             freq = np.arange(1 / T_tot, 0.5 / bin_len, 1 / (5 * T_tot))
             freq=freq[np.where(freq > 1 / 10000.)]
-            [FP, out_period,max_NormLSP] = funcs.get_LS(x, flux, freq, outpath=figurepath,outname=str(srcID[i]),show=False)
+            [FP, out_period,max_NormLSP] = funcs.get_LS(x, flux, freq, outpath=figurepath,outname=outname,show=False,save=True)
             FP_all.append(FP);out_period_all.append(out_period);srcID_output.append(srcID[i]);counts_all.append(counts)
 
         FP_all=np.array(FP_all);out_period_all=np.array(out_period_all);srcID_output=np.array(srcID_output);counts_all=np.array(counts_all)
         LS_info=np.column_stack((srcID_output,FP_all,out_period_all,counts_all))
         np.savetxt(figurepath+'LS_info_bin{0}.txt'.format(bin_len),LS_info,fmt='%10d %10.5f %10.5f %10d')
+
 
 def filter_obs(src_evt,useid):
     src_evt_use = src_evt[np.where(src_evt[:-1] == useid[0])[0]]
@@ -151,11 +161,14 @@ def pfold_fromlc(lc,epoch_info,p_test,bin,shift,path_out,label='test'):
 
 
 if __name__=='__main__':
-    figurepath = '/Users/baotong/eSASS/data/raw_data/47_Tuc/fig_LS/LS_net_psf75_bin100/'
-    obsIDlist=[700011, 700163, 700013, 700014, 700173, 700174, 700175]
+
+    plot_LS_all_single_obs(ifnet=True)
+
+    # figurepath = '/Users/baotong/eSASS/data/raw_data/47_Tuc/fig_LS/LS_net_psf75_bin100/'
+    # obsIDlist=[700011, 700163, 700013, 700014, 700173, 700174, 700175]
     # obsIDlist = [700011]
     # plot_LS_merge(srcID=5,obsIDlist=obsIDlist)
-
+    #
     # srcIDlist=np.arange(1,889,1)
     # src_LS_info=[]
     # for i in range(len(srcIDlist)):
@@ -173,12 +186,12 @@ if __name__=='__main__':
     # np.savetxt(figurepath+'net_counts.txt',np.array(net_counts),fmt='%10d')
 
     ##pfold
-    srcID=735;
-    # [srcID,FP,out_period,bkgscale_mean,src_cts,bkg_cts,net_cts]=plot_LS_merge(srcID, obsIDlist, bin_len=100)
-    # print(net_cts)
-
-    (lc_all,bkgscale_meanlist,src_cts,bkg_cts,net_cts) = get_netlc_merge(srcID, obsIDlist, ecf=75,bin_len=100)
-    # # print(np.sum(lc_all))
-    epoch_info = np.loadtxt('/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/epoch_src_{0}.txt'.format(srcID))
-    # # #
-    pfold_fromlc(lc=lc_all,epoch_info=epoch_info,p_test=19872.06265,bin=20,shift=0.,path_out=figurepath,label=str(srcID))
+    # srcID=45;
+    # # [srcID,FP,out_period,bkgscale_mean,src_cts,bkg_cts,net_cts]=plot_LS_merge(srcID, obsIDlist, bin_len=100)
+    # # print(net_cts)
+    #
+    # (lc_all,bkgscale_meanlist,src_cts,bkg_cts,net_cts) = get_netlc_merge(srcID, obsIDlist, ecf=75,bin_len=100)
+    # # # print(np.sum(lc_all))
+    # epoch_info = np.loadtxt('/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/epoch_src_{0}.txt'.format(srcID))
+    # # # #
+    # pfold_fromlc(lc=lc_all,epoch_info=epoch_info,p_test=19872.06265,bin=20,shift=0.,path_out=figurepath,label=str(srcID))

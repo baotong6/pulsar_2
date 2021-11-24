@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.wcs import WCS
@@ -11,7 +12,7 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.stats import poisson_conf_interval
 import vg
-import funcs_timing as funcs
+import esass.funcs_timing as funcs
 
 ra_center=6.022318
 dec_center=-72.081443

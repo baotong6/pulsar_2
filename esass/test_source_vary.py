@@ -6,8 +6,8 @@ import pandas as pd
 import sys
 import os
 from tkinter import _flatten
-import funcs_fits2txt as funcs
-from funcs_fits2txt import Circle
+import esass.funcs_fits2txt as funcs
+from esass.funcs_fits2txt import Circle
 from scipy import interpolate
 from astropy.coordinates import SkyCoord
 from astropy import units as u
@@ -82,5 +82,52 @@ def plot_vary_src():
     expT=[25808.86,25268.79,25208.83,25208.82,8809.16,8389.71,8330.68]
     np.loadtxt(path+'txt/txt_merge_psf{0}_0.2_5/src_vary_info.txt'.format(ecf))
 
+def write_src_info(ecf=0.75):
+    ##返回的radi是arcsec单位
+    path='/Users/baotong/eSASS/data/raw_data/47_Tuc/'
+    srcid=np.arange(1,889,1)
+    obsIDlist = [700011,700163,700013,700014,700173,700174,700175]
+    expT=[25808.86,25268.79,25208.83,25208.82,8809.16,8389.71,8330.68]
+    for k in range(len(obsIDlist)):
+        obsid=obsIDlist[k]
+        srcarea = np.loadtxt(path + 'txt/txt_psf{0}_{1}/src_area.txt'.format(int(100*ecf), obsid))
+        srcscale = srcarea[:, 1]
+        radi=np.sqrt(srcscale/np.pi)/20.
+        bkgimgfile='bkg_map_02_5_{0}.fits'.format(obsid)
+        bkgimg=fits.open(path+bkgimgfile)[0].data.T
+
+        catalog_file = '/Users/baotong/Desktop/period_Tuc/erosita_cat_coord.xlsx'
+        (ra, dec, srcIDlist) = funcs.read_erosita_cat(catalog_file)
+        (phy_x, phy_y) = funcs.trans_radec2xy(path+bkgimgfile, ra, dec)
+        img_x=(phy_x+41000)/80;img_y=(phy_y+41000)/80
+        img_x=img_x.astype('int');img_y=img_y.astype('int')
+        img_x[np.where(img_x>1024-1)]=0;img_y[np.where(img_y>1024-1)]=0
+        median_bkgvalue=bkgimg[img_x,img_y]
+        bkg_cts_est=median_bkgvalue*srcscale/6400
+        src_cts=[]
+        for i in range(len(srcid)):
+            srctxtfile=path+'txt/txt_psf{0}_{1}/{2}_{1}.txt'.format(int(100*ecf),obsid,srcid[i])
+            time=np.loadtxt(srctxtfile)
+            src_cts.append(len(time))
+        src_cts=np.array(src_cts)
+        SNR=(src_cts- bkg_cts_est) / np.sqrt(src_cts)
+        SNR[np.where(radi<0.1)]=0  ##出界的源，SNR自然应该是0，0.1是随便取的值，筛出出界的源即可
+        info = np.column_stack((srcid, src_cts, bkg_cts_est, radi, SNR))
+        np.savetxt(path + 'txt/txt_psf{0}_{1}/src_info.txt'.format(int(100*ecf), obsid), info,
+                   fmt='%10d %10d %10.2f %10.5f %10.5f')
+
+def select_SNR_src(ecf=0.75,threshold=5):
+    path='/Users/baotong/eSASS/data/raw_data/47_Tuc/'
+    srcid=np.arange(1,889,1)
+    obsIDlist = [700011,700163,700013,700014,700173,700174,700175]
+    expT=[25808.86,25268.79,25208.83,25208.82,8809.16,8389.71,8330.68]
+    for k in range(len(obsIDlist)):
+        obsid=obsIDlist[k]
+        srcinfo=np.loadtxt(path + 'txt/txt_psf{0}_{1}/src_info.txt'.format(int(100*ecf), obsid))
+        sel_src=srcinfo[:,0][np.where(srcinfo[:,4]>threshold)]
+        np.savetxt(path+'txt/txt_psf{0}_{1}/select_SNR{2}_src.txt'.format(int(100*ecf), obsid,threshold),
+                   sel_src,fmt='%10d')
+
 if __name__=='__main__':
-    source_photon()
+    write_src_info(ecf=0.90)
+    select_SNR_src(ecf=0.90,threshold=5)

@@ -7,18 +7,9 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 import sys
 import os
-import string
-from datetime import datetime
-from scipy.interpolate import lagrange
-from scipy import interpolate
-from scipy.optimize import curve_fit
-from tkinter import _flatten
-from astropy.wcs import WCS
-import pandas as pd
-import linecache
 from astropy.io import fits
 from astropy.wcs import WCS
-from astropy.utils.data import get_pkg_data_filename
+
 # ------choose obsID-------------
 obsList=["0108060401","0108060501","0108060601","0108060701","0108061801","0108061901","0108062101",
          "0108062301","0555780101","0555780201","0555780301","0555780401","0555780501","0555780601",
@@ -33,7 +24,7 @@ det3 = "mos"
 # -------------------------------
 #
 # ------choose det --------------
-detList = [det3]
+detList = [det1,det2,det3]
 
 path = '/Users/baotong/Desktop/CDFS/xmm_CDFS/'
 os.chdir(path)

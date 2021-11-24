@@ -143,8 +143,8 @@ def plot_CRbased_contour_2():
     plt.show()
 #plot_CRbased_contour_2()
 def plot_pCV_fD():
-    sim_N=100
-    path='/Users/baotong/Desktop/period_terzan5/simulation/'
+    sim_N=50
+    path='/Users/baotong/Desktop/period_Tuc/simulation/'
     #path = '/Users/baotong/Desktop/period_terzan5/simulation/'
     # ID_50k=['1674','442','1525','2344','2238','1538','1677','3564',
     #     '2199','2338','3107','1634','214','3401','1628','790','1514',
@@ -154,21 +154,22 @@ def plot_pCV_fD():
     # ID_20k=['147','1084','1538','2730','1133','3120','1853','1487','2422','1219','3357','2508']
     #ID_50k=['28','41','52','225']
     # ID_40k = ['49']
-    threshold = 0.9
+    threshold = 0.99
     #ID_10k=['2020','2313','2355','687','2478']
     #ID_50k=['84','10','83','106','117','118','241','104','116','1','82','74']
-    ID_30k=[15,57,121,81,24,10]
-
-    ID_50k=[84,14,37,294,85,128,78,372,374,66,292,55]
-    period_det_50k=[10431.44455,15797.78831,22805.0171,24826.21649,27987.68542,29877.50224,31486.1461,43591.97908,44404.97336,44483.98577,48473.09743,49382.71605]
-    period_det_30k=[28650.01146,11015.27819,10734.68161,19549.95992,11434.452,27638.81595]
+    # ID_30k=[15,57,121,81,24,10]
+    ID_50k=[232,258,283,345,223,261,350,567]
+    period_det_50k=[37268.,32407.55744,44622.93619,48837.66361,46151.00609,23917.72303,22026.91689,38008.36184]
+    # ID_50k=[84,14,37,294,85,128,78,372,374,66,292,55]
+    # period_det_50k=[10431.44455,15797.78831,22805.0171,24826.21649,27987.68542,29877.50224,31486.1461,43591.97908,44404.97336,44483.98577,48473.09743,49382.71605]
+    # period_det_30k=[28650.01146,11015.27819,10734.68161,19549.95992,11434.452,27638.81595]
     ID=ID_50k;period_det=period_det_50k
 
     detect_rate=np.zeros(len(ID))
     for k in range(len(ID)):
         for i in range(sim_N):
-            if os.path.exists(path+'result_{0}_50k/result_sim_{1}.txt'.format(ID[k],i+1)):
-                res=np.loadtxt(path+'result_{0}_50k/result_sim_{1}.txt'.format(ID[k],i+1))
+            if os.path.exists(path+'result_all_{0}_50k/result_sim_{1}.txt'.format(ID[k],i+1)):
+                res=np.loadtxt(path+'result_all_{0}_50k/result_sim_{1}.txt'.format(ID[k],i+1))
                 if res[2] > threshold and (np.abs(res[4]-period_det[k]))>0.0001*period_det[k]:
                     detect_rate[k]+=1
             else:

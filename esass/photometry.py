@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 import os
 from tkinter import _flatten
-import funcs_fits2txt as funcs
+import esass.funcs_fits2txt as funcs
 from scipy import interpolate
 from astropy.coordinates import SkyCoord
 from astropy import units as u

@@ -12,16 +12,16 @@ from scipy.interpolate import lagrange
 from scipy import interpolate
 from scipy.optimize import curve_fit
 import pandas as pd
-import read_csv as data
 
 path_out='/Users/baotong/Desktop/aas/pCV_GC/'
 path_figure='/Users/baotong/Desktop/aas/pCV_GC/figure/'
 ###----------------read table---------------###
-label='omg_cen'
+label='47Tuc'
 path_table = '/Users/baotong/Desktop/period_Tuc/'
 result_Tuc = pd.read_excel(path_table + 'result_0.5_8_all.xlsx', label)
 
 ID_Tuc=result_Tuc['seq']
+print(ID_Tuc)
 P_Tuc=result_Tuc['P_out']
 net_percent_Tuc=result_Tuc['net_percent']
 ###----------------read table---------------###

@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 import functools
 import datetime
-import GL_algorithm_esass as GL
-import funcs_sim_timeseries as funcs_sim
-import funcs_timing as funcs_time
+import esass.GL_algorithm_esass as GL
+import esass.funcs_sim_timeseries as funcs_sim
+import esass.funcs_timing as funcs_time
 import sys
 
 def write_LS_result(path,cts_num,amp_num,sim_N=100):

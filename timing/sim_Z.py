@@ -14,7 +14,7 @@ from scipy.fftpack import fft,ifft
 import scipy.signal as ss
 import random
 import pandas as pd
-import read_data as data
+import timing.read_data as data
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 import matplotlib.style as style

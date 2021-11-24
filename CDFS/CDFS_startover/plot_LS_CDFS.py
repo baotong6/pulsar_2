@@ -23,8 +23,13 @@ from stingray.simulator import simulator, models
 from CDFS.CDFS_startover import useful_functions as func
 from CDFS.CDFS_startover import sim_psd as sim
 
+# plt.rc('text', usetex=True)
+# plt.rc('font', family='Helvetica', size = 30)
+# plt.rcParams['xtick.direction'] = 'in'
+# plt.rcParams['ytick.direction'] = 'in'
 
-font1 = {'family': 'Normal',
+
+font1 = {'family': 'normal',
          'weight': 'normal',
          'size': 18, }
 def filter_energy(time,energy,band):
@@ -126,9 +131,9 @@ def get_LS(time, flux,freq,dataname,k,save=0,show=0):
     plt.plot([freq[0], freq[-1]], [FP_99, FP_99], '--')
     plt.plot([freq[0], freq[-1]], [FP_95, FP_95], '--')
     plt.plot([freq[0], freq[-1]], [FP_68, FP_68], '--')
-    plt.text(freq[0], FP_99, '1-FAP 99.73%',font1)
-    plt.text(freq[0], FP_95, '95%',font1)
-    plt.text(freq[0], FP_68, '68%',font1)
+    plt.text(freq[int(len(freq)*0.32)], FP_99, '1-FAP 99.73%',font1)
+    plt.text(freq[int(len(freq)*0.7)], FP_95, '95%',font1)
+    plt.text(freq[int(len(freq)*0.7)], FP_68, '68%',font1)
     plt.xlabel('Frequency (Hz)',font1)
     plt.ylabel('Normalized LS Periodogram',font1)
     plt.tick_params(labelsize=16)
@@ -222,12 +227,12 @@ def plot_CDFS_ep_LS(k_num):
 
 if __name__=='__main__':
     bin_len = 100
-    high_id_ep3 = ['948']
+    high_id_ep3 = ['780']
     # source_id=np.arange(1,1056,1)
     source_id = high_id_ep3
 
-    figurepath = '/Users/baotong/Desktop/aas/AGN_CDFS/figure/'
-    plot_CDFS_ep_LS([2])
+    figurepath = '/Users/baotong/Desktop/aas/AGN_CDFS_mod1/figure/'
+    plot_CDFS_ep_LS([4])
     # plt.figure(1, (8, 8))
     # plt.subplot(211)
     # plot_CDFS_ep_LS([2])

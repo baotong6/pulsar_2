@@ -23,6 +23,16 @@ font1 = {'family': 'Normal',
          'weight': 'normal',
          'size': 16, }
 
+def filter_obs(src_evt,useid):
+    src_evt_use = src_evt[np.where(src_evt[:-1] == useid[0])[0]]
+    i=1
+    while i < len(useid):
+        id=useid[i]
+        src_evt_use_temp=src_evt[np.where(src_evt[:-1]==id)[0]]
+        src_evt_use = np.concatenate((src_evt_use, src_evt_use_temp))
+        i+=1
+    return src_evt_use
+
 def get_hist(t, len_bin,tstart=0,tstop=0):
     ###将输入的time信息，按照len_bin的长度输出为lc
     if tstart==0 and tstop==0:
@@ -66,13 +76,13 @@ def get_LS(time, flux,freq):
     # if FP<0.01:print(dataname)
     # plt.title('{0},FP={1}'.format(dataname,FP))
     # plt.semilogx()
-    plt.title('XID 19')
+    # plt.title('XID 19')
     plt.plot(freq, power)
     plt.semilogx()
     print(1. / freq[np.where(power == np.max(power))])
     print(np.where(power == np.max(power)))
     # if FP<0.01:print(1./freq[np.where(power==np.max(power))]);print(np.where(power==np.max(power)))
-    # out_period=1./freq[np.where(power==np.max(power))]
+    out_period=1./freq[np.where(power==np.max(power))]
     plt.plot([freq[0], freq[-1]], [FP_99, FP_99], '--')
     plt.plot([freq[0], freq[-1]], [FP_90, FP_90], '--')
     plt.plot([freq[0], freq[-1]], [FP_68, FP_68], '--')
@@ -85,18 +95,23 @@ def read_txt():
     # path='/Volumes/pulsar/CDFS/merge_data/timing/txt_all_obs_0.5_8/'
     # file=np.loadtxt(path+'XID19.txt')
     # epoch_file=np.loadtxt(path+'epoch_src_XID19.txt')
-    path='/Users/baotong/Downloads/'
+    path='/Users/baotong/Desktop/period_Tuc/txt_all_obs_0.5_8/'
     # path='/Users/baotong/eSASS/data/47_Tuc/txt/'
     # path = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
-    file=np.loadtxt(path+'testdither.txt')
-    epoch_file=np.loadtxt(path+'epoch_testdither.txt')
+    src_evt=np.loadtxt(path+'364.txt')
+    epoch_file=np.loadtxt(path+'epoch_src_364.txt')
 
-    # time=file[:,0]
-    time=file
-    # tstart=epoch_file[:,0];tstop=epoch_file[:,1]
-    tstart=[epoch_file[0]];tstop=[epoch_file[1]]
+    epoch_info = epoch_file
+    useid =epoch_info[:, 2]
+    print(useid)
+    tstart=epoch_info[:, 0]
+    tstop =epoch_info[:, 1]
+    src_evt=filter_obs(src_evt,useid)
+    time=src_evt[:,0]
+    energy=src_evt[:,1]
 
-    T_TOT =tstop[-1]-tstart[0];dt=50
+    # tstart=[epoch_file[0]];tstop=[epoch_file[1]]
+    T_TOT =tstop[-1]-tstart[0];dt=100
     lc=get_hist(time,dt,tstart[0],tstop[-1])
     # lc_cut0=lc.truncate(tstart[0],tstop[0],method='time')
     lc_all=lc
@@ -112,14 +127,11 @@ def read_txt():
             P.append(P[-1] + dP)
         return np.array(P)
 
-    freq=np.arange(1/T_TOT,1/200,1/(1*T_TOT))
-    freq=freq[np.where(freq>1/10000.)]
+    freq=np.arange(1/T_TOT,1/200,1/(5*T_TOT))
+    freq=freq[np.where(freq>1/50000.)]
     print(np.sum(lc_all.counts))
 
     # ps = Powerspectrum(lc_all,norm='leahy')
-
-
-
 
     get_LS(lc_all.time,lc_all.counts,freq)
 if __name__ == '__main__':

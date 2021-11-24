@@ -14,7 +14,7 @@ from scipy.fftpack import fft,ifft
 import scipy.signal as ss
 import random
 import pandas as pd
-import read_csv as data
+import plot_result.read_csv as data
 path_table='/Users/baotong/Desktop/period/table/'
 result_NSC=pd.read_excel(path_table+'final_all_del.csv','result_NSC_IG')
 result_LW=pd.read_excel(path_table+'final_all_del.csv','result_LW')

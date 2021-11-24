@@ -11,7 +11,7 @@ from scipy.interpolate import lagrange
 from scipy import interpolate
 from scipy.optimize import curve_fit
 import pandas as pd
-import read_csv as data
+import plot_result.read_csv as data
 import linecache
 def get_line_context(file_path, line_number):
     return linecache.getline(file_path, line_number).strip()

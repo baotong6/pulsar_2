@@ -49,11 +49,8 @@ def make_region_each_obs():
     # print(phy_x,phy_y)
     src_x = np.rint(src_x)
     src_y = np.rint(src_y)
-
     src_x = src_x.astype(np.int)
     src_y = src_y.astype(np.int)
-
-
 
     for i in range(len(obs_ID_all)):
         os.chdir(path)

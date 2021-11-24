@@ -56,6 +56,7 @@ def plot_lc_ap(mode):
         #src_ID=['202']
         obs_ID=np.loadtxt('LW_epoch.txt')[:,2]
         obs_time=(np.loadtxt('LW_epoch.txt')[:,0]+np.loadtxt('LW_epoch.txt')[:,1])/2
+        obs_time=(np.loadtxt('LW_epoch.txt')[:,0]+np.loadtxt('LW_epoch.txt')[:,1])/2
         os.chdir(path_LW)
         time = obs_time / 86400 + 2449352.5 - 2400000.5
     elif mode == '47Tuc':

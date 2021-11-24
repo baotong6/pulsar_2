@@ -1,22 +1,28 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
+from astropy import units as u
+from astropy.coordinates import SkyCoord
 import pandas as pd
 import sys
 import os
 from scipy import interpolate
 
 def getlen(a,b):
-    length=((a[0]-b[0])**2+(a[1]-b[1])**2)**0.5
-    return length
+    c1 = SkyCoord(a[0] * u.deg, a[1] * u.deg, frame='fk5')
+    c2 = SkyCoord(b[0] * u.deg, b[1] * u.deg, frame='fk5')
+    dist = c1.separation(c2)
+    dist = dist.arcsec
 
-def compare_counterpart(ra_dec1,ra_dec2,seq1,seq2):
-    offset=1
+    return dist
+
+def compare_counterpart(ra_dec1,ra_dec2,seq1,seq2,offset=1):
+    # offset unit of arcsec
     match=[[] for i in range(len(seq1))];
     seq2_all=[];ra2_all=[];dec2_all=[]
     for i in range(len(seq1)):
         for j in range(len(seq2)):
-            dis=getlen([ra_dec2[0][j],ra_dec2[1][j]],[ra_dec1[0][i],ra_dec1[1][i]])*3600
+            dis=getlen([ra_dec2[0][j],ra_dec2[1][j]],[ra_dec1[0][i],ra_dec1[1][i]])
             if dis<offset:
                 match[i].append([seq1[i],seq2[j],dis])
                 seq2_all.append(seq2[j])
