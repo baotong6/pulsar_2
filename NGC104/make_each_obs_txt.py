@@ -16,14 +16,27 @@ from tkinter import _flatten
 from astropy.wcs import WCS
 import warnings
 warnings.filterwarnings("ignore")
-path='/Volumes/pulsar/NGC6752/merge_data/timing/'
+path='/Volumes/pulsar/47Tuc/merge_data/timing/'
 
-epoch_file='NGC6752_epoch.txt'
+epoch_file='47Tuc_epoch.txt'
 #epoch_file='SgrA_G_epoch.txt'
 #epoch_file='LW_epoch.txt'
 obs_ID_all=np.loadtxt(path+epoch_file)[:,2]
 obs_ID_all=obs_ID_all.astype(int)
 obs_ID_all=obs_ID_all.astype(str)
+
+def read_region(obs_id, regname):
+    reg_file = []
+    with open(path + 'region_{0}/'.format(obs_id) + 'region_90/' + regname, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline()  # 整行读取数据
+            reg_file.append(lines)
+            if not lines:
+                break
+                pass
+    region = reg_file[-2][7:-2]
+    reg_x, reg_y, reg_r = [float(i) for i in region.split(',')]
+    return [reg_x, reg_y, reg_r]
 
 def make_region_each_obs():
     os.chdir(path)
@@ -150,18 +163,6 @@ def get_txt(obs_id):
         np.savetxt(path+'txt_{0}/'.format(obs_id)+str(item)+'.txt',src_txt,fmt="%.7f  %5.3f  %d")
 
 def merge_txt(src_id):
-    def read_region(obs_id,regname):
-        reg_file = []
-        with open(path+'region_{0}/'.format(obs_id)+'region_90/'+regname, 'r') as file_to_read:
-            while True:
-                lines = file_to_read.readline() # 整行读取数据
-                reg_file.append(lines)
-                if not lines:
-                    break
-                    pass
-        region=reg_file[-2][7:-2]
-        reg_x,reg_y,reg_r=[float(i) for i in region.split(',')]
-        return [reg_x,reg_y,reg_r]
 
     #epoch_all=np.loadtxt(path+'txt_all_obs/'+'ACIS-I_epoch.txt')
     epoch_all = np.loadtxt(path + epoch_file)
@@ -183,22 +184,23 @@ def merge_txt(src_id):
     for i in range(len(obs_ID_all)):
         res_temp=np.loadtxt(path+'txt_{0}/'.format(obs_ID_all[i])+str(src_id)+'.txt')
         if len(res_temp)==0:
-            expmap_name = 'reproj_evt2_sou_{0}_i5.fits'.format(obs_ID_all[i])
-            expmap = fits.open(path + expmap_name)
-            exptime_all = expmap[0].data
-            exptime_all = exptime_all.T
-            reg = read_region(obs_ID_all[i], str(src_id) + '.reg')
-            src_x=int(np.rint(reg[0])-2896);src_y=int(np.rint(reg[1])-2896)
-
-            if exptime_all[src_x][src_y]>0:
-                #print('keep')
-                epoch_ID.append(obs_ID_all[i])
-                epoch_start.append(obs_tstart[i])
-                epoch_stop.append(obs_tstop[i])
-                epoch_expt.append(obs_expt[i])
-            else:
-                #print('none')
-                continue
+            # expmap_name = 'reproj_evt2_sou_{0}_i5.fits'.format(obs_ID_all[i])
+            # expmap = fits.open(path + expmap_name)
+            # exptime_all = expmap[0].data
+            # exptime_all = exptime_all.T
+            # reg = read_region(obs_ID_all[i], str(src_id) + '.reg')
+            # src_x=int(np.rint(reg[0])-2896);src_y=int(np.rint(reg[1])-2896)
+            #
+            # if exptime_all[src_x][src_y]>0:
+            #     #print('keep')
+            #     epoch_ID.append(obs_ID_all[i])
+            #     epoch_start.append(obs_tstart[i])
+            #     epoch_stop.append(obs_tstop[i])
+            #     epoch_expt.append(obs_expt[i])
+            # else:
+            #     #print('none')
+            #     continue
+            continue
 
         elif type(res_temp[0])==type(np.array([1.2])[0]):
             ##判断是否只有1个光子，数据类型的bug,1.2只是随便取的一个值，任意float均可
@@ -228,6 +230,15 @@ def merge_txt(src_id):
     np.savetxt(path+'txt_all_obs_0.5_8/'+'epoch_src_'+str(src_id)+'.txt',epoch_info,fmt='%15.2f %15.2f %10d %20.2f')
     np.savetxt(path+'txt_all_obs_0.5_8/'+str(src_id)+'.txt',result,fmt="%.7f  %5.3f  %d")
 
+def select_src(src_id_list):
+    sl_src=[]
+    for id in src_id_list:
+        evt=np.loadtxt(path + 'txt_all_obs_0.5_8/' + str(id) + '.txt')
+        if len(evt)>100:
+            sl_src.append(id)
+    sl_src=np.array(sl_src)
+    np.savetxt(path+'bright_src.txt',sl_src,fmt='%10d')
+
 #get_id_of_G()
     #np.savetxt(path_out+'src_list_both.txt',src_list_both,fmt="%d")
 #merge_I_with_GRT()
@@ -238,9 +249,8 @@ def merge_txt(src_id):
 # srclist_500=np.loadtxt(path_out+'G_src.txt')
 # srclist_temp=np.setdiff1d(srclist_all,srclist_500)
 # np.savetxt(path_out+'src_list_other500.txt',srclist_temp,fmt="%d")
-source_id=np.linspace(1,244,244)
-source_id=source_id.astype(int)
-
+source_id=np.arange(1,593,1)
+select_src(src_id_list=source_id)
 # for i in range(len(obs_ID_all)):
 #     get_txt(obs_ID_all[i])
 
@@ -256,6 +266,6 @@ source_id=source_id.astype(int)
 
 
 #merge_txt('2148_core')
-for item in source_id:
-    merge_txt(item)
+# for item in source_id:
+#     merge_txt(item)
 

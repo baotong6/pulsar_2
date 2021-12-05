@@ -6,7 +6,7 @@ import sys
 import os
 
 path='/Users/baotong/eSASS/data/raw_data/47_Tuc/'
-file='pm00_700011_020_EventList_c001.fits'
+file='pm00_700175_020_EventList_c001.fits'
 evt=fits.open(path+file)[1].data['TIME']
 TM_NR=fits.open(path+file)[1].data['TM_NR']
 flare_START=[];flare_STOP=[]
@@ -15,10 +15,10 @@ for i in range(2,9):
     flare_STOP.extend(fits.open(path+file)[i].data['STOP'])
 # print(len(flare_START),len(flare_STOP))
 
-GTI_START_all=[];GTI_STOP_all=[]
-for i in range(51,57):
-    GTI_START_all.extend(fits.open(path+file)[i].data['START'])
-    GTI_STOP_all.extend(fits.open(path+file)[i].data['STOP'])
+# GTI_START_all=[];GTI_STOP_all=[]
+# for i in range(51,57):
+#     GTI_START_all.extend(fits.open(path+file)[i].data['START'])
+#     GTI_STOP_all.extend(fits.open(path+file)[i].data['STOP'])
 # print(GTI_START_all-np.sort(GTI_START_all))
 
 for i in (1,2,4,5,6,7):

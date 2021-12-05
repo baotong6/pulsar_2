@@ -243,7 +243,7 @@ def get_T_in_mbins(epoch_info,w,m,fi):
     return T_in_perbin
 
 #
-path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700011/'
+path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
 path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_0.5_8/'
 path = path_eSASS
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
@@ -262,7 +262,7 @@ def write_result(dataname):
     #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
     filename=str(dataname)+'.txt'
     data_file=path + str(dataname) + '.txt'
-    epoch_file = path + 'epoch_47Tuc_700011.txt'
+    epoch_file = path + 'epoch_47Tuc_700163.txt'
     # epoch_file = path + 'epoch_src_' + str(dataname) + '.txt'
 
     epoch_info=np.loadtxt(epoch_file)
@@ -279,7 +279,7 @@ def write_result(dataname):
     energy=src_evt[:,1]
     #time = filter_energy(time, energy, [200, 500])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./100,1./30,1.e-5)
+    w_range=2*np.pi*np.arange(1./10000,1./3000,1.e-7)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info,w_range=w_range,m_max=10,parallel=False)
     endtime = datetime.datetime.now()
@@ -325,6 +325,6 @@ def get_result_fromid(id_range):
     np.savetxt(path+'result_1h_{0}.txt'.format(id_range[0]), result,
                fmt='%10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
-get_result_fromid(['293_700011'])
+get_result_fromid(['481_700163'])
 
 #choose_id(1, 3)

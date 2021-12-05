@@ -102,9 +102,10 @@ def plot_longT_V(data_file,bkg_file,epoch_file):
     if not bkg_file:
         for i in range(len(obsID)):
             cts.append(len(np.where(time[:, 2] == obsID[i])[0]))
-            cts = np.array(cts)
-            CR = cts / expT
-            CR_ERR = np.sqrt(CR * expT) / expT
+        cts = np.array(cts)
+        CR = cts / expT
+        CR_ERR = np.sqrt(CR * expT) / expT
+
     else:
         time_bkg = np.loadtxt(bkg_file)
         for i in range(len(obsID)):
@@ -116,6 +117,7 @@ def plot_longT_V(data_file,bkg_file,epoch_file):
         CR_ERR=np.sqrt(CR*expT)/expT
 
     # print(obsID[np.where(CR>0.0006)])
+    plt.semilogy()
     plt.errorbar(t_start,CR,CR_ERR,fmt='o',capsize=3, elinewidth=1, ecolor='red')
     plt.show()
 
@@ -139,7 +141,7 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
     # useid =np.concatenate((epoch_info[:, 2][1:2],epoch_info[:, 2][5:6]))
     # tstart=np.concatenate((epoch_info[:, 0][0:1],epoch_info[:, 0][4:5]))
     # tstop= np.concatenate((epoch_info[:, 1][0:1],epoch_info[:, 1][4:5]))
-    useid =epoch_info[:, 2][0:1]
+    useid =epoch_info[:, 2][5:13]
     print(useid)
     tstart=epoch_info[:, 0]
     tstop =epoch_info[:, 1]
@@ -154,7 +156,7 @@ def phase_fold(data_file,epoch_file,p_test,bin,net_percent,shift,label,pathout):
     #     plt.plot([tstart[k]-time[0],tstart[k]-time[0]],[0,20],'--',color='red')
     #     plt.plot([tstop[k]-time[0], tstop[k]-time[0]], [0, 20], '--', color='green')
 
-    plt.hist(time-time[0],bins=100,histtype='step')
+    plt.hist(time,bins=100,histtype='step')
     plt.show()
 
     def trans(t,p_test,shift):
@@ -254,16 +256,16 @@ path_NGC6752='/Users/baotong/Desktop/period_NGC6752/txt_all_obs_0.5_8/'
 path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/'
 path_xmmCDFS='/Users/baotong/Desktop/CDFS/xmm_txt/'
 obsid=700014
-path_eSASS='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_reg4_psf75_0.2_5/'
+path_eSASS='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_reg2_psf75_0.2_5/'
 # path_eSASS='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_{0}/'.format(obsid)
 figurepath='/Users/baotong/Desktop/aas/pCV_GC/figure/47Tuc/'
 if __name__=='__main__':
-    path=path_eSASS
-    period=34.52641
+    path=path_Tuc
+    period=42955.32646/2
     # dataname='481_{0}.txt'.format(obsid)
-    dataname = '148.txt'
-    net_p=0.22
+    dataname = '350.txt'
+    net_p=0.8
     epoch_file = path + 'epoch_src_' + dataname
-    # plot_longT_V()
+    plot_longT_V(data_file=path + dataname, bkg_file=None,epoch_file=epoch_file,)
     # epoch_file=path+'epoch_47Tuc_{0}.txt'.format(obsid)
     phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.0, label =dataname[0:-4],pathout=figurepath)
