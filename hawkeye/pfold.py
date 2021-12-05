@@ -51,6 +51,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     T_in_perbin = funcs.get_T_in_mbins(epoch_info, 2 * np.pi / p_test, bin, shift * 2 * np.pi)
 
     correct_gap = T_in_perbin / (sum(T_in_perbin) / len(T_in_perbin))
+    print('correct_gap=',correct_gap)
     y2 /= np.concatenate((correct_gap, correct_gap))
     y2_err = np.array(poisson_conf_interval(y2, interval='frequentist-confidence'))
     y2_err[0] = y2 - y2_err[0]

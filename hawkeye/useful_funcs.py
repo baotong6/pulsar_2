@@ -49,7 +49,7 @@ def filter_energy(time,energy,band):
 
     return T
 
-def filter_obs(src_evt,bkg_evt,useid):
+def filter_obs(src_evt,useid,bkg_evt=None):
     src_evt_use = src_evt[np.where(src_evt[:-1] == useid[0])[0]]
     i=1
     while i < len(useid):
@@ -58,7 +58,8 @@ def filter_obs(src_evt,bkg_evt,useid):
         src_evt_use = np.concatenate((src_evt_use, src_evt_use_temp))
         i+=1
     if not bkg_evt:
-        return src_evt
+        return src_evt_use
+
     if bkg_evt:
         bkg_evt_use = bkg_evt[np.where(bkg_evt[:-1] == useid[0])[0]]
         i = 1

@@ -11,7 +11,7 @@ font2 = {'family': 'Normal',
          'weight': 'normal',
          'size': 16, }
 
-def get_LS(time, flux,freq,outpath,outname,save=False,show=True):
+def get_LS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
     x = time
     y = flux
     LS = LombScargle(x, y,normalization = 'standard')

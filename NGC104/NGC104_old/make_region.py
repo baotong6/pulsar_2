@@ -53,7 +53,6 @@ p90_data=hdul_p90[0].data
 p90_data=p90_data.T
 src_radius=p90_data[src_x_int,src_y_int]
 src_radius*=2.03252
-#src_radius*=2
 #pixel size=0.492arcsec
 #the default units of p90 fits is arcsec, 1/0.492=2.03252
 print(np.sort(src_radius))
