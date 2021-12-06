@@ -153,7 +153,7 @@ def compute_GL(Tlist,epoch_info, m_max=20, w_range=None, ni=10, parallel=False):
         # compute GL algorithm
         fbin = precompute_binmult(N)
         v = m_max - 1
-        #T = float(np.max(Tlist))  # duration of the observation
+        T = float(np.max(Tlist))  # duration of the observation
         if w_range is None:  # use default frequencies
             w_hi = 5*np.pi * N / T  # max default frequency
 
@@ -244,8 +244,8 @@ def get_T_in_mbins(epoch_info,w,m,fi):
 
 #
 path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
-path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_0.5_8/'
-path = path_eSASS
+path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p90/'
+path = path_Tuc
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
 def filter_obs(src_evt,useid):
@@ -262,15 +262,13 @@ def write_result(dataname):
     #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
     filename=str(dataname)+'.txt'
     data_file=path + str(dataname) + '.txt'
-    epoch_file = path + 'epoch_47Tuc_700163.txt'
+    epoch_file = path + 'epoch_src_{0}.txt'.format(dataname)
     # epoch_file = path + 'epoch_src_' + str(dataname) + '.txt'
-
     epoch_info=np.loadtxt(epoch_file)
     epoch_info=epoch_info
     if epoch_info.ndim == 1:
         epoch_info=np.array([epoch_info])
     epoch_info=epoch_info##这里随意改
-
     # useid =np.concatenate((epoch_info[:, 2][0:1],epoch_info[:, 2][3:4]))
     useid = epoch_info[:, 2]
     src_evt=np.loadtxt(data_file)
@@ -279,9 +277,9 @@ def write_result(dataname):
     energy=src_evt[:,1]
     #time = filter_energy(time, energy, [200, 500])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./10000,1./3000,1.e-7)
+    w_range=2*np.pi*np.arange(1./50000,1./10000,1.e-7)
     starttime = datetime.datetime.now()
-    GL_R=compute_GL(time,epoch_info,w_range=w_range,m_max=10,parallel=False)
+    GL_R=compute_GL(time,epoch_info,w_range=w_range,m_max=10,parallel=True)
     endtime = datetime.datetime.now()
     srcid=dataname
     runtime=(endtime - starttime).seconds
@@ -325,6 +323,7 @@ def get_result_fromid(id_range):
     np.savetxt(path+'result_1h_{0}.txt'.format(id_range[0]), result,
                fmt='%10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
-get_result_fromid(['481_700163'])
+if __name__ == '__main__':
+    get_result_fromid(['235'])
 
 #choose_id(1, 3)
