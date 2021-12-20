@@ -32,6 +32,35 @@ def get_T_in_mbins(epoch_info,w,m,fi):
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
 
+def choose_obs(epoch_info,flux_info=None,flux_filter=0,expT_filter=0,if_flux_high=True,if_expT_high=True,obsID=None):
+
+    if obsID:
+        filter=[]
+        for i in range(len(obsID)):
+            index=np.where(epoch_info[:,2].astype('int')==obsID[i])[0][0]
+            filter.append(index)
+        epoch_info_use = epoch_info[filter]
+        useid = epoch_info_use[:, 2]
+        return (useid,epoch_info_use)
+    if len(epoch_info)!=len(flux_info):
+        print('ERROR! Flux info!')
+        return None
+    if if_expT_high:
+        if if_flux_high:
+            filter=np.where((epoch_info[:, 3] > expT_filter)&(flux_info > flux_filter))
+        else:
+            filter=np.where((epoch_info[:, 3] > expT_filter)&(flux_info < flux_filter))
+    else:
+        if if_flux_high:
+            filter=np.where((epoch_info[:, 3] < expT_filter)&(flux_info > flux_filter))
+        else:
+            filter=np.where((epoch_info[:, 3] < expT_filter)&(flux_info < flux_filter))
+
+    epoch_info_use = epoch_info[filter]
+    useid = epoch_info_use[:, 2]
+
+    return (useid,epoch_info_use)
+
 def filter_energy(time,energy,band):
     T=time
     E=energy
@@ -50,16 +79,15 @@ def filter_energy(time,energy,band):
     return T
 
 def filter_obs(src_evt,useid,bkg_evt=None):
-    src_evt_use = src_evt[np.where(src_evt[:-1] == useid[0])[0]]
+    src_evt_use = src_evt[np.where(src_evt[:,-1] == useid[0])]
     i=1
     while i < len(useid):
         id=useid[i]
-        src_evt_use_temp=src_evt[np.where(src_evt[:-1]==id)[0]]
+        src_evt_use_temp=src_evt[np.where(src_evt[:,-1]==id)]
         src_evt_use = np.concatenate((src_evt_use, src_evt_use_temp))
         i+=1
     if not bkg_evt:
         return src_evt_use
-
     if bkg_evt:
         bkg_evt_use = bkg_evt[np.where(bkg_evt[:-1] == useid[0])[0]]
         i = 1

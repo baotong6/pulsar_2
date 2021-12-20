@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 import functools
 import datetime
+import hawkeye as hawk
 
 starttime = datetime.datetime.now()
 
@@ -195,11 +196,14 @@ def compute_GL(Tlist,epoch_info, m_max=20, w_range=None, ni=10, parallel=False):
         m_opt = m_opt + 1  # start bin index with 1
         C = np.trapz(S, w)  # compute normalization
         S = S / C  # normalized probability
-        O_period = np.sum(O1m)  # integrated odds ratio
+        O_period = np.sum(O1m[1:])  # integrated odds ratio
         p_period = O_period / (1 + O_period)  # likelihood of periodic event
         cdf = np.array(S)
+        plt.plot(w,cdf)
+        plt.show()
         for i in range(0, np.size(S)):
             cdf[i] = np.trapz(S[0:i], w[0:i])
+
         wr = np.extract(np.logical_and(cdf > .0025, cdf < .9975), w)
         w_peak = w[np.argmax(S)]
         w_mean = np.trapz(S * w, w)
@@ -230,6 +234,7 @@ def get_T_in_mbins(epoch_info,w,m,fi):
     N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
     intN_bin_t_start=np.floor(N_bin_t_start)+1
     intN_bin_t_end=np.floor(N_bin_t_end)
+
     intN_bin_t_start=intN_bin_t_start.astype(int)
     intN_bin_t_end=intN_bin_t_end.astype(int)
     for i in range(len(N_bin_t_start)):
@@ -271,17 +276,23 @@ def write_result(dataname):
     epoch_info=epoch_info
     if epoch_info.ndim == 1:
         epoch_info=np.array([epoch_info])
-    epoch_info=epoch_info##这里随意改
-    # useid =np.concatenate((epoch_info[:, 2][0:1],epoch_info[:, 2][3:4]))
-    # useid = epoch_info[:, 2]
-    useid = np.concatenate((epoch_info[:, 2][0:4], epoch_info[:, 2][8:]))
     src_evt=np.loadtxt(data_file)
-    src_evt=filter_obs(src_evt,useid)
+
+    CR=hawk.plot_longT_V(src_evt=src_evt, bkg_file=None,epoch_info=epoch_info,show=False)
+    plt.close()
+    print(CR)
+    (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
+                                            flux_filter=2e-5,expT_filter=1000,
+                                            if_flux_high=True, if_expT_high=True,obsID=None)
+    epoch_info = epoch_info_use  ##这里随意改
+
+    src_evt_use =hawk.filter_obs(src_evt, useid)
+    src_evt=src_evt_use
     time=src_evt[:,0]
     energy=src_evt[:,1]
     #time = filter_energy(time, energy, [200, 500])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./50000,1./30000,1.e-8)
+    w_range=2*np.pi*np.arange(1./20000,1./10000,1.e-8)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=12,parallel=True)
     endtime = datetime.datetime.now()
@@ -331,6 +342,6 @@ def get_result_fromid(id_range):
                fmt='%10.2f %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    get_result_fromid(['211'])
+    get_result_fromid(['294'])
 
 #choose_id(1, 3)

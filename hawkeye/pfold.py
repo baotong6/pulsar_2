@@ -13,7 +13,7 @@ from scipy.optimize import curve_fit
 import pandas as pd
 from astropy.stats import poisson_conf_interval
 import scipy
-import hawkeye.useful_funcs as funcs
+import hawkeye.timing_funcs as funcs
 
 font1 = {'family': 'Normal',
          'weight': 'normal',

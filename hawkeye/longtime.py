@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.timeseries import LombScargle
 import hawkeye.pfold as pfold
-def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=None,shift=None):
+
+def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=None,shift=None,show=True):
     if epoch_info.ndim == 1:epoch_info=np.array([epoch_info])
     t_start = epoch_info[:, 0]
     t_end = epoch_info[:, 1]
@@ -30,7 +31,8 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
     plt.figure(1)
     plt.semilogy()
     plt.errorbar(t_mid,CR,CR_ERR,fmt='o',capsize=3, elinewidth=1, ecolor='red')
-    plt.show()
+    if show:
+        plt.show()
 
     if iffold:
         plt.figure(2)
@@ -38,3 +40,10 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
         plt.errorbar(turns, CR, CR_ERR, fmt='o', capsize=3, elinewidth=1, ecolor='red')
         plt.errorbar(turns+1, CR, CR_ERR, fmt='o', capsize=3, elinewidth=1, ecolor='red')
         plt.show()
+
+    return CR
+
+def plot_singleobs_lc(lc):
+    plt.title('T0={0}'.format(lc.time[0]))
+    plt.step(lc.time-lc.time[0],lc.counts)
+    plt.show()

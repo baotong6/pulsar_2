@@ -25,7 +25,10 @@ Tlist=src_evt[:,0]
 starttime = datetime.datetime.now()
 w_range=2*np.pi*np.arange(1./10000,1./3000,1.e-6)
 w_range=list(w_range);Tlist=list(Tlist)
-res=jl.compute_GL(Tlist,w_range)
-endtime = datetime.datetime.now()
-print(endtime-starttime)
-print(res)
+
+
+if __name__=="__main__":
+    res=jl.compute_GL(Tlist,w_range)
+    endtime = datetime.datetime.now()
+    print(endtime-starttime)
+    print(res)

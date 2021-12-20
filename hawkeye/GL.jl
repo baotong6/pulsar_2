@@ -1,5 +1,5 @@
 using Trapz
-using Pkg
+
 const logf = Ref{Vector{Float64}}()
 
 function compute_bin(Tlist, m, ω, ϕ) #OK
@@ -36,16 +36,20 @@ function get_T_in_mbins(m, ω, ϕ, gtis)
         ϕ_start = mod2pi(ω*t_start+ϕ)/(2π)
         pm = floor(Int, m*ϕ_start) + 1
         temp = pm*dT-ϕ_start*T
-        T_in_perbin[pm] += temp
+        if temp > t_end - t_start
+            T_in_perbin[pm] += t_end - t_start
+            continue
+        else
+            T_in_perbin[pm] += temp
+        end
         temp += t_start
-        pm = mod(pm+1, 1:m)
         while temp < t_end
+            pm = mod(pm+1, 1:m)
             if t_end > temp+dT
                 T_in_perbin[pm] += dT
             else
                 T_in_perbin[pm] += t_end-temp
             end
-            pm = mod(pm+1, 1:m)
             temp += dT
         end
     end

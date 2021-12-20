@@ -60,9 +60,8 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srci
     return None
 def make_region_merge(path_in,path_out,ra,dec,psfimage,ecf=90,srcid=None,multiple_src=1,single_name=0):
     psfmap=fits.open(path_in+psfimage)
-    ecf
 
-def get_txt(path_in,path_out,reg_name,obs_id,suffix=''):
+def get_txt(path_in,path_in_reg,path_out,reg_name,obs_id,ecf=90,suffix=''):
     ##对单个obs_id##
     evt_list='all_bcc_{0}_reproj_evt.fits'.format(obs_id)
     hdul_evt= fits.open(path_in+evt_list)
@@ -83,7 +82,7 @@ def get_txt(path_in,path_out,reg_name,obs_id,suffix=''):
         os.system('mkdir txt_{0}{1}'.format(obs_id,suffix))
 
     for item in reg_name:
-        reg = reg_func.read_region(path_in+'region_{0}/'.format(obs_id)+'region_90/'+str(item)+'.reg')
+        reg = reg_func.read_region(path_in_reg+'region_{0}/'.format(obs_id)+'region_{0}/'.format(suffix[2:])+str(item)+'.reg')
         src_index=where_region(x,y,reg)
         src_x=x[src_index]
         src_y=y[src_index]

@@ -11,7 +11,6 @@ from scipy.interpolate import lagrange
 from scipy import interpolate
 from scipy.optimize import curve_fit
 import pandas as pd
-import read_csv as data
 import linecache
 from astropy.timeseries import LombScargle
 
