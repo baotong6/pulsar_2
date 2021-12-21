@@ -261,7 +261,7 @@ def filter_obs(src_evt,useid):
         i+=1
     return src_evt_use
 
-def write_result(dataname):
+def write_result(data_file,epoch_file,w_range,dataname='1'):
     #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
     data_file=path + str(dataname) + '.txt'
     epoch_file = path + 'epoch_src_{0}.txt'.format(dataname)

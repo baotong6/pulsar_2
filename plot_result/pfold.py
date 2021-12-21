@@ -255,17 +255,19 @@ path_NGC6397='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
 path_NGC6752='/Users/baotong/Desktop/period_NGC6752/txt_all_obs_0.5_8/'
 path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep2/'
 path_xmmCDFS='/Users/baotong/Desktop/CDFS/xmm_txt/'
-obsid=700163
+obsid=700011
 # path_eSASS='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_reg2_psf75_0.2_5/'
-path_eSASS='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf90_{0}/'.format(obsid)
+path_eSASS='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_{0}/'.format(obsid)
 figurepath='/Users/baotong/Desktop/aas/pCV_GC/figure/47Tuc/'
 if __name__=='__main__':
-    path=path_CDFS
-    period=8130.0813
-    dataname='481_{0}.txt'.format(obsid)
+    path=path_eSASS
+    period=5818.18182
+    dataname='591_{0}.txt'.format(obsid)
     # dataname = '481.txt'
-    net_p=0.8
+    net_p=0.2
     epoch_file = path + 'epoch_src_' + dataname
+    epoch_file=path+f'epoch_47Tuc_{obsid}.txt'
     plot_longT_V(data_file=path + dataname, bkg_file=None,epoch_file=epoch_file,)
     # epoch_file=path+'epoch_47Tuc_{0}.txt'.format(obsid)
-    phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.0, label =dataname[0:-4],pathout=figurepath)
+    # phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.5, label =dataname[0:-4],pathout=figurepath)
+    phase_fold(path + dataname, epoch_file, period, bin = 20, net_percent = net_p, shift = 0.5, label ='',pathout=figurepath)

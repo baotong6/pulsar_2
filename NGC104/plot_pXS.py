@@ -60,16 +60,6 @@ def plot_RK_CV():
     ax1.set_xlim(7e-2,60)
     #print(len(np.where(spin_IP > 0)[0]))
     #plt.legend(['NSC','LW','Polar','DN','IP','Spin of IP'])
-    ax1.legend(['Polar', 'DN', 'IP', 'Spin of IP'])
-    P_min = 7./6.
-    P_gap = [7740.0 / 3600., 11448.0 / 3600.]
-    ax1.plot([P_min, P_min], [0, 200], '--',color='grey')
-    ax1.plot([P_gap[0], P_gap[0]], [0, 200], '-',lw=2.,color='grey')
-    ax1.plot([P_gap[1], P_gap[1]], [0, 200], '-',lw=2.,color='grey')
-
-    ax1.text(P_gap[0]+0.1, 230, 'gap',fontsize=12)
-    ax1.text(P_min - 0.41, 220, 'minimum',fontsize=12)
-
     # plt.show()
     return (fig,ax1)
 
@@ -97,7 +87,16 @@ def plot_NP(save=1,show=1):
     ax1.set_xlabel('Period (hours)',font1)
     ax1.set_ylabel('Number of sources',font1)
     plt.tick_params(labelsize=16)
-    ax1.legend(['Polar', 'DN', 'IP', 'Spin of IP','47 Tuc'])
+    ax1.legend(['Polar', 'DN', 'IP', 'Spin of IP','CV in 47Tuc'])
+    P_min = 7./6.
+    P_gap = [7740.0 / 3600., 11448.0 / 3600.]
+    ax1.plot([P_min, P_min], [0, 200], '--',color='grey')
+    ax1.plot([P_gap[0], P_gap[0]], [0, 200], '-',lw=2.,color='grey')
+    ax1.plot([P_gap[1], P_gap[1]], [0, 200], '-',lw=2.,color='grey')
+
+    ax1.text(P_gap[0]+0.1, 230, 'gap',fontsize=12)
+    ax1.text(P_min - 0.41, 220, 'minimum',fontsize=12)
+
     if save:
         plt.savefig(path_out+'47Tuc_NP.eps',bbox_inches='tight', pad_inches=0.0)
     if show:
@@ -144,5 +143,5 @@ def plot_dist_profile():
     plt.savefig(path_out+'47Tuc_profile.pdf',bbox_inches='tight', pad_inches=0.0)
     plt.show()
 if __name__=="__main__":
-    # plot_NP()
-    plot_dist_profile()
+    plot_NP()
+    # plot_dist_profile()
