@@ -37,8 +37,8 @@ def load_data(dataname,ecf=90):
     return (src_evt_use,epoch_info_use)
 
 def main_process():
-    (src_evt_use,epoch_info_use)=load_data(dataname='294',ecf=75)
-    period = 11486.016
+    (src_evt_use,epoch_info_use)=load_data(dataname='314',ecf=90)
+    period = 45310.3761
     net_p = 0.8
     bin_len=1000.
     time = src_evt_use[:, 0]
