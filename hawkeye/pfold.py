@@ -45,7 +45,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     fig=plt.figure(1,(10,7.5))
     ax1 = fig.add_subplot(111)
     bkg_x = [0, 2]
-    plt.fill_between(bkg_x, bkg_y_low, bkg_y_high,facecolor = 'blue', alpha = 0.5)
+    plt.fill_between(bkg_x, bkg_y_low, bkg_y_high,facecolor = 'green', alpha = 0.5)
     x2 = np.concatenate((x, x + 1))
     y2 = np.concatenate((loc, loc))
     T_in_perbin = funcs.get_T_in_mbins(epoch_info, 2 * np.pi / p_test, bin, shift * 2 * np.pi)
@@ -71,7 +71,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     ax2.plot([0, 2], [1.0, 1.0], '--', color='green')
     ax2.set_ylim([0, yhigh])
     ax2.tick_params(labelsize=18)
-    if save:plt.savefig(outpath + 'pfold_lc_{0}.eps'.format(label))
+    if save:plt.savefig(outpath + 'pfold_lc_{0}.eps'.format(label),bbox_inches='tight', pad_inches=0.0)
     if show:plt.show()
     else:plt.close()
 

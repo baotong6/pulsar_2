@@ -20,7 +20,7 @@ from stingray.lightcurve import Lightcurve
 from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,AveragedPowerspectrum
 from stingray.simulator import simulator, models
 from astropy.stats import poisson_conf_interval
-
+from hawkeye.longtime import plot_singleobs_lc
 def plot_LS_all_single_obs(ifnet=False):
     bin_len=100
     # obsIDlist=[700011,700013,700014,700163,700173,700174,700175]
@@ -76,47 +76,69 @@ def filter_obs(src_evt,useid):
         i+=1
     return src_evt_use
 
-def get_netlc_merge(srcID,obsIDlist,ecf=75,bin_len=100):
-    record=0
+def get_netlc_merge(srcID,obsIDlist,ecf=75,bin_len=100,backtxt=None):
+    record=0;blank=np.zeros(len(obsIDlist))+1
     src_cts=0;bkg_cts=0;net_cts=0;bkgscale_meanlist=[]
     for i in range(len(obsIDlist)):
         obsid=obsIDlist[i]
         path='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf{0}_{1}/'.format(ecf,obsid)
         srcevt = np.loadtxt(path + '{0}_{1}.txt'.format(srcID,obsid))
-        bkgevt= np.loadtxt(path + '{0}_bkg_{1}.txt'.format(srcID,obsid))
-        if srcevt.ndim<2 or bkgevt.ndim<2 or len(srcevt)<10:
+        if srcevt.ndim<2 or len(srcevt)<10:
+            blank[i] = 0
             continue
-        src_area=np.loadtxt(path+'src_area.txt')
-        bkg_area=np.loadtxt(path+'bkg_area.txt')
-        bkgscale=(src_area[:,1][np.where(src_area[:,0]==srcID)])/(bkg_area[:,1][np.where(bkg_area[:,0]==srcID)])
-        bkgscale=bkgscale[0]
         time = srcevt[:, 0];
         energy_src = srcevt[:, 1]
-        time_bkg = bkgevt[:, 0];
-        energy_bkg = bkgevt[:, 1]
+        if backtxt:
+            bkgevt = np.loadtxt(path + '{0}_bkg_{1}.txt'.format(srcID, obsid))
+            src_area=np.loadtxt(path+'src_area.txt')
+            bkg_area=np.loadtxt(path+'bkg_area.txt')
+            bkgscale=(src_area[:,1][np.where(src_area[:,0]==srcID)])/(bkg_area[:,1][np.where(bkg_area[:,0]==srcID)])
+            bkgscale=bkgscale[0]
+            time_bkg = bkgevt[:, 0];
+            energy_bkg = bkgevt[:, 1]
 
-        lc = funcs.get_hist_withbkg(time,time_bkg, len_bin=bin_len,bkgscale=bkgscale,tstart=0,tstop=0)
-        src_cts+=len(time);bkg_cts+=len(time_bkg);net_cts+=np.sum(lc.counts)
-        bkgscale_meanlist.append(bkgscale)
+            lc = funcs.get_hist_withbkg(time,time_bkg, len_bin=bin_len,bkgscale=bkgscale,tstart=0,tstop=0)
+            bkg_cts += len(time_bkg)
+            bkgscale_meanlist.append(bkgscale)
+        else:
+            lc = funcs.get_hist(time, len_bin=bin_len, tstart=0, tstop=0)
+            srcinfo=np.loadtxt(path+'src_info.txt')
+            bkg_cts_est_list=srcinfo[:,2]
+            bkg_cts_est=bkg_cts_est_list[np.where(srcinfo[:,0]==srcID)][0]
+            lc.counts=lc.counts-bkg_cts_est*bin_len/(lc.time[-1]-lc.time[0])
+            bkg_cts += bkg_cts_est
+            bkgscale_meanlist.append(0)
+        src_cts+=len(time);net_cts+=np.sum(lc.counts)
+
         if i==0:
-            lc_all=lc;
+            lc_all=lc
             record=1
         elif record==0:
             lc_all=lc
         else:
             lc_all=lc_all.join(lc)
-    return (lc_all,bkgscale_meanlist,src_cts,bkg_cts,net_cts)
+    if np.sum(blank) == 0:
+        print('here')
+        return None
+    else:
+        return (lc_all,bkgscale_meanlist,src_cts,bkg_cts,net_cts)
 
 def plot_LS_merge(srcID,obsIDlist,ecf=75,bin_len=100):
-    (lc_all,bkgscale_meanlist,src_cts,bkg_cts,net_cts)=get_netlc_merge(srcID, obsIDlist, bin_len=bin_len)
+    res=get_netlc_merge(srcID, obsIDlist, bin_len=bin_len,backtxt=None)
+    if res==None:
+        return[srcID,0,0,0,0,0]
+    else:
+        (lc_all,bkgscale_meanlist,src_cts,bkg_cts,net_cts)=get_netlc_merge(srcID, obsIDlist, bin_len=bin_len,backtxt=None)
     bkgscale_mean = np.mean(np.array(bkgscale_meanlist))
     x=lc_all.time;flux=lc_all.counts
+    plot_singleobs_lc(lc=lc_all)
     T_tot = x[-1] - x[0]
     freq = np.arange(1 / T_tot, 0.5 / bin_len, 1 / (10* T_tot))
-    freq = freq[np.where(freq > 1 / 10000.)]
-    figurepath='/Users/baotong/eSASS/data/raw_data/47_Tuc/fig_LS/LS_net_psf{0}_bin{1}/'.format(ecf,bin_len)
-    [FP, out_period, max_NormLSP] = funcs.get_LS(x, flux, freq, outpath=figurepath, outname=str(srcID),save=True,show=False)
-    return [srcID,1-FP,out_period,bkgscale_mean,src_cts,bkg_cts,net_cts]
+    freq = freq[np.where(freq > 1 / 30000.)]
+    figurepath='/Users/baotong/eSASS/data/raw_data/47_Tuc/fig_LS/LS_net_psf{0}_bin{1}_4long_bkgimg/'.format(ecf,bin_len)
+    plot_singleobs_lc(lc=lc_all,figurepath=figurepath,save=1,show=0,dataname=srcID)
+    [FP, out_period, max_NormLSP] = funcs.get_LS(x, flux, freq, outpath=figurepath, outname=str(srcID),save=True,show=1)
+    return [srcID,1-FP,out_period,src_cts,bkg_cts,net_cts]
 
 
 def pfold_fromlc(lc,epoch_info,p_test,bin,shift,path_out,label='test'):
@@ -162,20 +184,21 @@ def pfold_fromlc(lc,epoch_info,p_test,bin,shift,path_out,label='test'):
 
 if __name__=='__main__':
 
-    plot_LS_all_single_obs(ifnet=True)
+    # plot_LS_all_single_obs(ifnet=True)
 
     # figurepath = '/Users/baotong/eSASS/data/raw_data/47_Tuc/fig_LS/LS_net_psf75_bin100/'
-    # obsIDlist=[700011, 700163, 700013, 700014, 700173, 700174, 700175]
+    obsIDlist=[700011, 700163, 700013, 700014]
     # obsIDlist = [700011]
     # plot_LS_merge(srcID=5,obsIDlist=obsIDlist)
-    #
-    # srcIDlist=np.arange(1,889,1)
-    # src_LS_info=[]
-    # for i in range(len(srcIDlist)):
-    #     info_temp=plot_LS_merge(srcID=srcIDlist[i],obsIDlist=obsIDlist)
-    #     src_LS_info.append(info_temp)
-    # src_LS_info=np.array(src_LS_info)
-    # np.savetxt(figurepath+'LS_info.txt',src_LS_info,fmt='%10d %10.5f %10.5f %10.5f %10d %10d %10.2f')
+
+    figurepath = '/Users/baotong/eSASS/data/raw_data/47_Tuc/fig_LS/LS_net_psf{0}_bin{1}_4long_bkgimg/'.format(75,100)
+    srcIDlist=np.arange(481,482,1)
+    src_LS_info=[]
+    for i in range(len(srcIDlist)):
+        info_temp=plot_LS_merge(srcID=srcIDlist[i],obsIDlist=obsIDlist)
+        src_LS_info.append(info_temp)
+    src_LS_info=np.array(src_LS_info)
+    # np.savetxt(figurepath+'LS_info.txt',src_LS_info,fmt='%10d %10.5f %10.5f %10d %10.2f %10.2f')
 
 
     ##输出net_counts，运行一次即可;更新后已废

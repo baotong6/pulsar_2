@@ -45,6 +45,7 @@ def make_phy_reg(srcid,x,y,psfradii,outpath,inpath=None,imgfile=None,coordtype='
 
     elif coordtype=='physical':
         reg_x = x;reg_y = y;reg_r = psfradii
+        print(reg_r,reg_x,reg_y)
         if singlename and len(srcid)==1:
             for i in range(len(x)):
                 with open(outpath+'/{0}.reg'.format(singlename), 'w+') as f1:

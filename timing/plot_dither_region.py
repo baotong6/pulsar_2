@@ -6,7 +6,7 @@ import os
 import string
 
 def get_and_plot():
-    srcID='202'
+    srcID='528'
     obsID=['5934','6362','6365','9500','9501','9502',
            '9503','9504','9505','9854','9855','9892','9893']
     for id in obsID:
@@ -15,14 +15,15 @@ def get_and_plot():
         # regfile='region_{0}/region_90/{1}.reg'.format(id,srcID)
         # with open(path+'merge_data/timing/'+regfile,'r') as f:
         #     reg=f.readline()
-        reg='circle(17:51:38.3376,-29:42:40.032,7.63)'
+        # reg='circle(17:51:38.3376,-29:42:40.032,20")'
+        # reg="circle(17:51:04.1499,-29:27:48.301,11)"
+        reg="circle(17:51:04.1499,-29:27:48.301,11'')"
         os.chdir(path + id + '/cal')
 
         asolname = 'aspect_1_bcc.fits'
-        cmd='dither_region infile={0} region="{1}" maskfile=maskfile.fits ' \
-            'wcsfile=evt2file_bcc.fits outfile=fracarea_vs_time_{2}_src{3}.fits clobber=yes verbose=5'.format(asolname,reg,id,srcID)
+        cmd='dither_region infile={0} region="{1}" maskfile=maskfile.fits wcsfile=evt2file_bcc.fits outfile=fracarea_vs_time_{2}_src{3}.fits clobber=yes verbose=5'.format(asolname,reg,id,srcID)
         print(cmd)
-        #os.system(cmd)
+        # os.system(cmd)
         filename = 'fracarea_vs_time_{0}_src{1}.fits'.format(id,srcID)
         hdul = fits.open(path+id+'/cal/' + filename)
         time = hdul[1].data.field(0)
@@ -32,16 +33,17 @@ def get_and_plot():
         plt.plot(time, frac)
         plt.savefig('frac_{0}_src{1}.eps'.format(id,srcID))
         plt.show()
-#get_and_plot()
+# get_and_plot()
+
 def compute_index():
     path = '/Volumes/pulsar/LimWin_damage/'
-    srcID=['324','118','16','206','40','20','88'
-        ,'141','521','229','42','513'
-        ,'371','196','152','194','99','191'
-        ,'500','153','114','244','202']
-    #srcID=['324']
-    obsID=['5934','6362','6365','9500','9501','9502',
-           '9503','9504','9505','9854','9855','9892','9893']
+    # srcID=['324','118','16','206','40','20','88'
+    #     ,'141','521','229','42','513'
+    #     ,'371','196','152','194','99','191'
+    #     ,'500','153','114','244','202']
+    srcID=['528']
+    obsID=['6362','5934','6365','9505','9855','9502',
+           '9500','9501','9854','9503','9892','9893','9504']
     dither_info_time=[]
     dither_info_frac=[]
     index_total = []

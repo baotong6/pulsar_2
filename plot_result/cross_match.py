@@ -14,7 +14,7 @@ from scipy.fftpack import fft,ifft
 import scipy.signal as ss
 import random
 import pandas as pd
-import read_csv as data
+import plot_result.read_csv as data
 
 def getlen(a,b):
     length=((a[0]-b[0])**2+(a[1]-b[1])**2)**0.5

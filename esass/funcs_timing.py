@@ -35,6 +35,7 @@ def get_LS(time, flux,freq,outpath,outname,save=False,show=True):
     # LS = LombScargle(x, y, normalization='psd')
     power = LS.power(freq)
     max_NormLSP=np.max(power)
+    period_peak=1./freq[np.where(power==np.max(power))][0]
     FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='baluev')
     FP_99 = LS.false_alarm_level(0.0027,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     FP_95 = LS.false_alarm_level(0.05, minimum_frequency=freq[0],
@@ -44,11 +45,14 @@ def get_LS(time, flux,freq,outpath,outname,save=False,show=True):
 
     # if FP<0.01:print(dataname)
     # plt.title('Epoch {2}: XID={0},FAP={1}'.format(dataname,np.round(FP,4),k),font1)
+    plt.figure(1, (15, 6))
+    plt.title('Period={0:.2f}'.format(period_peak), font1)
     # plt.semilogx()
     # print(freq)
     plt.plot(freq, power)
     plt.semilogx()
     out_period=1./freq[np.where(power==np.max(power))][0]
+    # plt.plot([1/period_peak,1/period_peak],[0,np.max(power)],'--')
     plt.plot([freq[0], freq[-1]], [FP_99, FP_99], '--')
     plt.plot([freq[0], freq[-1]], [FP_95, FP_95], '--')
     plt.plot([freq[0], freq[-1]], [FP_68, FP_68], '--')
@@ -60,7 +64,7 @@ def get_LS(time, flux,freq,outpath,outname,save=False,show=True):
     plt.tick_params(labelsize=16)
     # plt.show()
     if save:
-        plt.savefig(outpath + outname + '.eps')
+        plt.savefig(outpath + outname + '.eps',bbox_inches='tight', pad_inches=0.0)
     if show:
         plt.show()
     else:

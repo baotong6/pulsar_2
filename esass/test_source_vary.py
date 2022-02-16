@@ -83,7 +83,7 @@ def plot_vary_src():
     np.loadtxt(path+'txt/txt_merge_psf{0}_0.2_5/src_vary_info.txt'.format(ecf))
 
 def write_src_info(ecf=0.75):
-    ##返回的radi是arcsec单位
+    ##返回的radi是arcsec单位,with bkgimage
     path='/Users/baotong/eSASS/data/raw_data/47_Tuc/'
     srcid=np.arange(1,889,1)
     obsIDlist = [700011,700163,700013,700014,700173,700174,700175]

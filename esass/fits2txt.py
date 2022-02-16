@@ -24,6 +24,7 @@ def make_epochfile(path,ID,outpath):
     np.savetxt(outpath+'epoch_47Tuc.txt',res,fmt="%20.2f  %20.2f  %20.2f %10d")
 
 def get_singlesrc_evt(evtfile,imgname,obsid,ra,dec,emin,emax,radius,outpath,outname):
+
     (phy_x,phy_y)=funcs.trans_radec2xy(imgname,ra,dec)
     reg=[phy_x,phy_y,radius]
     [src_t, src_E, src_ID]=funcs.get_evt_srcreg(evtname=evtfile,obsid=obsid,src_reg=reg,emin=emin,emax=emax)
@@ -34,6 +35,7 @@ def get_singlesrc_evt(evtfile,imgname,obsid,ra,dec,emin,emax,radius,outpath,outn
     src_ID = src_ID.astype('int')
     src_txt = np.column_stack((src_t, src_E, src_ID))
     src_txt = src_txt[src_txt[:, 0].argsort()]
+    print(outpath+outname +'_'+str(obsid)+ '.txt')
     np.savetxt(outpath + outname +'_'+str(obsid)+ '.txt', src_txt, fmt="%.7f  %10.3f  %10d")
 
 def get_singlebkg_evt(evtfile,imgname,obsid,ra,dec,emin,emax,radius_src,radius_list,ra_list,dec_list,outpath,outname):
@@ -100,7 +102,7 @@ def merge_txt(inpath,outpath,outname,epoch_file,ecf):
     np.savetxt(outpath + outname+ '.txt', result, fmt="%.7f  %10.3f  %10d")
     # np.savetxt(outpath + outname+ '_bkg.txt', result, fmt="%.7f  %10.3f  %10d")
 
-def get_psfradius(srcID,ra,dec,obsid,inpath,outpath,ecf=0.5,if_SN_radius=False):
+def get_psfradius(srcID,ra,dec,obsid,inpath,ecf=0.5,if_SN_radius=False):
     ## ra and dec should be array
     ##注意这里的数字位置都是从0开始计数##
     ##erosita现在的psfmap大小都是21x21，注意手动换算##
@@ -136,7 +138,7 @@ def get_psfradius(srcID,ra,dec,obsid,inpath,outpath,ecf=0.5,if_SN_radius=False):
     def output_psf_intervalue(ecf,psf_x,psf_y,img_x,img_y,if_ecflist=False):
         if if_ecflist==False:
             indexpsf=np.where(ecflist==ecf)[0][0]
-            print(indexpsf)
+            print('psfindex=',indexpsf)
             psfmap_ecf = psfmap_all[indexpsf]
             psfmap_ecf = psfmap_ecf.T
             psfmap_ecf[np.where(psfmap_ecf == 0.)] += 1e-5
@@ -370,9 +372,9 @@ if __name__=='__main__':
     # for obsid in ID:
     #     get_singlesrc_evt(path+'pm00_{0}_020_EventList_c001_bary.fits'.format(obsid),obsid=obsid,
     #                   ra=6.04485,dec=-72.07383,radius=20./3600,outpath='/Users/baotong/eSASS/data/47_Tuc/txt/',
-    #                   outname='402')
+    #                   outname='182')
     #
-    # merge_txt(ID,outpath='/Users/baotong/eSASS/data/47_Tuc/txt/',outname='402')
+    # merge_txt(ID,outpath='/Users/baotong/eSASS/data/47_Tuc/txt/',outname='182')
 
     # get_psfradius(ra=np.array([6.0178,6.1078]),dec=np.array([-72.08281,-72.18281]),obsid=700011,inpath=path,outpath=path)
     (ra,dec,srcIDlist)=funcs.read_erosita_cat(catalog_file)
@@ -382,7 +384,7 @@ if __name__=='__main__':
     # get_all_bkg_txt(catalog_file, obsIDlist=ID, inpath=path)
 
     # get_all_src_txt_SNRpsf(catalog_file, obsIDlist=ID, inpath=path)
-    merge_4reg_txt(srcIDlist,ecf=0.90)
+    # merge_4reg_txt(srcIDlist,ecf=0.90)
 
     # for obsID in ID[0:]:
     #     (psf_bestSNR_no_overlap,ECF_allsrc,SNR_allsrc,not_include_index)=get_psfradius(srcID=srcIDlist[0:],ra=ra[0:], dec=dec[0:], obsid=obsID, inpath=path,
@@ -391,9 +393,25 @@ if __name__=='__main__':
     #                       ecf=ECF_allsrc,SNR=SNR_allsrc,not_include_index=not_include_index,obsIDlist=[obsID],outpath=path)
     #     make_region(srcID=srcIDlist[0:],ra=ra[0:],dec=dec[0:],ecf='SNR',radius=psf_bestSNR_no_overlap,obsIDlist=[obsID],outpath=path)
 
-    #make all region## ##
+    ##==make all region==##
+    #
     # for obsID in ID:
-    #     (psf_bettervalue,not_include_index)=get_psfradius(srcID=srcIDlist,ra=ra, dec=dec, obsid=obsID, inpath=path,
-    #                   outpath=path, ecf=0.50,if_SN_radius=False)
+    #     (psf_bettervalue,not_include_index)=get_psfradius(srcID=srcIDlist,ra=ra, dec=dec, obsid=obsID, inpath=path, ecf=0.90,if_SN_radius=False)
     #
     #     make_region(srcID=srcIDlist,ra=ra,dec=dec,ecf=0.50,radius=psf_bettervalue,obsIDlist=[obsID],outpath=path)
+
+    ## for single source
+    for obsID in ID:
+        ecf=0.50
+        ra_src=6.01467
+        dec_src=-72.08112
+        (psf_bettervalue, not_include_index) = get_psfradius(srcID=srcIDlist, ra=[ra_src], dec=[dec_src], obsid=obsID, inpath=path,
+                                                         ecf=ecf, if_SN_radius=False)
+        print(psf_bettervalue)
+        make_region(srcID=['CID_224'], ra=[ra_src], dec=[dec_src], ecf=ecf, radius=psf_bettervalue, obsIDlist=[obsID], outpath=path)
+
+        get_singlesrc_evt(path + 'pm00_{0}_020_EventList_c001_bary.fits'.format(obsID), imgname=path+ '{0}_02_5_img.fits'.format(obsID),obsid=obsID,
+                          ra=[ra_src],dec=[dec_src],emin=200, emax=5000,radius=psf_bettervalue,outpath=f'{path}txt/txt_psf{int(ecf*100)}_{obsID}/',
+                           outname='CID_224')
+        merge_txt(inpath=path+'txt/',outpath=path+'txt/txt_merge_psf{0}_0.2_5/'.format(int(ecf*100)),
+                  outname='CID_224',epoch_file='epoch_47Tuc.txt',ecf=ecf)

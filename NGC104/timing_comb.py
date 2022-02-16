@@ -6,7 +6,6 @@ from astropy.io import fits
 import sys
 import os
 import string
-#import correct as correct
 from datetime import datetime
 from scipy.interpolate import lagrange
 from scipy import interpolate
@@ -18,6 +17,7 @@ import hawkeye as hawk
 
 def load_data(dataname,ecf=90):
     path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(ecf)
+    # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
     path = path_Tuc
     dataname = '{0}.txt'.format(dataname)
     epoch_file = path + 'epoch_src_' + dataname
@@ -26,33 +26,68 @@ def load_data(dataname,ecf=90):
     CR=hawk.plot_longT_V(src_evt=src_evt, bkg_file=None,epoch_info=epoch_info)
     # print(epoch_info[:,2])
     CR/=ecf/100.
-    # (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-    #                                         flux_filter=2e-3,expT_filter=1000,
-    #                                         if_flux_high=True,if_expT_high=True,obsID=16527)
+
     (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                            flux_filter=2e-5,expT_filter=1000,
-                                            if_flux_high=True, if_expT_high=True,obsID=None)
+                                            flux_filter=0.01,expT_filter=1000,
+                                            if_flux_high=False, if_expT_high=True,obsID=None)
+    # [16527, 15747, 16529, 17420, 15748, 16528]
     src_evt_use =hawk.filter_obs(src_evt, useid)
     print(useid)
     return (src_evt_use,epoch_info_use)
 
+def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
+    obsIDlist=epoch_info_use[:,2].astype('int')
+    blank = np.zeros(len(obsIDlist)) + 1
+    record=0
+    for i in range(len(obsIDlist)):
+        if src_evt_use.ndim < 2 or len(src_evt_use) < 10:
+            blank[i] = 0
+            continue
+        obsid=obsIDlist[i]
+        path='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf{0}_{1}/'.format(ecf,obsid)
+        src_info=np.loadtxt(path+'src_info.txt')
+        bkg_cts_est_list = src_info[:, 2]
+        bkg_cts_est = bkg_cts_est_list[np.where(src_info[:, 0] == srcID)][0]
+        print(bkg_cts_est * bin_len / (epoch_info_use[:,1][i] - epoch_info_use[:,0][i]))
+        time = src_evt_use[:, 0][np.where(src_evt_use[:,-1]==obsid)]
+        lc = hawk.get_hist(time, len_bin=bin_len,tstart=epoch_info_use[:,0][i],tstop=epoch_info_use[:,1][i])
+        lc.counts = lc.counts - bkg_cts_est * bin_len / (epoch_info_use[:,1][i] - epoch_info_use[:,0][i])
+        lc.counts[np.where(lc.counts<0)]=0
+        if i==0:
+            lc_all=lc
+            record=1
+        elif record==0:
+            lc_all=lc
+        else:
+            lc_all=lc_all.join(lc)
+
+    return lc_all
+
 def main_process():
-    (src_evt_use,epoch_info_use)=load_data(dataname='314',ecf=90)
-    period = 45310.3761
-    net_p = 0.8
-    bin_len=1000.
+    dataname='345'
+    bin_len = 100.
+    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=50)
+    # lc=get_lc_frombkgimg(dataname,src_evt_use,epoch_info_use,ecf=75,bin_len=bin_len)
+    figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
+
+    period = 22242.816
+    net_p = 0.999
+
     time = src_evt_use[:, 0]
-    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[500,8000])
-    hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.3)
+
+    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[500,2000])
+    hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.8)
     plt.close()
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,p_test=period,outpath=None,bin=30)
+    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=30,shift=0.5,label='',save=1,show=1)
 
     lc=hawk.get_hist(time,len_bin=bin_len)
     T_tot=epoch_info_use[:,1][-1]-epoch_info_use[:,0][0]
-    freq = np.arange(1 / T_tot, 0.5 / bin_len, 1 / (5* T_tot))
+    freq = np.arange(1 / T_tot, 0.5 / bin_len, 1 / (10* T_tot))
     freq = freq[np.where(freq > 1 / 60000.)]
-    # (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq=freq)
+
+    figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
+    (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq=freq,outpath=figurepath, outname=str(dataname),save=0,show=1)
     # print('Period=',format(out_period))
-    hawk.plot_singleobs_lc(lc)
+    # hawk.plot_singleobs_lc(lc,period=period,ifsin=1,figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',dataname=dataname,save=0,show=1)
 if __name__=='__main__':
     main_process()

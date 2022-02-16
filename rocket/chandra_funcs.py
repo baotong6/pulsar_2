@@ -31,13 +31,14 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srci
     out_index=np.union1d(np.where(src_x>binx-1),np.where(src_y>biny-1))
     src_x[out_index]=binx-1;src_y[out_index]=biny-1
 
-    phy_x = src_x + 4096-binx/2
-    phy_y = src_y + 4096-biny/2
-
     src_x = np.rint(src_x)
     src_y = np.rint(src_y)
     src_x = src_x.astype(np.int)
     src_y = src_y.astype(np.int)
+    src_x[np.where(src_x>binx or src_x<0)]=0
+    src_y[np.where(src_y>biny or src_y<0)]=0
+    phy_x = src_x + 4096-binx/2
+    phy_y = src_y + 4096-biny/2
 
     for i in range(len(obs_ID_all)):
         os.chdir(path_out)
@@ -58,6 +59,7 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srci
         reg_func.make_phy_reg(srcid=srcid,x=phy_x,y=phy_y,psfradii=src_radius,outpath='./region_{0}/'.format(ecf),singlename=singlename)
 
     return None
+
 def make_region_merge(path_in,path_out,ra,dec,psfimage,ecf=90,srcid=None,multiple_src=1,single_name=0):
     psfmap=fits.open(path_in+psfimage)
 
