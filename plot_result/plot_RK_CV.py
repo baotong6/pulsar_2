@@ -76,7 +76,7 @@ def plot_P_N():
     plt.hist(spin_IP, bins = bins_spin, histtype = 'step',lw=1, color = 'purple')
 
     print(len(spin_IP))
-    print(len(orb_IP))
+    print(len(orb_DN))
     #print(len(np.where(spin_IP > 0)[0]))
 
     #plt.legend(['NSC','LW','Polar','DN','IP','Spin of IP'])

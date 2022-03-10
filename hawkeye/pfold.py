@@ -57,13 +57,14 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     y2_err[0] = y2 - y2_err[0]
     y2_err[1] = y2_err[1] - y2
 
-    plt.title("#{0} P={1:.2f},C={2}".format(label, p_test, str(len(time))), fontsize=18)
+    # plt.title("#{0} P={1:.2f},C={2}".format(label, p_test, str(len(time))), fontsize=18)
     plt.xlabel('phase', font1)
     plt.ylabel('counts/bin', font1)
     plt.tick_params(labelsize=18)
     plt.ylim(0, (np.max(y2) + np.max(y2) ** 0.5) * 1.05)
     plt.step(np.concatenate(([0], x2)), np.concatenate(([y2[0]], y2)), color='red')
     plt.errorbar(x2 - 0.5 / bin, y2, yerr=y2_err, fmt='.', capsize=1, elinewidth=1, ecolor='red')
+    plt.text(1.7,0.03*np.max(y2),'C={0}'.format(str(len(time))),fontsize=18)
 
     ax2 = ax1.twinx()
     yhigh = (np.max(y2) + np.max(y2) ** 0.5) * 1.05 / np.mean(y2)
@@ -71,7 +72,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     ax2.plot([0, 2], [1.0, 1.0], '--', color='green')
     ax2.set_ylim([0, yhigh])
     ax2.tick_params(labelsize=18)
-    if save:plt.savefig(outpath + 'pfold_lc_{0}.eps'.format(label),bbox_inches='tight', pad_inches=0.0)
+    if save:plt.savefig(outpath + 'pfold_lc_{0}.eps'.format(label),bbox_inches='tight', pad_inches=0.1)
     if show:plt.show()
     else:plt.close()
 

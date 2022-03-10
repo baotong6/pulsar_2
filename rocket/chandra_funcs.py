@@ -19,7 +19,7 @@ def delete_photon_ID(time, energy, ID,e_low,e_high):
         i = i + 1
     return [time, energy, ID]
 
-def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srcid=None,multiple_src=1,single_name=0):
+def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srcid=None,multiple_src=1,single_name=0,single_srcradius=0):
     if srcid==None:
         srcid=np.arange(1,len(ra)+1,1)
     os.chdir(path_in)
@@ -27,6 +27,8 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srci
     w = WCS(path_in + fitsname)
     src_x, src_y = w.all_world2pix(ra, dec, 1)
     binx,biny=np.shape(fits.open(path_in+fitsname)[0].data)
+    phy_x = src_x + 4096-binx/2
+    phy_y = src_y + 4096-biny/2
 
     out_index=np.union1d(np.where(src_x>binx-1),np.where(src_y>biny-1))
     src_x[out_index]=binx-1;src_y[out_index]=biny-1
@@ -35,11 +37,9 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srci
     src_y = np.rint(src_y)
     src_x = src_x.astype(np.int)
     src_y = src_y.astype(np.int)
-    src_x[np.where(src_x>binx or src_x<0)]=0
-    src_y[np.where(src_y>biny or src_y<0)]=0
-    phy_x = src_x + 4096-binx/2
-    phy_y = src_y + 4096-biny/2
-
+    # src_x[np.where(src_x>binx or src_x<0)]=0
+    # src_y[np.where(src_y>biny or src_y<0)]=0
+    print(4096-binx/2,4096-biny/2)
     for i in range(len(obs_ID_all)):
         os.chdir(path_out)
         if not os.path.exists('region_{0}'.format(obs_ID_all[i])):
@@ -50,13 +50,18 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srci
         p90_data = hdul_p90[0].data
         p90_data = p90_data.T
         src_radius = p90_data[src_x, src_y]
-        src_radius *= 2.032521
+        if single_srcradius:src_radius=np.array([single_srcradius])
+        src_radius =src_radius* 2.032521
         os.chdir(path_out+'region_{0}'.format(obs_ID_all[i]))
         os.system('mkdir region_{0}'.format(ecf))
         if multiple_src:singlename=None
         elif single_name:singlename=single_name
-
-        reg_func.make_phy_reg(srcid=srcid,x=phy_x,y=phy_y,psfradii=src_radius,outpath='./region_{0}/'.format(ecf),singlename=singlename)
+        else:
+            print("Must specify multiple or single source")
+            return None
+        reg_func.make_phy_reg(srcid=srcid,x=phy_x,y=phy_y,psfradii=src_radius,
+                              outpath=path_out+'region_{0}/'.format(obs_ID_all[i])+'region_{0}/'.format(ecf),
+                              singlename=singlename)
 
     return None
 
@@ -124,7 +129,7 @@ def merge_txt(src_id,epoch_info,inpath,outpath,suffix,outname='txt_all_obs_0.5_8
     ## 对单个点源 ##
     ## Watch out the name of directory  ##
     ## Must follow the style given by get_txt##
-
+    if epoch_info.ndim==1:epoch_info=np.array([epoch_info])
     obs_tstart=epoch_info[:,0]
     obs_tstop = epoch_info[:,1]
     obs_ID_all=epoch_info[:,2]

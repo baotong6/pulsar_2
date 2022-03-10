@@ -47,8 +47,10 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
         plt.show()
 
     return CR
+
 def sin_temp(x,period,shift,A,B):
     return A*np.sin(2*np.pi/period*(x+shift))+B
+
 def curvefit_sin(x,y,yerr,period):
     param_bounds = ((period*0.95,0,8,8),(period*1.05, 0.1,10,10))
     popt, pcov = op.curve_fit(sin_temp, x,y,bounds=param_bounds)
@@ -69,10 +71,11 @@ def plot_singleobs_lc(lc,period=None,ifsin=None,figurepath=None,save=0,show=0,da
         (popt,perr)=curvefit_sin(x,y2,0.5*(y2_err[0]+y2_err[1]),period)
         print(popt)
         # y1 = sin_temp(x,popt[0],popt[1],popt[2],popt[3])
-        y1 = sin_temp(x,period,6.28,10,10)
-        plt.plot(x,y1)
+        x1=np.linspace(x.min(),x.max(),10000)
+        y1 = sin_temp(x1,period,6.28,8,8)
+        plt.plot(x1,y1)
     # absolute_sigma = True, sigma = yerr,
-    plt.errorbar(x, y2,yerr=y2_err, fmt='co--', capsize=4, elinewidth=2, ecolor='red',color='green')
+    plt.errorbar(x, y2,yerr=y2_err, fmt='co', capsize=4, elinewidth=2, ecolor='red',color='green')
     plt.xlabel(r'Time-$T_0$ (second)',font1)
     plt.ylabel('Counts/bin',font1)
     plt.tick_params(labelsize=16)
