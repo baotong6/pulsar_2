@@ -247,7 +247,7 @@ def get_T_in_mbins(epoch_info,w,m,fi):
 
 #
 path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
-path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p75/'
+path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p90/'
 path = path_Tuc
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
@@ -276,7 +276,7 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
         print(CR)
         (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
                                                 flux_filter=0.1,expT_filter=1000,
-                                                if_flux_high=False, if_expT_high=True,obsID=[16527,15747,16529,17420, 15748, 16528])
+                                                if_flux_high=False, if_expT_high=True,obsID=[2735,2736,2737,2738])
         epoch_info = epoch_info_use  ##这里随意改
 
         src_evt_use =hawk.filter_obs(src_evt, useid)
@@ -285,7 +285,7 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
     time=src_evt[:,0]
     energy=src_evt[:,1]
     starttime = datetime.datetime.now()
-    time = hawk.filter_energy(time, energy, [500, 8000])
+    time = hawk.filter_energy(time, energy, [2000, 8000])
     counts = len(time)
     print('counts=',counts)
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=12,parallel=True)
@@ -305,7 +305,7 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
 def get_result_fromid(id_range):
     # path = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
     # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf50_0.2_5/'
-    path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(75)
+    path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(90)
     path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
     path_out='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/result_psf75_700163/'
 
@@ -318,7 +318,7 @@ def get_result_fromid(id_range):
         # epoch_file = path + f'epoch_47Tuc_{obsid}.txt'
         data_file = path + f'{dataname}.txt'
         epoch_file = path + f'epoch_src_{dataname}.txt'
-        w_range = 2 * np.pi * np.arange(1 / 30000., 1 / 10000., 1e-8)
+        w_range = 2 * np.pi * np.arange(1 / 20000., 1 / 10000., 1e-8)
         result = hawk.GL.write_result(data_file, epoch_file,w_range, dataname=dataname,if_filter=True)
         print(result)
         result_new=np.reshape(np.array(result),(1,9))
@@ -326,7 +326,7 @@ def get_result_fromid(id_range):
                    fmt='%10s %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    id_range=[345]
+    id_range=[232]
     get_result_fromid(id_range)
 
 #choose_id(1, 3)

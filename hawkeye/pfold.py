@@ -2,17 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import matplotlib.pyplot as plt
-from astropy.io import fits
-import sys
-import os
-import string
-from datetime import datetime
-from scipy.interpolate import lagrange
-from scipy import interpolate
-from scipy.optimize import curve_fit
-import pandas as pd
 from astropy.stats import poisson_conf_interval
-import scipy
 import hawkeye.timing_funcs as funcs
 
 font1 = {'family': 'Normal',
@@ -29,7 +19,36 @@ def trans(t, p_test, shift):
         turns[i] = turns[i] - int(turns[i])
     return turns
 
-def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,label='test',save=False,show=True):
+def get_T_in_mbins(epoch_file,w,m,fi):
+    T=2*np.pi/w
+    T_in_perbin = np.zeros(m)
+    # 每个bin的总积分时间
+    tbin = T/m
+    # 每个bin的时间长度
+    epoch_info = np.loadtxt(epoch_file)
+    t_start = np.array([epoch_info[0]])
+    t_end = np.array([epoch_info[1]])
+    exptime=np.sum(t_end-t_start)
+    print('exptime={0}'.format(exptime))
+    N_bin_t_start=t_start/tbin+m*fi/(2*np.pi)
+    N_bin_t_end=t_end/tbin+m*fi/(2*np.pi)
+    intN_bin_t_start=np.floor(N_bin_t_start)+1
+    intN_bin_t_end=np.floor(N_bin_t_end)
+    intN_bin_t_start=intN_bin_t_start.astype(int)
+    intN_bin_t_end=intN_bin_t_end.astype(int)
+    for i in range(len(N_bin_t_start)):
+        if intN_bin_t_end[i]>=intN_bin_t_start[i]:
+            T_in_perbin+=int((intN_bin_t_end[i]-intN_bin_t_start[i])/m)*tbin
+            T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(intN_bin_t_start[i]-N_bin_t_start[i])*tbin
+            T_in_perbin[np.mod(intN_bin_t_end[i],m)]+=(N_bin_t_end[i]-intN_bin_t_end[i])*tbin
+            rest=np.mod(intN_bin_t_end[i]-intN_bin_t_start[i],m)
+            for k in range(rest):
+                T_in_perbin[int(np.mod((intN_bin_t_start[i] + k), m))] += tbin
+        else:
+            T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
+    return T_in_perbin+1e-5
+
+def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,label='test',text=None,save=False,show=True):
     turns=trans(time,p_test,shift)
     loc=np.zeros(bin)
     for index in turns:
@@ -51,7 +70,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     T_in_perbin = funcs.get_T_in_mbins(epoch_info, 2 * np.pi / p_test, bin, shift * 2 * np.pi)
 
     correct_gap = T_in_perbin / (sum(T_in_perbin) / len(T_in_perbin))
-    print('correct_gap=',correct_gap)
+    # print('correct_gap=',correct_gap)
     y2 /= np.concatenate((correct_gap, correct_gap))
     y2_err = np.array(poisson_conf_interval(y2, interval='frequentist-confidence'))
     y2_err[0] = y2 - y2_err[0]
@@ -62,8 +81,9 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     plt.ylabel('counts/bin', font1)
     plt.tick_params(labelsize=18)
     plt.ylim(0, (np.max(y2) + np.max(y2) ** 0.5) * 1.05)
-    plt.step(np.concatenate(([0], x2)), np.concatenate(([y2[0]], y2)), color='red')
-    plt.errorbar(x2 - 0.5 / bin, y2, yerr=y2_err, fmt='.', capsize=1, elinewidth=1, ecolor='red')
+    plt.step(np.concatenate(([0], x2)), np.concatenate(([y2[0]], y2)), color='red',linewidth=1.0)
+    plt.errorbar(x2 - 0.5 / bin, y2, yerr=y2_err, fmt='.', capsize=1, elinewidth=1.0, ecolor='red',linewidth=1.0)
+    if text:plt.text(0.,0.95, '{0}, P={1:.2f}s'.format(text,p_test), fontsize=18,fontweight='semibold',transform=ax1.transAxes)
     plt.text(1.7,0.03*np.max(y2),'C={0}'.format(str(len(time))),fontsize=18)
 
     ax2 = ax1.twinx()
@@ -72,7 +92,9 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     ax2.plot([0, 2], [1.0, 1.0], '--', color='green')
     ax2.set_ylim([0, yhigh])
     ax2.tick_params(labelsize=18)
-    if save:plt.savefig(outpath + 'pfold_lc_{0}.eps'.format(label),bbox_inches='tight', pad_inches=0.1)
+    if save:plt.savefig(outpath + 'pfold_lc_{0}.pdf'.format(label),bbox_inches='tight', pad_inches=0.1)
     if show:plt.show()
     else:plt.close()
 
+if __name__=="__main__":
+    print('How you doing?')

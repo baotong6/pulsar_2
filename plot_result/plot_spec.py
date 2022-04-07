@@ -7,6 +7,7 @@ import sys
 import os
 from matplotlib.ticker import FuncFormatter
 import pandas as pd
+
 f1 = plt.figure(figsize=(15, 24))
 
 plt.rc('text', usetex=True)

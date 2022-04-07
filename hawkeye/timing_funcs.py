@@ -27,7 +27,6 @@ def get_T_in_mbins(epoch_info,w,m,fi):
             rest=np.mod(intN_bin_t_end[i]-intN_bin_t_start[i],m)
             for k in range(rest):
                 T_in_perbin[int(np.mod((intN_bin_t_start[i] + k), m))] += tbin
-            #print(rest)
         else:
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin

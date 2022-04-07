@@ -1,6 +1,7 @@
 import numpy as np
 from astropy.wcs import WCS
 import os
+from astropy.io import fits
 
 def read_region(regname):
     reg_file=[]
@@ -37,8 +38,9 @@ def make_phy_reg(srcid,x,y,psfradii,outpath,inpath=None,imgfile=None,coordtype='
 
         w = WCS(inpath + imgfile)
         src_x, src_y = w.all_world2pix(x, y, 1)
-        phy_x = src_x + 2896
-        phy_y = src_y + 2896
+        binx, biny = np.shape(fits.open(inpath + imgfile)[0].data)
+        phy_x = src_x + 4096 - binx / 2
+        phy_y = src_y + 4096 - biny / 2
         src_radius = psfradii*2.03252
 
         reg_x=phy_x;reg_y=phy_y;reg_r=src_radius

@@ -247,8 +247,8 @@ def get_T_in_mbins(epoch_info,w,m,fi):
 
 #
 # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
-# path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p90/'
-path_Tuc='/Users/baotong/Desktop/period_NGC3201/txt_all/txt_all_obs_p90/'
+path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p75/'
+# path_Tuc='/Users/baotong/Desktop/period_NGC3201/txt_all/txt_all_obs_p90/'
 # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
 path = path_Tuc
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
@@ -276,21 +276,22 @@ def write_result(dataname):
     if src_evt.ndim==1:
         src_evt=np.array([src_evt])
 
-    # CR=hawk.plot_longT_V(src_evt=src_evt, bkg_file=None,epoch_info=epoch_info,show=False)
-    # plt.close()
-    # print(CR)
-    # (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-    #                                         flux_filter=0.006,expT_filter=1000,
-    #                                         if_flux_high=False, if_expT_high=True,obsID=None)
-    # epoch_info = epoch_info_use  ##这里随意改
-    #
-    # src_evt_use =hawk.filter_obs(src_evt, useid)
-    # src_evt=src_evt_use
+    CR=hawk.plot_longT_V(src_evt=src_evt, bkg_file=None,epoch_info=epoch_info,show=False)
+    plt.close()
+    print(CR)
+    (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
+                                            flux_filter=10,expT_filter=1000,
+                                            if_flux_high=0, if_expT_high=True,obsID=None)
+    epoch_info = epoch_info_use  ##这里随意改
+
+    src_evt_use =hawk.filter_obs(src_evt, useid)
+    src_evt=src_evt_use
 
     time=src_evt[:,0]
     energy=src_evt[:,1]
+    time = hawk.filter_energy(time, energy, [500, 8000])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./3000,1./300,1.e-5)
+    w_range=2*np.pi*np.arange(1./50000,1./10000,1.e-7)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=20,parallel=True)
     endtime = datetime.datetime.now()
@@ -337,12 +338,13 @@ def get_result_fromid(id_range):
     print(result)
     print(path)
     #np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result, fmt='%10d %10.2f %10.2f %10.5f %10.5f %10d %10.5f %10.5f')
-    np.savetxt(path+'result_3k/'+'result_0.3k_3k_{0}.txt'.format(id_range[0]), result,
+    np.savetxt(path+'result_0.3k_3k_{0}.txt'.format(id_range[0]), result,
                fmt='%10.2f %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    a=np.arange(1,79,1)
-    for i in a:
-        get_result_fromid([i])
+    get_result_fromid(['345'])
+    # a=np.arange(1,79,1)
+    # for i in a:
+    #     get_result_fromid([i])
 
 #choose_id(1, 3)

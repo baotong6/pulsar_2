@@ -16,9 +16,9 @@ import scipy
 import hawkeye as hawk
 
 def load_data(dataname,ecf=90):
-    # path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(ecf)
+    path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(ecf)
     # path_Tuc='/Users/baotong/Desktop/period_NGC3201/txt_all/txt_all_obs_p{0}/'.format(ecf)
-    path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
+    # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
     path = path_Tuc
     dataname = '{0}.txt'.format(dataname)
     epoch_file = path + 'epoch_src_' + dataname
@@ -30,10 +30,12 @@ def load_data(dataname,ecf=90):
     CR/=ecf/100.
 
     (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                            flux_filter=6,expT_filter=10000,
-                                            if_flux_high=False, if_expT_high=True,obsID=None)
-    # [78, 953,   954,   955,   956,  2735,  3384,  2736,  3385,  2737,
-    #  3386,  2738,  3387, 16527,15747, 16529, 17420, 15748, 16528]
+                                            flux_filter=30,expT_filter=1000,
+                                            if_flux_high=0, if_expT_high=1,obsID=None)
+
+    # [953,955,956, 2736, 3385,2738,16527,15747, 16529,15748]
+    # [78, 953,   954,   955,   956,  2735,  3384,  2736,  3385,  2737,3386,  2738,  3387,
+    # [16527,15747, 16529, 17420, 15748, 16528]
     src_evt_use =hawk.filter_obs(src_evt, useid)
     print(useid)
     return (src_evt_use,epoch_info_use)
@@ -67,26 +69,25 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
     return lc_all
 
 def main_process():
-    dataname='481'
-    bin_len = 1000.
-    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=75)
-    lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=75,bin_len=bin_len)
+    dataname='453'
+    bin_len = 100
+    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90)
+    # lc=get_lc_frombkgimg(int(dataname41236.76764705603),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
-
-    period = 14366.885135125476
-
-    net_p = 0.99
+    period =8646.77907
+    net_p = 0.89
 
     time = src_evt_use[:, 0]
 
-    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[200,5000])
-    hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.8)
-    plt.close()
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=20,shift=0.,label='',save=1,show=1)
+    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[500,8000])
+    hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.0)
+    # plt.close()
+    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=50,shift=0.,
+                    label=dataname,text='Seq.414 (W2)',save=0,show=1)
 
-    plt.hist(time,bins=140,histtype='step')
-    plt.show()
-    # lc=hawk.get_hist(time,len_bin=bin_len)
+    # plt.hist(time,bins=300,histtype='step')
+    # plt.show()
+    lc=hawk.get_hist(time,len_bin=bin_len,tstart=epoch_info_use[:,0][0],tstop=epoch_info_use[:,1][-1])
     T_tot=epoch_info_use[:,1][-1]-epoch_info_use[:,0][0]
     freq = np.arange(1 / T_tot, 0.5 / bin_len, 1 / (10* T_tot))
     freq = freq[np.where(freq > 1 / 50000.)]
@@ -94,6 +95,6 @@ def main_process():
     figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
     (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq=freq,outpath=figurepath, outname=str(dataname),save=0,show=1)
     print('Period=',format(out_period))
-    hawk.plot_singleobs_lc(lc,period=period,ifsin=1,figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',dataname=dataname,save=1,show=1)
+    # hawk.plot_singleobs_lc(lc,period=period,ifsin=1,figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',dataname=dataname,save=1,show=1)
 if __name__=='__main__':
     main_process()

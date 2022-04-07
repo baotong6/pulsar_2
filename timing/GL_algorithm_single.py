@@ -248,7 +248,7 @@ def get_T_in_mbins(epoch_info,w,m,fi):
 
 #
 path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
-path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p75/'
+path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p90/'
 path = path_Tuc
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
@@ -274,14 +274,14 @@ def write_result(dataname):
     epoch_info=epoch_info##这里随意改
     # useid =np.concatenate((epoch_info[:, 2][0:1],epoch_info[:, 2][3:4]))
     # useid = epoch_info[:, 2]
-    useid = np.concatenate((epoch_info[:, 2][0:4], epoch_info[:, 2][8:]))
+    # useid = np.concatenate((epoch_info[:, 2][0:4], epoch_info[:, 2][8:]))
     src_evt=np.loadtxt(data_file)
-    src_evt=filter_obs(src_evt,useid)
+    # src_evt=filter_obs(src_evt,useid)
     time=src_evt[:,0]
     energy=src_evt[:,1]
     #time = filter_energy(time, energy, [200, 500])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./50000,1./30000,1.e-8)
+    w_range=2*np.pi*np.arange(1./9000,1./8000,1.e-8)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=12,parallel=True)
     endtime = datetime.datetime.now()
@@ -327,10 +327,13 @@ def get_result_fromid(id_range):
                               result_wconf_lo, result_wconf_hi,result_counts))
     print(result)
     #np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result, fmt='%10d %10.2f %10.2f %10.5f %10.5f %10d %10.5f %10.5f')
-    np.savetxt(path+'result_1h_{0}.txt'.format(id_range[0]), result,
+    np.savetxt('/Users/baotong/Desktop/period_Tuc/result_startover/result_all_obs_p90_0.5_8/'+'result_1h_3h_{0}.txt'.format(id_range[0]), result,
                fmt='%10.2f %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    get_result_fromid(['211'])
+    get_result_fromid(['224'])
+    # bright_src=np.loadtxt(path+'bright_src.txt')
+    # for i in range(len(bright_src)):
+    #     get_result_fromid([str(int(bright_src[i]))])
 
 #choose_id(1, 3)

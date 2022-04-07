@@ -109,7 +109,9 @@ def plot_CV_all(save=0,show=1):
     spin_IP/=3600.
     orb_all=np.concatenate((orb_DN,orb_IP,orb_Polar))
     orb_all=orb_all[np.where(orb_all>0)]
-    print(len(orb_all))
+    print('CV number',len(orb_all))
+    print('short period CV',len(orb_all[np.where(orb_all<7700/3600.)]))
+    print('long period CV',len(orb_all[np.where(orb_all>11448.0 / 3600)]))
     (ra, dec, seq, period, L, Lmin, Lmax, type)=read_excel('47Tuc')
     period_Tuc=period[np.where(type=='CV')]
     period_Tuc/=3600.
@@ -130,7 +132,7 @@ def plot_CV_all(save=0,show=1):
     ax1.legend(['Field CVs', 'CVs in 47 Tuc', 'CVs in Galactic Bulge'])
 
     P_min = 7./6.
-    P_gap = [7600.0 / 3600., 11448.0 / 3600.]
+    P_gap = [7740.0 / 3600., 11448.0 / 3600.]
     ax1.set_ylim(8e-1, 360)
     ax1.set_xlim(0.5, 60)
     ax1.plot([P_min, P_min], [0, 220], '--',color='grey')
@@ -193,14 +195,18 @@ def plot_NP(save=1,show=1):
 
     return None
 
-def plot_dist_profile():
+def plot_dist_profile(save=0,show=1):
     (ra, dec, seq, period, L, Lmin, Lmax, type)=read_excel('47Tuc')
-    print(type)
+    (ra_AB03, dec_AB03, seq_AB03, period_AB03, L_AB03, Lmin_AB03, Lmax_AB03, type_AB03)=read_excel('47Tuc_AB')
     [ra_center,dec_center,rhl,rc]=pos_all['47Tuc']
     c1 = SkyCoord(ra * u.deg, dec * u.deg, frame='fk5')
     c2 = SkyCoord(ra_center * u.deg, dec_center * u.deg, frame='fk5')
     dist = c1.separation(c2)
     dist = dist.arcmin
+    c3= SkyCoord(ra_AB03 * u.deg, dec_AB03 * u.deg, frame='fk5')
+    dist_AB03 = c3.separation(c2)
+    dist_AB03 = dist_AB03.arcmin
+
 
     period_CV=period[np.where(type=='CV')]
     dist_CV=dist[np.where(type=='CV')]
@@ -209,11 +215,15 @@ def plot_dist_profile():
     period_LB=period[np.where(type=='LMXB')]
     dist_LB=dist[np.where(type=='LMXB')]
     L_LB=L[np.where(type=='LMXB')]
-    print(dist_LB)
 
     period_AB=period[np.where(type=='AB')]
     dist_AB=dist[np.where(type=='AB')]
     L_AB=L[np.where(type=='AB')]
+
+    period_AB03=period_AB03[np.where(type_AB03=='xAB')]*3600
+    dist_AB03=dist_AB03[np.where(type_AB03=='xAB')]
+    L_AB03=L_AB03[np.where(type_AB03=='xAB')]
+    print(period_AB03)
 
     fig=plt.figure(1,figsize=(12,8))
     ax2=fig.add_subplot(211)
@@ -225,7 +235,7 @@ def plot_dist_profile():
     ax2.set_ylabel(r'Luminosity ($\rm erg~s^{-1}$)',font1)
     ax2.tick_params(labelsize=16)
     ax2.legend(['CV','LMXB','AB'],loc='best')
-    P_gap = [7740.0 / 3600., 11448.0 / 3600.]
+    P_gap = [7740.0 / 3600., 11048.0 / 3600.]
     P_min = [4902.0 / 3600., 4986.0/3600]
     y1 = [0, 2e33]
     # ax2.text(7900 / 3600., 5e36, 'period gap')
@@ -240,6 +250,8 @@ def plot_dist_profile():
     ax3.scatter(period_CV/3600.,dist_CV,marker='v',s=80,color='w',linewidths=2,edgecolors='red')
     ax3.scatter(period_LB/3600.,dist_LB,marker='*',s=80,color='w',linewidths=2,edgecolors='green')
     ax3.scatter(period_AB/3600.,dist_AB,marker='o',s=80,color='w',linewidths=2,edgecolors='purple')
+    # ax3.scatter(period_AB03/3600.,dist_AB03,marker='o',s=80,color='w',linewidths=2,edgecolors='purple')
+
     ax3.plot([P_min[0],30],[rhl/60,rhl/60],'--')
     ax3.plot([P_min[0],30],[rc/60,rc/60],'--')
     ax3.text(P_min[0]-0.1,rhl/60,r'$\rm r_h$',fontsize=15)
@@ -256,9 +268,20 @@ def plot_dist_profile():
     # ax2.text(7900 / 3600., 5e36, 'period gap')
     ax3.fill_between(P_min, y2[1], facecolor='grey', alpha=0.2)
     ax3.fill_between(P_gap, y2[1], facecolor='yellow', alpha=0.2)
-    plt.savefig(path_out+'47Tuc_profile.pdf',bbox_inches='tight', pad_inches=0.0)
-    plt.show()
 
+    # plt.figure(2)
+    # plt.hist(dist_CV*60,bins=20,histtype='step',lw=2,color='red',cumulative=1,density=1,linestyle='--')
+    # plt.hist(dist_AB03*60, bins=30, histtype = 'step', lw = 3, color = 'blue', cumulative = 1, density = 1, linestyle = '-')
+    # plt.semilogx()
+    # plt.show()
+    if save:
+        plt.savefig(path_out + '47Tuc_profile.pdf', bbox_inches='tight', pad_inches=0.05)
+    if show:
+        plt.show()
+
+    # plt.figure(2)
+    # plt.scatter(dist_CV/rhl,L_CV)
+    # plt.show()
 def plot_erosita_lightcurve(dataname,ecf):
     path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
     path = path_Tuc
@@ -274,14 +297,14 @@ def plot_erosita_lightcurve(dataname,ecf):
     bin_len=1000
     lc=hawk.get_hist(time,len_bin=bin_len)
 
-def plot_twopfold():
-    period = 31200.27
-    net_p = 0.999
-    figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
-    time1=1;epoch_info_use1=1;
-    time2=2;epoch_info_use2=2;
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=100,shift=0.5,label='',save=1,show=1)
+# def plot_twopfold():
+#     period = 31200.27
+#     net_p = 0.999
+#     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
+#     time1=1;epoch_info_use1=1;
+#     time2=2;epoch_info_use2=2;
+#     hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=100,shift=0.5,label='',save=1,show=1)
 
 if __name__=="__main__":
     plot_CV_all(save=1,show=1)
-    # plot_dist_profile()
+    # plot_dist_profile(save=1,show=1)

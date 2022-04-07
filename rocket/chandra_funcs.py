@@ -114,8 +114,11 @@ def make_epoch_file(obsid,inpath,outpath,outname):
     for id in obsid:
         evtfits=inpath+'all_bcc_{0}_reproj_evt.fits'.format(str(id))
         hdul=fits.open(evtfits)
-        TSTART.append(hdul[1].header['TSTART'])
-        TSTOP.append(hdul[1].header['TSTOP'])
+        # TSTART.append(hdul[1].header['TSTART'])
+        # TSTOP.append(hdul[1].header['TSTOP'])
+        TSTART.append(hdul[1].data['time'][0])
+        TSTOP.append(hdul[1].data['time'][-1])
+
     TSTART=np.array(TSTART)
     TSTOP=np.array(TSTOP)
     obs_id=np.array(obsid)
