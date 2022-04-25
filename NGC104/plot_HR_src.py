@@ -3,13 +3,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
-import sys
-import os
-import pandas as pd
 from astropy.stats import poisson_conf_interval
 from astropy.coordinates import SkyCoord
 from astropy import units as u
-import scipy
 import hawkeye as hawk
 import rocket
 
@@ -17,6 +13,25 @@ ra_center = [6.0223292];
 dec_center = [-72.0814444]
 inter_radius = 3.17*60
 path_in='/Users/baotong/Desktop/period_Tuc/'
+
+def cal_HR_err(cts_s,cts_h):
+    ## x and y must be integers
+    u=(cts_h-cts_s)/(cts_s+cts_h)
+    x=cts_s-cts_h;y=cts_s+cts_h
+    if u<0:u=-u
+    cts_s_1sigma = poisson_conf_interval(cts_s, interval='frequentist-confidence').T
+    cts_h_1sigma = poisson_conf_interval(cts_h, interval='frequentist-confidence').T
+    cts_s_low=cts_s_1sigma[0];cts_s_high=cts_s_1sigma[1];cts_h_low=cts_h_1sigma[0];cts_h_high=cts_h_1sigma[1]
+    cts_s_err = min(cts_s_high-cts_s,cts_s-cts_s_low)
+    cts_h_err = min(cts_h_high - cts_h, cts_h - cts_h_low)
+    if cts_s==0: cts_s_err=0
+    if cts_h==0: cts_h_err=0
+
+    x_err=cts_s_err+cts_h_err
+    y_err=x_err
+    u_err=np.sqrt((x_err**2*y**2+y_err**2*x**2)/y**4)
+    if np.isnan(u_err):u_err=0
+    return (u,u_err)
 
 def input_srcinfo():
     cat = fits.open(path_in + 'Cheng2019.fit')
@@ -72,6 +87,11 @@ inter_srcID_psrc=np.intersect1d(inter_srcID,inter_srcID_psrc)
 CV_srcID=np.intersect1d(inter_srcID,CV_srcID)
 AB_srcID=np.intersect1d(inter_srcID,AB_srcID)
 HR=(netcts_h-netcts_s)/(netcts_h+netcts_s)
+HR_err=[]
+for i in range(len(HR)):
+    HR_err.append(cal_HR_err(netcts_s[i],netcts_h[i])[1])
+HR_err=np.array(HR_err)
+
 path_out = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
 def plot_threefig(save=0,show=1):
     plt.figure(1,(9,6))
@@ -95,6 +115,18 @@ def plot_threefig(save=0,show=1):
         plt.text(HR[CV_srcID[i]],L_05_8[CV_srcID[i]]*1.2,CV_srcID[i]+1,fontsize=12)
     plt.text(HR[197], L_05_8[197] * 1.2, 197+ 1, fontsize=12)
     plt.text(HR[282], L_05_8[282] * 1.2, 282+ 1, fontsize=12)
+    filt1 = np.intersect1d(inter_srcID,np.where(L_05_8<1e30))
+    filt2 = np.intersect1d(inter_srcID, np.where((L_05_8> 1e30)&(L_05_8 < 1e31)))
+    filt3 = np.intersect1d(inter_srcID, np.where((L_05_8> 1e31)&(L_05_8 < 1e32)))
+    filt4 = np.intersect1d(inter_srcID, np.where((L_05_8> 1e32)&(L_05_8 < 1e33)))
+    x11=HR[filt1];x11_err=HR_err[filt1]
+    x12=HR[filt2];x12_err=HR_err[filt2]
+    x13=HR[filt3];x13_err=HR_err[filt3]
+    x14=HR[filt4];x14_err=HR_err[filt4]
+    plt.errorbar(x=0.5,xerr=np.mean(x11_err),y=5.5e29,yerr=4.e29,fmt='.', capsize=5, elinewidth=1.5, ecolor='red',linewidth=1.0)
+    plt.errorbar(x=0.5,xerr=np.mean(x12_err),y=5.5e30,yerr=4.e30,fmt='.', capsize=5, elinewidth=1.5, ecolor='green',linewidth=1.0)
+    plt.errorbar(x=0.5,xerr=np.mean(x13_err),y=5.5e31,yerr=4.e31,fmt='.', capsize=5, elinewidth=1.5, ecolor='blue',linewidth=1.0)
+    plt.errorbar(x=0.5,xerr=np.mean(x14_err),y=5.5e32,yerr=4.e32,fmt='.', capsize=5, elinewidth=1.5, ecolor='orange',linewidth=1.0)
     # for i in range(len(AB_srcID)):
     #     plt.text(HR[AB_srcID[i]], L_05_8[AB_srcID[i]]*1.2, AB_srcID[i] + 1,fontsize=12)
     if save:

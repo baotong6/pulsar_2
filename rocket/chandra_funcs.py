@@ -20,7 +20,8 @@ def delete_photon_ID(time, energy, ID,e_low,e_high):
     return [time, energy, ID]
 
 def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srcid=None,multiple_src=1,single_name=0,single_srcradius=0):
-    if srcid==None:
+    # srcid=[1,2,3]
+    if srcid is None:
         srcid=np.arange(1,len(ra)+1,1)
     os.chdir(path_in)
     fitsname = wcsimage

@@ -10,7 +10,7 @@ from scipy.interpolate import lagrange
 from scipy import interpolate
 from scipy.optimize import curve_fit
 import pandas as pd
-import read_csv as data
+# import read_csv as data
 # from scipy.interpolate import Spline
 
 path_fits='/Users/baotong/Desktop/period_LW/'
@@ -96,7 +96,7 @@ def plot_P_N():
     N=len(orb_IP)+len(orb_Polar)+len(orb_DN)
     #print(N)
     plt.show()
-plot_P_N()
+# plot_P_N()
 
 def plot_P_RK():
     bins=np.logspace(np.log10(0.5), np.log10(100), 51)
@@ -109,6 +109,12 @@ def plot_P_RK():
     orb_AMCV=orb[np.where(type1 == 'AC')]
     P_min = 7./6.
     P_gap = [7740.0 / 3600., 11448.0 / 3600.]
+
+    print(len(orb_DN))
+    print(len(np.where((orb_DN>P_gap[0])&(orb_DN<P_gap[1]))[0]))
+    print(len(np.where(orb_Polar<P_gap[0])[0]))
+    print(len(np.where(orb_IP<P_gap[0])[0]))
+    print(len(orb_Polar),len(orb_IP))
     plt.figure(1,(9,6))
     plt.loglog()
     plt.xlabel('Period (hours)',fontsize=20)
@@ -171,3 +177,4 @@ def get_dist_DN():
     print(a)
 #plot_P_N()
 # get_dist_DN()
+plot_P_RK()

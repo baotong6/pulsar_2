@@ -49,7 +49,7 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
     return CR
 
 def sin_temp(x,period,shift,A,B):
-    return A*np.sin(2*np.pi/period*(x+shift))+B
+    return A*np.sin(2*np.pi/period*x+shift)+B
 
 def curvefit_sin(x,y,yerr,period):
     param_bounds = ((period*0.95,0,8,8),(period*1.05, 0.1,10,10))

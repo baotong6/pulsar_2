@@ -24,8 +24,9 @@ def get_LS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
                                  maximum_frequency=freq[-1], method='baluev')
     FP_68 = LS.false_alarm_level(0.32,minimum_frequency=freq[0],
                                  maximum_frequency=freq[-1], method='baluev')
-    plt.figure(1, (15, 6))
-    plt.title('Period={0:.2f}'.format(period_peak), font1)
+    plt.figure(1, (6, 8))
+    # plt.title('Period={0:.2f}'.format(period_peak), font1)
+    plt.text(freq[np.where(power==np.max(power))][0]*1.3,max_NormLSP*0.95,'P={0:.2f}s'.format(period_peak),font1)
     plt.plot(freq, power)
     plt.semilogx()
     out_period=1./freq[np.where(power==np.max(power))][0]
@@ -39,7 +40,7 @@ def get_LS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
     plt.ylabel('Normalized LS Periodogram',font1)
     plt.tick_params(labelsize=16)
     if save:
-        plt.savefig(outpath + outname + '_LS.eps',bbox_inches='tight', pad_inches=0.0)
+        plt.savefig(outpath + outname + '_LS.pdf',bbox_inches='tight', pad_inches=0.01)
     if show:plt.show()
     else:plt.close()
     return [FP,out_period,max_NormLSP]
