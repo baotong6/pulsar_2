@@ -28,7 +28,7 @@ def main_process():
     epoch_info=np.loadtxt(path_out_txt+'47Tuc_epoch.txt')
     for id in obs_ID_all:
         rocket.get_txt(path_in=path_in,path_in_reg=path_out_reg,path_out=path_out_txt,srcid_list=srcID_list,obs_id=id,ecf=90,suffix='_p90')
-        rocket.extract_evtlist(path_in=path_in,path_in_reg=path_out_reg, path_out=path_out_txt, obs_id=id, srcid_list=srcID_list, ecf=90,suffix='_p90')
+        rocket.extract_evtlist_bkg(path_in=path_in,path_in_reg=path_out_reg, path_out=path_out_txt, obs_id=id, srcid_list=srcID_list, ecf=90,suffix='_p90')
     for srcid in srcID_list:
         rocket.merge_txt(srcid,epoch_info,inpath=path_out_txt,outpath=path_out_txt,bkg=1,suffix='_p90',outname='txt_all_obs_p90')
 

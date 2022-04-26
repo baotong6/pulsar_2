@@ -129,7 +129,7 @@ def get_txt(path_in,path_in_reg,path_out,srcid_list,obs_id,ecf=90,suffix=''):
     return None
 
 
-def extract_evtlist(path_in, path_in_reg, path_out, obs_id,srcid_list,ecf=90,suffix=''):
+def extract_evtlist_bkg(path_in, path_in_reg, path_out, obs_id,srcid_list,ecf=90,suffix=''):
     print('processing ' + str(obs_id))
     for srcid in srcid_list:
         f = open(path_in_reg + 'region_{}/region_{}/{}_bkg.reg'.format(obs_id, ecf,srcid)).readlines()
