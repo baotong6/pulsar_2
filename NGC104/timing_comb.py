@@ -31,7 +31,7 @@ def load_data(dataname,ecf=90):
 
     (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
                                             flux_filter=30,expT_filter=10000,
-                                            if_flux_high=0, if_expT_high=1,obsID=None)
+                                            if_flux_high=0, if_expT_high=1,obsID=[16527,15747, 16529, 17420, 15748, 16528])
 
     # [953,955,956, 2736, 3385,2738,16527,15747, 16529,15748]
     # [78, 953,   954,   955,   956,  2735,  3384,  2736,  3385,  2737,3386,  2738,  3387,
@@ -69,12 +69,12 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
     return lc_all
 
 def main_process():
-    dataname='258'
-    bin_len = 100
+    dataname='245'
+    bin_len = 50
     (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90)
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
-    period =95731.20/3
+    period =205.02498
     net_p = 0.90
 
     time = src_evt_use[:, 0]
@@ -82,7 +82,7 @@ def main_process():
     time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[200,8000])
     hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.0)
     # plt.close()
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=50,shift=0.45,
+    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=20,shift=0.45,
                     label=dataname,text='Src-No.481',save=1,show=1)
 
     # plt.hist(time,bins=300,histtype='step')

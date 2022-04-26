@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from astropy.io import fits
-import sys
-import os
+import sys,os
+import math
 from tkinter import _flatten
 from astropy.wcs import WCS
 import rocket.make_region as reg_func
-
+import rocket.position as pos
 def delete_photon_ID(time, energy, ID,e_low,e_high):
     i = 0
     while i < len(energy):
@@ -19,7 +19,21 @@ def delete_photon_ID(time, energy, ID,e_low,e_high):
         i = i + 1
     return [time, energy, ID]
 
-def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srcid=None,multiple_src=1,single_name=0,single_srcradius=0):
+def where_region(x,y,reg):
+    r=np.array((x-reg[0],y-reg[1]))
+    len_r=np.sqrt(r[0]**2+r[1]**2)
+    temp=len_r-reg[2]
+    return np.where(temp<=0)
+
+def trans_radec2xy(imagename,ra,dec):
+    w = WCS(imagename)
+    src_x, src_y = w.all_world2pix(ra, dec, 1)
+    binx,biny=np.shape(fits.open(imagename)[0].data)
+    phy_x = src_x + 4096-binx/2
+    phy_y = src_y + 4096-biny/2
+    return (phy_x,phy_y)
+
+def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,bkg=1,ecf=90,srcid=None,multiple_src=1,single_name=0,single_srcradius=0):
     # srcid=[1,2,3]
     if srcid is None:
         srcid=np.arange(1,len(ra)+1,1)
@@ -40,7 +54,7 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srci
     src_y = src_y.astype(np.int)
     # src_x[np.where(src_x>binx or src_x<0)]=0
     # src_y[np.where(src_y>biny or src_y<0)]=0
-    print(4096-binx/2,4096-biny/2)
+    # print(4096-binx/2,4096-biny/2)
     for i in range(len(obs_ID_all)):
         os.chdir(path_out)
         if not os.path.exists('region_{0}'.format(obs_ID_all[i])):
@@ -63,13 +77,25 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,ecf=90,srci
         reg_func.make_phy_reg(srcid=srcid,x=phy_x,y=phy_y,psfradii=src_radius,
                               outpath=path_out+'region_{0}/'.format(obs_ID_all[i])+'region_{0}/'.format(ecf),
                               singlename=singlename)
+        if bkg:
+            srcid_list, x_list, y_list, psf_list = srcid, phy_x, phy_y, src_radius
+
+            for n in range(srcid_list.size):
+                f = open(path_out + 'region_{}/region_{}/{}_bkg.reg'.format(obs_ID_all[i],ecf,srcid_list[n]), 'w+')
+                x = x_list[n]
+                y = y_list[n]
+                psf = psf_list[n]
+                distance_square = (x_list - x) ** 2 + (y_list - y) ** 2
+                idx_list = np.where((distance_square - (4 * psf + psf_list) ** 2) < 0)[0]
+                f.write('annulus({},{},{},{})\n'.format(x, y, psf * 2, psf * 4))
+                for idx in idx_list:
+                    f.write('-circle({:.6f},{:.6f},{:.6f})\n'.format(x_list[idx], y_list[idx], 1.5 * psf_list[idx]))
+                f.close()
 
     return None
+# path_in,path_in_reg,path_out,reg_name,obs_id,ecf=90,suffix=''
 
-def make_region_merge(path_in,path_out,ra,dec,psfimage,ecf=90,srcid=None,multiple_src=1,single_name=0):
-    psfmap=fits.open(path_in+psfimage)
-
-def get_txt(path_in,path_in_reg,path_out,reg_name,obs_id,ecf=90,suffix=''):
+def get_txt(path_in,path_in_reg,path_out,srcid_list,obs_id,ecf=90,suffix=''):
     ##对单个obs_id##
     evt_list='all_bcc_{0}_reproj_evt.fits'.format(obs_id)
     hdul_evt= fits.open(path_in+evt_list)
@@ -78,19 +104,12 @@ def get_txt(path_in,path_in_reg,path_out,reg_name,obs_id,ecf=90,suffix=''):
     energy=hdul_evt[1].data['energy']
     time=hdul_evt[1].data['time']
     obs_ID=np.array([obs_id for i in range(len(time))])
-
-    def where_region(x,y,reg):
-        r=np.array((x-reg[0],y-reg[1]))
-        len_r=np.sqrt(r[0]**2+r[1]**2)
-        temp=len_r-reg[2]
-        return np.where(temp<=0)
-
     os.chdir(path_out)
     if not os.path.exists('txt_{0}{1}'.format(obs_id,suffix)):
         os.system('mkdir txt_{0}{1}'.format(obs_id,suffix))
 
-    for item in reg_name:
-        reg = reg_func.read_region(path_in_reg+'region_{0}/'.format(obs_id)+'region_{0}/'.format(suffix[2:])+str(item)+'.reg')
+    for item in srcid_list:
+        reg = reg_func.read_region(path_in_reg+'region_{0}/'.format(obs_id)+'region_{0}/'.format(ecf)+str(item)+'.reg')
         src_index=where_region(x,y,reg)
         src_x=x[src_index]
         src_y=y[src_index]
@@ -108,6 +127,57 @@ def get_txt(path_in,path_in_reg,path_out,reg_name,obs_id,ecf=90,suffix=''):
         np.savetxt(path_out+'txt_{0}{1}/'.format(obs_id,suffix)+str(item)+'.txt',src_txt,fmt="%.7f  %5.3f  %d")
 
     return None
+
+
+def extract_evtlist(path_in, path_in_reg, path_out, obs_id,srcid_list,ecf=90,suffix=''):
+    print('processing ' + str(obs_id))
+    for srcid in srcid_list:
+        f = open(path_in_reg + 'region_{}/region_{}/{}_bkg.reg'.format(obs_id, ecf,srcid)).readlines()
+        anu = f[0][8:-2]
+        rad = np.array(f[1:])
+        x, y, inner_radius, outer_radius = np.array(anu.split(',')).astype('float')
+        info = np.zeros((rad.size, 3))
+        for i in range(rad.size):
+            info[i, :] = rad[i][8:-2].split(',')
+        x1 = info.astype('float')[:, 0]
+        y1 = info.astype('float')[:, 1]
+        r1 = info.astype('float')[:, 2]
+        x1 = np.append(x1, x)
+        y1 = np.append(y1, y)
+        r1 = np.append(r1, inner_radius)
+        evtfile = path_in + 'all_bcc_{}_reproj_evt.fits'.format(obs_id)
+        hdu = fits.open(evtfile)
+        arrival_time_list = hdu[1].data['time']
+        x_list = hdu[1].data['x']
+        y_list = hdu[1].data['y']
+        energy_list = hdu[1].data['energy']
+        idx1 = np.where((x_list - x) ** 2 + (y_list - y) ** 2 < outer_radius ** 2)[0]
+        arrival_time_list = arrival_time_list[idx1]
+        x_list = x_list[idx1]
+        y_list = y_list[idx1]
+        energy_list = energy_list[idx1]
+        idx = []
+        for i in range(x_list.size):
+            xxx = x_list[i]
+            yyy = y_list[i]
+            distant_square = (x1 - xxx) ** 2 + (y1 - yyy) ** 2 - r1 ** 2
+            if (distant_square > 0).all():
+                idx.append(i)
+        idx = np.array(idx)
+        if idx.size != 0:
+            x_list = x_list[idx]
+            y_list = y_list[idx]
+            energy_list = energy_list[idx]
+            arrival_time_list = arrival_time_list[idx]
+            f = open(path_out + 'txt_{}{}}/{}_bkg.txt'.format(obs_id, suffix,srcid), 'w+')
+            for i in range(x_list.size):
+                f.write("{} {} {}\n".format(arrival_time_list[i], energy_list[i], obs_id))
+            f.close()
+        else:
+            f = open(path_out + 'txt_{}{}/{}_bkg.txt'.format(obs_id, suffix,srcid), 'w+')
+            f.close()
+    return
+
 
 def make_epoch_file(obsid,inpath,outpath,outname):
     TSTART=[]
@@ -129,7 +199,7 @@ def make_epoch_file(obsid,inpath,outpath,outname):
     epoch = epoch[epoch[:,0].argsort()]
     np.savetxt(outpath+outname+'.txt',epoch,fmt='%15.2f %15.2f %10d %20.2f')
 
-def merge_txt(src_id,epoch_info,inpath,outpath,suffix,outname='txt_all_obs_0.5_8'):
+def merge_txt(src_id,epoch_info,inpath,outpath,suffix,bkg=1,outname='txt_all_obs_0.5_8'):
     ## 对单个点源 ##
     ## Watch out the name of directory  ##
     ## Must follow the style given by get_txt##
@@ -141,13 +211,12 @@ def merge_txt(src_id,epoch_info,inpath,outpath,suffix,outname='txt_all_obs_0.5_8
 
     obs_ID_all=obs_ID_all.astype(int)
 
-    res_t=[];res_E=[];res_ID=[]
+    res_t=[];res_E=[];res_ID=[];res_bkg_t=[];res_bkg_E=[];res_bkg_ID=[]
     epoch_ID=[];epoch_start=[];epoch_stop=[];epoch_expt=[]
 
     for i in range(len(obs_ID_all)):
         res_temp=np.loadtxt(inpath+'txt_{0}{1}/'.format(obs_ID_all[i],suffix)+str(src_id)+'.txt')
         if len(res_temp)==0:continue
-
         if res_temp.ndim==1:res_temp=np.array(res_temp)
         else:
             epoch_ID.append(obs_ID_all[i])
@@ -158,14 +227,29 @@ def merge_txt(src_id,epoch_info,inpath,outpath,suffix,outname='txt_all_obs_0.5_8
             res_t.append(list(res_temp[:, 0]))
             res_E.append(list(res_temp[:, 1]))
             res_ID.append(list((res_temp[:, 2])))
+        if bkg:
+            res_bkg_temp=np.loadtxt(inpath+'txt_{0}{1}/'.format(obs_ID_all[i],suffix)+str(src_id)+'_bkg.txt')
+            if len(res_bkg_temp) == 0: continue
+            if res_bkg_temp.ndim == 1: res_bkg_temp = np.array(res_temp)
+            res_bkg_t.append(list(res_bkg_temp[:, 0]))
+            res_bkg_E.append(list(res_bkg_temp[:, 1]))
+            res_bkg_ID.append(list((res_bkg_temp[:, 2])))
 
     res_t = list(_flatten(res_t))
     res_E = list(_flatten(res_E))
     res_ID = list(_flatten(res_ID))
     result = np.column_stack((res_t, res_E, res_ID))
+    if bkg:
+        res_bkg_t = list(_flatten(res_bkg_t))
+        res_bkg_E = list(_flatten(res_bkg_E))
+        res_bkg_ID = list(_flatten(res_bkg_ID))
+        result_bkg= np.column_stack((res_bkg_t, res_bkg_E, res_bkg_ID))
+
     epoch_info = np.column_stack((epoch_start, epoch_stop, epoch_ID, epoch_expt))
     if not os.path.exists(outpath+'{0}/'.format(outname)):
         os.mkdir(outpath+'{0}/'.format(outname))
     np.savetxt(outpath + '{0}/'.format(outname) + 'epoch_src_' + str(src_id) + '.txt', epoch_info,
                fmt='%15.2f %15.2f %10d %20.2f')
     np.savetxt(outpath + '{0}/'.format(outname) + str(src_id) + '.txt', result, fmt="%.7f  %5.3f  %d")
+    if bkg:
+        np.savetxt(outpath + '{0}/'.format(outname) + str(src_id) + '_bkg.txt', result_bkg, fmt="%.7f  %5.3f  %d")
