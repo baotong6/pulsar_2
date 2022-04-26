@@ -176,8 +176,7 @@ def extract_evtlist_bkg(path_in, path_in_reg, path_out, obs_id,srcid_list,ecf=90
         else:
             f = open(path_out + 'txt_{}{}/{}_bkg.txt'.format(obs_id, suffix,srcid), 'w+')
             f.close()
-    return
-
+    return None
 
 def make_epoch_file(obsid,inpath,outpath,outname):
     TSTART=[]
