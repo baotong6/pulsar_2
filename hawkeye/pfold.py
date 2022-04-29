@@ -62,7 +62,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     bkg_y = len(time) * src_bkg/bin
     b_1sigma = poisson_conf_interval(bkg_y, interval='frequentist-confidence').T
     bkg_y_low=b_1sigma[0];bkg_y_high=b_1sigma[1]
-    fig=plt.figure(1,(6,8))
+    fig=plt.figure(1,(9,6))
     ax1 = fig.add_subplot(111)
     bkg_x = [0, 2]
     plt.fill_between(bkg_x, bkg_y_low, bkg_y_high,facecolor = 'green', alpha = 0.5)
@@ -78,14 +78,14 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     y2_err[1] = y2_err[1] - y2
 
     # plt.title("#{0} P={1:.2f},C={2}".format(label, p_test, str(len(time))), fontsize=18)
-    plt.xlabel('phase', font1)
-    plt.ylabel('counts/bin', font1)
+    plt.xlabel('Phase', font1)
+    plt.ylabel('Counts/bin', font1)
     plt.tick_params(labelsize=18)
     plt.ylim(0, (np.max(y2) + np.max(y2) ** 0.5) * 1.05)
     plt.step(np.concatenate(([0], x2)), np.concatenate(([y2[0]], y2)), color='red',linewidth=1.5)
     plt.errorbar(x2 - 0.5 / bin, y2, yerr=y2_err, fmt='.', capsize=1, elinewidth=1.5, ecolor='red',linewidth=1.5)
-    if text:plt.text(0.,0.95, '{0}, P={1:.2f}s'.format(text,p_test), fontsize=18,fontweight='semibold',transform=ax1.transAxes)
-    plt.text(1.7,0.03*np.max(y2),'C={0}'.format(str(len(time))),fontsize=18)
+    if text:plt.text(0.05,0.95, '{0}, P={1:.2f}s'.format(text,p_test), fontsize=18,fontweight='semibold',transform=ax1.transAxes)
+    plt.text(1.6,0.03*np.max(y2),'C={0}'.format(str(len(time))),fontsize=18)
 
     ax2 = ax1.twinx()
     yhigh = (np.max(y2) + np.max(y2) ** 0.5) * 1.05 / np.mean(y2)

@@ -345,7 +345,7 @@ def plot_src_lc_singleobs(ifsin=None,figurepath=None,save=0,show=0):
         y1 = hawk.sin_temp(x1,period,6.28,8,8)
         y2 = hawk.sin_temp(x1, period*2, 6.28, 8, 8)
         plt.plot(x1,y1)
-        plt.plot(y2)
+        # plt.plot(x1,y2)
     # absolute_sigma = True, sigma = yerr,
 
     ### add bkg ###
@@ -384,28 +384,16 @@ def plot_src_lc_singleobs(ifsin=None,figurepath=None,save=0,show=0):
     x2=c-c[0]
     ax2.errorbar(x2, y3, yerr=y3_err, fmt='co', capsize=4, elinewidth=2, ecolor='red', color='green')
     x1 = np.linspace(x2.min(), x2.max(), 10000)
-    y1 = hawk.sin_temp(x1, period, -1.4, 8, 8)
+    y1 = hawk.sin_temp(x1, period, 6.28, 7, 7)
     y2= hawk.sin_temp(x1, period*2,6.28, 8, 8)
     ax2.plot(x1, y1)
-    ax2.plot(x1,y2)
-    ax2.set_xlabel(r'Time-$T_0$ (second)',font1)
+    # ax2.plot(x1,y2)
+    ax2.set_xlabel(r'Time (second)',font1)
     ax2.set_ylabel('Net-Counts/bin',font1)
     ax2.tick_params(labelsize=16)
     if save:plt.savefig(figurepath+f'{dataname}_lc_4longobs.pdf',bbox_inches='tight', pad_inches=0.01)
     if show:plt.show()
     else:plt.close()
-
-def plot_LSandpfold():
-    dataname='481'
-    bin_len = 100
-    period=14366.89
-    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=75)
-    lc_net = get_lc_frombkgimg(int(dataname), src_evt_use, epoch_info_use, ecf=75, bin_len=bin_len)
-    time = src_evt_use[:, 0]
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=100,shift=0.83,
-                    label=dataname,text='Seq.162 (W58)',save=1,show=1)
-    (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq=freq,outpath=figurepath, outname=str(dataname),save=1,show=1)
-    return None
 
 def plot_CR_all():
     path='/Users/baotong/Desktop/period_Tuc/'
@@ -459,6 +447,6 @@ def plot_CR_GCLW(save=0,show=1):
 if __name__=="__main__":
     # plot_CV_all(save=1,show=1)
     # plot_dist_profile(save=1,show=1)
-    plot_src_lc_singleobs(figurepath=path_out,save=0,show=1)
+    plot_src_lc_singleobs(figurepath=path_out,save=1,show=1)
     # plot_CR_all()
     # plot_CR_GCLW(save=1,show=1)

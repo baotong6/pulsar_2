@@ -74,6 +74,7 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,bkg=1,ecf=9
         else:
             print("Must specify multiple or single source")
             return None
+        print(srcid)
         reg_func.make_phy_reg(srcid=srcid,x=phy_x,y=phy_y,psfradii=src_radius,
                               outpath=path_out+'region_{0}/'.format(obs_ID_all[i])+'region_{0}/'.format(ecf),
                               singlename=singlename)

@@ -22,19 +22,19 @@ def input_srcinfo():
     return (srcID_list,ra,dec)
 
 def main_process():
-    rocket.make_region_each_obs(path_in,path_out_reg,ra=ra,dec=dec,wcsimage=wcsimage,obs_ID_all=obs_ID_all,
-                                ecf=90,srcid=srcID_list,multiple_src=1,bkg=1)
-    rocket.make_epoch_file(obsid=obs_ID_all,inpath=path_in,outpath=path_out_txt,outname='47Tuc_epoch')
+    # rocket.make_region_each_obs(path_in,path_out_reg,ra=ra,dec=dec,wcsimage=wcsimage,obs_ID_all=obs_ID_all,
+    #                             ecf=90,srcid=srcID_list,multiple_src=1,bkg=0)
+    # rocket.make_epoch_file(obsid=obs_ID_all,inpath=path_in,outpath=path_out_txt,outname='47Tuc_epoch')
     epoch_info=np.loadtxt(path_out_txt+'47Tuc_epoch.txt')
     for id in obs_ID_all:
         rocket.get_txt(path_in=path_in,path_in_reg=path_out_reg,path_out=path_out_txt,srcid_list=srcID_list,obs_id=id,ecf=90,suffix='_p90')
-        rocket.extract_evtlist_bkg(path_in=path_in,path_in_reg=path_out_reg, path_out=path_out_txt, obs_id=id, srcid_list=srcID_list, ecf=90,suffix='_p90')
+        # rocket.extract_evtlist_bkg(path_in=path_in,path_in_reg=path_out_reg, path_out=path_out_txt, obs_id=id, srcid_list=srcID_list, ecf=90,suffix='_p90')
     for srcid in srcID_list:
-        rocket.merge_txt(srcid,epoch_info,inpath=path_out_txt,outpath=path_out_txt,bkg=1,suffix='_p90',outname='txt_all_obs_p90')
+        rocket.merge_txt(srcid,epoch_info,inpath=path_out_txt,outpath=path_out_txt,bkg=0,suffix='_p90',outname='txt_all_obs_p90')
 
 if __name__=='__main__':
-    (srcID_list, ra, dec) = input_srcinfo()
-    # srcID_list=[999];ra=[5.8738750];dec=[72.3454609038340]
+    # (srcID_list, ra, dec) = input_srcinfo()
+    srcID_list=[55293];ra=[5.5125976];dec=[-72.0692052]
     wcsimage = '47Tuc_4.fits'
     main_process()
     # rocket.select_src_bypos(srcID_list,ra,dec,ra_c=ra_center,dec_c=dec_center,
