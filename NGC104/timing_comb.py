@@ -69,21 +69,21 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
     return lc_all
 
 def main_process():
-    dataname='182'
+    dataname='462'
     bin_len = 100.
     (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90)
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
-    period =31200.2746
-    net_p = 0.99
+    period =10384.216
+    net_p = 0.97
 
     time = src_evt_use[:, 0]
 
     time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[200,8000])
     hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.0)
     # plt.close()
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=100,shift=0.83,
-                    label=dataname,text='Seq.162 (W58)',save=1,show=1)
+    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=40,shift=0.,
+                    label=dataname,text='Seq.414 (W2)',save=0,show=1)
 
     # plt.hist(time,bins=300,histtype='step')
     # plt.show()

@@ -53,7 +53,6 @@ def del_twoarray(arr1,arr2):
     return arr1
 
 info=input_srcinfo()
-
 inter_srcID = rocket.select_src_bypos(info[:,0], info[:,1], info[:,2], ra_c=ra_center, dec_c=dec_center,
                                       inter_radius=inter_radius)
 
@@ -93,6 +92,7 @@ for i in range(len(HR)):
 HR_err=np.array(HR_err)
 
 path_out = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
+
 def plot_threefig(save=0,show=1):
     plt.figure(1,(9,6))
     plt.semilogy()
@@ -207,5 +207,10 @@ def plot_threefig(save=0,show=1):
     if show:
         plt.show()
 
+
+def plot_LW_GC_CVHR():
+    path_1='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p90/'
+    path_2='/Users/baotong/Desktop/period_LW/txt_all_obs/'
+    
 if __name__=="__main__":
     plot_threefig(save=1,show=1)

@@ -62,7 +62,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     bkg_y = len(time) * src_bkg/bin
     b_1sigma = poisson_conf_interval(bkg_y, interval='frequentist-confidence').T
     bkg_y_low=b_1sigma[0];bkg_y_high=b_1sigma[1]
-    fig=plt.figure(1,(9,6))
+    fig=plt.figure(1,(10,7.5))
     ax1 = fig.add_subplot(111)
     bkg_x = [0, 2]
     plt.fill_between(bkg_x, bkg_y_low, bkg_y_high,facecolor = 'green', alpha = 0.5)

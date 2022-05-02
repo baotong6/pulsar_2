@@ -59,7 +59,7 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,bkg=1,ecf=9
         os.chdir(path_out)
         if not os.path.exists('region_{0}'.format(obs_ID_all[i])):
             os.system('mkdir region_{0}'.format(obs_ID_all[i]))
-        p90_list='reproj_psf{0}_{1}_b4.fits'.format(ecf,obs_ID_all[i])
+        p90_list='reproj_psf{0}_{1}_e2000:8000.fits'.format(ecf,obs_ID_all[i])
         hdul_p90 = fits.open(path_in + p90_list)
 
         p90_data = hdul_p90[0].data
@@ -170,7 +170,7 @@ def extract_evtlist_bkg(path_in, path_in_reg, path_out, obs_id,srcid_list,ecf=90
             y_list = y_list[idx]
             energy_list = energy_list[idx]
             arrival_time_list = arrival_time_list[idx]
-            f = open(path_out + 'txt_{}{}}/{}_bkg.txt'.format(obs_id, suffix,srcid), 'w+')
+            f = open(path_out + 'txt_{}{}/{}_bkg.txt'.format(obs_id, suffix,srcid), 'w+')
             for i in range(x_list.size):
                 f.write("{} {} {}\n".format(arrival_time_list[i], energy_list[i], obs_id))
             f.close()
