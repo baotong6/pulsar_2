@@ -7,6 +7,9 @@ import pandas as pd
 import sys
 import os
 from scipy import interpolate
+font1 = {'family': 'Normal',
+         'weight': 'normal',
+         'size': 18, }
 
 path='/Users/baotong/Desktop/period_Tuc/'
 res = fits.open(path + 'xray_properties-592.fits')[1].data

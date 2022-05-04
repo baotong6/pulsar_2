@@ -291,7 +291,7 @@ def write_result(dataname):
     energy=src_evt[:,1]
     time = hawk.filter_energy(time, energy, [200, 8000])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./40000,1./10000,1.e-7)
+    w_range=2*np.pi*np.arange(1./50000,1./10000,1.e-7)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=20,parallel=True)
     endtime = datetime.datetime.now()
@@ -342,7 +342,7 @@ def get_result_fromid(id_range):
     #            fmt='%10.2f %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    get_result_fromid(['462'])
+    get_result_fromid(['314'])
     # a=np.arange(1,79,1)
     # for i in a:
     #     get_result_fromid([i])

@@ -170,9 +170,13 @@ def extract_evtlist_bkg(path_in, path_in_reg, path_out, obs_id,srcid_list,ecf=90
             y_list = y_list[idx]
             energy_list = energy_list[idx]
             arrival_time_list = arrival_time_list[idx]
+            arrival_time_list=np.array(arrival_time_list);energy_list=np.array(energy_list)
+            src_ID=np.array([obs_id for i in range(len(arrival_time_list))])
+            [arrival_time_list, energy_list, src_ID] = delete_photon_ID(arrival_time_list, energy_list, src_ID, e_low=500, e_high=8000)
+
             f = open(path_out + 'txt_{}{}/{}_bkg.txt'.format(obs_id, suffix,srcid), 'w+')
             for i in range(x_list.size):
-                f.write("{} {} {}\n".format(arrival_time_list[i], energy_list[i], obs_id))
+                f.write("{} {} {}\n".format(arrival_time_list[i], energy_list[i], src_ID[i]))
             f.close()
         else:
             f = open(path_out + 'txt_{}{}/{}_bkg.txt'.format(obs_id, suffix,srcid), 'w+')
