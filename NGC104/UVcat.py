@@ -68,6 +68,7 @@ def read_erosita_cat(filename):
         dec.append(c.dec.value)
 
     return (ra,dec)
+
 def plot_three_cat():
     (ra1,dec1,pos_err)=read_chandra_cat(path+'xray_properties-592.fits')
     (ra2,dec2)=read_erosita_cat(path+'erosita_cat_coord.xlsx')
@@ -80,6 +81,7 @@ def plot_three_cat():
     plt.scatter(ra3, dec3, marker='.', color='blue')
     plt.legend(['Chandra','eROSITA','HST_UV'])
     plt.show()
+
 def plot_HR_cat():
     (ra3,dec3,F275W,F336W,F435W,F606W,F814W)=read_uv_cat(path+'ngc0104/ngc104_meth1.txt')
     index=np.where((F606W>-99)&(F814W>-99))
@@ -132,7 +134,7 @@ def plot_pure_HR(sgbid3,band1,band2,band3,info,save=0,show=1,outname=None):
     ra3 = info['ra3'];
     dec3 = info['dec3']
     id3 = np.arange(1, len(ra3) + 1, 1)
-    plt.figure(1,(6,10))
+    plt.figure(2,(6,10))
     plt.xlim(-4,5)
     plt.ylim(14,28)
     plt.plot([1.0,1.0],[10,23],'--')
@@ -167,12 +169,20 @@ def astrometry(xrayidlist):
     ra_xray=np.array(ra_xray);ra_HST=np.array(ra_HST);dec_xray=np.array(dec_xray);dec_HST=np.array(dec_HST)
     d_RA=ra_HST-ra_xray;d_dec=dec_HST-dec_xray
     return (ra_xray,ra_HST,dec_xray,dec_HST,d_RA,d_dec)
+
+def random_match(info,xrayid,rad,band1,band2,band3):
+    color = info[band1] - info[band2]
+    ra3 = info['ra3'];
+    dec3 = info['dec3']
+    id3 = np.arange(1, len(ra3) + 1, 1)
+
+
 if __name__=='__main__':
     (ra3, dec3, F275W, F336W, F435W, F606W, F814W) = read_uv_cat(path + 'ngc0104/ngc104_meth1.txt')
     info={'ra3':ra3,'dec3':dec3,'F275W':F275W,'F336W':F336W,'F435W':F435W,'F606W':F606W,'F814W':F814W}
     xrayid_list=[453,206,402,462,364,304,350,283,321,345,258]
     for xrayid in xrayid_list:
-        (sgbid3,close_dist)=plot_close_HR(xrayid=xrayid,band1='F435W',band2='F814W',band3='F814W',info=info,save=1,show=0)
+        (sgbid3,close_dist)=plot_close_HR(xrayid=xrayid,band1='F435W',band2='F606W',band3='F606W',info=info,save=1,show=0)
         print(sgbid3,close_dist)
         plot_pure_HR(sgbid3=sgbid3, band1='F275W',band2='F336W',band3='F275W',info=info,save=1,show=0,outname=xrayid)
     # (ra_xray,ra_HST,dec_xray,dec_HST,d_RA,d_dec)=astrometry(xrayidlist=[453,206,402,304,321,258])

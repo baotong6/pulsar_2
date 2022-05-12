@@ -44,11 +44,12 @@ def read_excel(label):
     seq = np.array(res['Seq'])
     period = np.array(res['P_out'])
     L = np.array(res['L'])
+    L_1_8=np.array(res['L_1_8'])
     Lmin = np.array(res['Lmin'])
     Lmax = np.array(res['Lmax'])
     type = np.array(res['type'])
 
-    return (ra,dec,seq,period,L,Lmin,Lmax,type)
+    return (ra,dec,seq,period,L,Lmin,Lmax,type,L_1_8)
 
 def load_LW(label):
     res = pd.read_excel('/Users/baotong/Desktop/period_LW/' + 'final_all_del_add.xlsx', label)
@@ -59,8 +60,8 @@ def load_LW(label):
     L = np.array(res['L_ast'])
     Lmin =L+ np.array(res['L_low'])
     Lmax =L+ np.array(res['L_high'])
-    # type = np.array(res['type'])
-    return (ra,dec,seq,period,L,Lmin,Lmax)
+    type = np.array(res['type'])
+    return (ra,dec,seq,period,L,Lmin,Lmax,type)
 
 def plot_RK_CV():
     bins=np.logspace(np.log10(0.5), np.log10(50), 71)
@@ -116,7 +117,7 @@ def plot_CV_all(save=0,show=1):
     print('CV number',len(orb_all))
     print('short period CV',len(orb_all[np.where(orb_all<7700/3600.)]))
     print('long period CV',len(orb_all[np.where(orb_all>11448.0 / 3600)]))
-    (ra, dec, seq, period, L, Lmin, Lmax, type)=read_excel('47Tuc')
+    (ra, dec, seq, period, L, Lmin, Lmax, type,L_1_8)=read_excel('47Tuc')
     period_Tuc=period[np.where(type=='CV')]
     period_Tuc/=3600.
 
@@ -173,7 +174,7 @@ def plot_CV_all(save=0,show=1):
 
 def plot_NP(save=1,show=1):
     (fig,ax1)=plot_RK_CV()
-    (ra, dec, seq, period, L, Lmin, Lmax, type)=read_excel('47Tuc')
+    (ra, dec, seq, period, L, Lmin, Lmax, type,L_1_8)=read_excel('47Tuc')
     period/=3600.
     period=period[np.where(type=='CV')]
     bins_p=np.logspace(np.log10(2.3), np.log10(27), 9)
@@ -200,8 +201,8 @@ def plot_NP(save=1,show=1):
     return None
 
 def plot_dist_profile(save=0,show=1):
-    (ra, dec, seq, period, L, Lmin, Lmax, type)=read_excel('47Tuc')
-    (ra_AB03, dec_AB03, seq_AB03, period_AB03, L_AB03, Lmin_AB03, Lmax_AB03, type_AB03)=read_excel('47Tuc_AB')
+    (ra, dec, seq, period, L, Lmin, Lmax, type,L_1_8)=read_excel('47Tuc')
+    (ra_AB03, dec_AB03, seq_AB03, period_AB03, L_AB03, Lmin_AB03, Lmax_AB03, type_AB03,L_1_8_AB)=read_excel('47Tuc_AB')
     [ra_center,dec_center,rhl,rc]=pos_all['47Tuc']
     c1 = SkyCoord(ra * u.deg, dec * u.deg, frame='fk5')
     c2 = SkyCoord(ra_center * u.deg, dec_center * u.deg, frame='fk5')
@@ -213,6 +214,8 @@ def plot_dist_profile(save=0,show=1):
     dist_AB03 = c3.separation(c2)
     dist_AB03 = dist_AB03.arcmin
 
+    L=L_1_8
+    ##换成1-8keV的光度
 
     period_CV=period[np.where(type=='CV')]
     dist_CV=dist[np.where(type=='CV')]
@@ -229,27 +232,37 @@ def plot_dist_profile(save=0,show=1):
     period_AB03=period_AB03[np.where(type_AB03=='xAB')]*3600
     dist_AB03=dist_AB03[np.where(type_AB03=='xAB')]
     L_AB03=L_AB03[np.where(type_AB03=='xAB')]
-    print(period_AB03)
+    # print(period_AB03)
 
-    fig=plt.figure(1,figsize=(12,8))
+
+    (ra, dec, seq, period, L, Lmin, Lmax,type)=load_LW('result_LW')
+    print(type)
+    period_LW_CV=period[np.where(type=='CV')]
+    L_LW_CV=L[np.where(type=='CV')]
+
+
+
+    fig=plt.figure(1,figsize=(15,10))
     ax2=fig.add_subplot(211)
     ax2.scatter(period_CV/3600.,L_CV,marker='v',s=80,color='w',linewidths=2,edgecolors='red')
     ax2.scatter(period_LB/3600.,L_LB,marker='*',s=80,color='w',linewidths=2,edgecolors='green')
     ax2.scatter(period_AB/3600.,L_AB,marker='o',s=80,color='w',linewidths=2,edgecolors='purple')
-    ax2.scatter(14366.89/3600.,4.32e30,marker='^',s=80,color='w',linewidths=2,edgecolors='black')
+    ax2.scatter(14366.89/3600.,8.2266E+28,marker='^',s=80,color='w',linewidths=2,edgecolors='c')
+    ax2.scatter(period_LW_CV/3600.,L_LW_CV*1e31,marker='v',s=80,color='w',linewidths=2,edgecolors='black')
+
     ax2.set_yscale('log')
     ax2.set_xscale('log')
     ax2.set_ylabel(r'Luminosity ($\rm erg~s^{-1}$)',font1)
     ax2.tick_params(labelsize=16)
-    ax2.legend(['CV','LMXB','AB','Src-No.481'],loc='best')
+    ax2.legend(['CV','LMXB','AB','Src-No.481','CV in Galactic Bulge'],loc='best')
     P_gap = [7740.0 / 3600., 11048.0 / 3600.]
     P_min = [4902.0 / 3600., 4986.0/3600]
-    y1 = [0, 2e33]
+    y1 = [0, 1e35]
     # ax2.text(7900 / 3600., 5e36, 'period gap')
 
     ax2.text(P_gap[0] + 0.25, y1[1], r'$\rm P_{gap}$',fontsize=18)
     ax2.text(P_min[1] - 0.15, y1[1], r'$\rm P_{min}$',fontsize=18)
-    ax2.set_ylim(ymax=4e33)
+    ax2.set_ylim(ymax=4e35)
     ax2.fill_between(P_gap, y1[1], facecolor='yellow', alpha=0.2)
     ax2.fill_between(P_min, y1[1], facecolor='grey', alpha=0.2)
 
@@ -257,7 +270,7 @@ def plot_dist_profile(save=0,show=1):
     ax3.scatter(period_CV/3600.,dist_CV,marker='v',s=80,color='w',linewidths=2,edgecolors='red')
     ax3.scatter(period_LB/3600.,dist_LB,marker='*',s=80,color='w',linewidths=2,edgecolors='green')
     ax3.scatter(period_AB/3600.,dist_AB,marker='o',s=80,color='w',linewidths=2,edgecolors='purple')
-    ax3.scatter(14366.89/3600.,270.86/60,marker='^',s=80,color='w',linewidths=2,edgecolors='black')
+    ax3.scatter(14366.89/3600.,270.86/60,marker='^',s=80,color='w',linewidths=2,edgecolors='c')
     # ax3.scatter(period_AB03/3600.,dist_AB03,marker='o',s=80,color='w',linewidths=2,edgecolors='purple')
 
     ax3.plot([P_min[0],30],[rhl/60,rhl/60],'--')
@@ -444,9 +457,167 @@ def plot_CR_GCLW(save=0,show=1):
     if show:plt.show()
     else:plt.close()
     return None
+
+def plot_CV_Temp(save=0,show=1):
+    (ra, dec, seq, period, L, Lmin, Lmax, type, L_1_8) = read_excel('47Tuc')
+    (ra_AB03, dec_AB03, seq_AB03, period_AB03, L_AB03, Lmin_AB03, Lmax_AB03, type_AB03, L_1_8_AB) = read_excel(
+        '47Tuc_AB')
+    [ra_center, dec_center, rhl, rc] = pos_all['47Tuc']
+    c1 = SkyCoord(ra * u.deg, dec * u.deg, frame='fk5')
+    c2 = SkyCoord(ra_center * u.deg, dec_center * u.deg, frame='fk5')
+    dist = c1.separation(c2)
+    dist = dist.arcmin
+    print(seq)
+    print(dist * 60)
+    c3 = SkyCoord(ra_AB03 * u.deg, dec_AB03 * u.deg, frame='fk5')
+    dist_AB03 = c3.separation(c2)
+    dist_AB03 = dist_AB03.arcmin
+
+    L = L_1_8
+    ##换成1-8keV的光度
+    period_CV = period[np.where(type == 'CV')]
+    dist_CV = dist[np.where(type == 'CV')]
+    L_CV = L[np.where(type == 'CV')]
+
+    period_LB = period[np.where(type == 'LMXB')]
+    dist_LB = dist[np.where(type == 'LMXB')]
+    L_LB = L[np.where(type == 'LMXB')]
+
+    period_AB = period[np.where(type == 'AB')]
+    dist_AB = dist[np.where(type == 'AB')]
+    L_AB = L[np.where(type == 'AB')]
+
+    period_AB03 = period_AB03[np.where(type_AB03 == 'xAB')] * 3600
+    dist_AB03 = dist_AB03[np.where(type_AB03 == 'xAB')]
+    L_AB03 = L_AB03[np.where(type_AB03 == 'xAB')]
+    # print(period_AB03)
+
+    (ra, dec, seq, period, L, Lmin, Lmax, type) = load_LW('result_LW')
+    print(type)
+    period_LW_CV = period[np.where(type == 'CV')]
+    L_LW_CV = L[np.where(type == 'CV')]
+
+    CV_T_LW=np.array([40,40,11,40,7,42,40,21,
+                      40,40,40,40,40,40,40,40,40,
+                      4,40,40])
+    low_T_LW=np.array([40,40,6,40,4,10,40,5.8,
+                       40,40,40,40,40,40,40,40,40,
+                       1,40,40])
+    high_T_LW=np.array([50,50,64,50,19,85,50,77,
+                        50,50,50,50,50,50,50,50,50,
+                        32,50,50,])
+
+    CV_T_Tuc=np.array([7,9,40,4.6,13,20,1.6,19,4.4,2.1,11])
+    low_T_Tuc=np.array([6,6,40,3.8,9,12,1.2,10,4.0,1.8,9])
+    high_T_Tuc=np.array([9,14,50,5.8,23,45,2.1,54,5.4,2.4,14])
+
+    ## plot fig1 ###
+    '''
+    fig, (ax1, ax2) = plt.subplots(ncols=1, nrows=2, sharex='all',gridspec_kw={'height_ratios': [1, 1]}, figsize=(6, 6))
+    for i in range(len(period_LW_CV)):
+        if CV_T_LW[i]==40:
+            ax1.errorbar(period_LW_CV[i]/3600, CV_T_LW[i],yerr=np.row_stack((CV_T_LW[i]-low_T_LW[i],high_T_LW[i]-CV_T_LW[i])),
+                         fmt='co', uplims=False, lolims=True,
+                         capsize=4, elinewidth=2, ecolor='k',color='k')
+        else:
+            ax1.errorbar(period_LW_CV[i]/3600, CV_T_LW[i],yerr=np.row_stack((CV_T_LW[i]-low_T_LW[i],high_T_LW[i]-CV_T_LW[i])), fmt='co',
+                         capsize=4, elinewidth=2, ecolor='k',color='k')
+    ax1.errorbar(period_CV/3600, CV_T_Tuc, yerr=np.row_stack((CV_T_Tuc-low_T_Tuc, high_T_Tuc-CV_T_Tuc)), fmt='co', capsize=4, elinewidth=2,
+                 ecolor='r', color='r')
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+
+    # ax1.set_xlim(1,15)
+    index1=np.where(period_LW_CV<2*3600)
+    index2=np.where((period_LW_CV<10*3600)&(period_LW_CV>2*3600))
+    index3=np.where(period_LW_CV>10*3600)
+
+    ind1=np.where(period_CV<2*3600)
+    ind2=np.where((period_CV<10*3600)&(period_CV>2*3600))
+    ind3=np.where(period_CV>10*3600)
+    ax2.errorbar(1.5, CV_T_LW[index1].mean(),xerr=np.row_stack([0.5,0.5]),
+                 yerr=np.row_stack(((CV_T_LW[index1]-low_T_LW[index1]).mean(),(high_T_LW[index1]-CV_T_LW[index1]).mean())),
+                 fmt='co', capsize=4, elinewidth=2, ecolor='k',color='k',label='CVs in Galactic Bulge')
+    ax2.errorbar(6, CV_T_LW[index2].mean(),xerr=np.row_stack([4,4]),
+                 yerr=np.row_stack(((CV_T_LW[index2]-low_T_LW[index2]).mean(),(high_T_LW[index2]-CV_T_LW[index2]).mean())),
+                 fmt='co', capsize=4, elinewidth=2, ecolor='k',color='k')
+    ax2.errorbar(12, CV_T_LW[index3].mean(),xerr=np.row_stack([2,2]),
+                 yerr=np.row_stack(((CV_T_LW[index3]-low_T_LW[index3]).mean(),(high_T_LW[index3]-CV_T_LW[index3]).mean())),
+                 fmt='co', capsize=4, elinewidth=2, ecolor='k',color='k')
+    ax2.errorbar(1, CV_T_Tuc[ind1].mean(),xerr=np.row_stack([0.5,0.5]),yerr=np.row_stack(((CV_T_Tuc[ind1]-low_T_Tuc[ind1]).mean(),(high_T_Tuc[ind1]-CV_T_Tuc[ind1]).mean())),
+                 fmt='co', capsize=4, elinewidth=2, ecolor='r',color='r',label='CVs in 47 Tuc')
+    ax2.errorbar(6, CV_T_Tuc[ind2].mean(),xerr=np.row_stack([4,4]),yerr=np.row_stack(((CV_T_Tuc[ind2]-low_T_Tuc[ind2]).mean(),(high_T_Tuc[ind2]-CV_T_Tuc[ind2]).mean())),
+                 fmt='co', capsize=4, elinewidth=2, ecolor='r',color='r')
+    ax2.errorbar(12, CV_T_Tuc[ind3].mean(),xerr=np.row_stack([2,2]),yerr=np.row_stack(((CV_T_Tuc[ind3]-low_T_Tuc[ind3]).mean(),(high_T_Tuc[ind3]-CV_T_Tuc[ind3]).mean())),
+                 fmt='co', capsize=4, elinewidth=2, ecolor='r',color='r')
+    ax2.legend()
+    # ax2.set_xlim(1,15)
+    ax2.set_xscale('log')
+    ax2.set_yscale('log')
+    ax1.set_ylabel(r'$\rm T_b$ (keV)',font1)
+    # ax1.set_xlabel('Period (hours)',font1)
+    ax1.tick_params(labelsize=16)
+    ax2.set_ylabel(r'$\rm T_b$ (keV)',font1)
+    ax2.set_xlabel('Period (hours)',font1)
+    ax2.tick_params(labelsize=16)
+    '''
+
+    ## plot fig2 ###
+    (fig,ax1)=plt.subplots(ncols=1, nrows=1, figsize=(10,8))
+    for i in range(len(period_LW_CV)):
+        if CV_T_LW[i]==40:
+            ax1.errorbar(period_LW_CV[i]/3600, CV_T_LW[i],yerr=np.row_stack((CV_T_LW[i]-low_T_LW[i],high_T_LW[i]-CV_T_LW[i])),
+                         fmt='ks', uplims=False, lolims=True,
+                         capsize=2, elinewidth=0.5, capthick=0.5,ecolor='k',color='k',markersize=3,markerfacecolor='none',markeredgecolor='grey')
+        else:
+            ax1.errorbar(period_LW_CV[i]/3600, CV_T_LW[i],yerr=np.row_stack((CV_T_LW[i]-low_T_LW[i],high_T_LW[i]-CV_T_LW[i])), fmt='ks',
+                         capsize=2, elinewidth=0.5, capthick=0.5,ecolor='k',color='k',markersize=3,markerfacecolor='none',markeredgecolor='grey')
+    ax1.errorbar(period_CV/3600, CV_T_Tuc, yerr=np.row_stack((CV_T_Tuc-low_T_Tuc, high_T_Tuc-CV_T_Tuc)), fmt='rs', capsize=2, elinewidth=0.5,
+                 ecolor='r', color='r',capthick=0.5,markersize=3,markerfacecolor='none',markeredgecolor='r')
+
+    index1 = np.where(period_LW_CV < 2 * 3600)
+    index2 = np.where((period_LW_CV < 10 * 3600) & (period_LW_CV > 2 * 3600))
+    index3 = np.where(period_LW_CV > 10 * 3600)
+
+    ind1 = np.where(period_CV < 2 * 3600)
+    ind2 = np.where((period_CV < 10 * 3600) & (period_CV > 2 * 3600))
+    ind3 = np.where(period_CV > 10 * 3600)
+    ax1.errorbar(1.5, CV_T_LW[index1].mean(), xerr=np.row_stack([0.5, 0.5]),
+                 yerr=np.row_stack(
+                     ((CV_T_LW[index1] - low_T_LW[index1]).mean(), (high_T_LW[index1] - CV_T_LW[index1]).mean())),
+                 fmt='ks', capsize=4, elinewidth=2, ecolor='k', color='k', markersize=12,label='CVs in Galactic Bulge')
+    ax1.errorbar(6, CV_T_LW[index2].mean(), xerr=np.row_stack([4, 4]),
+                 yerr=np.row_stack(
+                     ((CV_T_LW[index2] - low_T_LW[index2]).mean(), (high_T_LW[index2] - CV_T_LW[index2]).mean())),
+                 fmt='ks', capsize=4, elinewidth=2, ecolor='k', color='k',markersize=12)
+    ax1.errorbar(12, CV_T_LW[index3].mean(), xerr=np.row_stack([2, 2]),
+                 yerr=np.row_stack(
+                     ((CV_T_LW[index3] - low_T_LW[index3]).mean(), (high_T_LW[index3] - CV_T_LW[index3]).mean())),
+                 fmt='ks', capsize=4, elinewidth=2, ecolor='k', color='k',markersize=12)
+    ax1.errorbar(1, CV_T_Tuc[ind1].mean(), xerr=np.row_stack([0.5, 0.5]), yerr=np.row_stack(
+        ((CV_T_Tuc[ind1] - low_T_Tuc[ind1]).mean(), (high_T_Tuc[ind1] - CV_T_Tuc[ind1]).mean())),
+                 fmt='rs', capsize=4, elinewidth=2, ecolor='r', color='r',markersize=12, label='CVs in 47 Tuc')
+    ax1.errorbar(6, CV_T_Tuc[ind2].mean(), xerr=np.row_stack([4, 4]), yerr=np.row_stack(
+        ((CV_T_Tuc[ind2] - low_T_Tuc[ind2]).mean(), (high_T_Tuc[ind2] - CV_T_Tuc[ind2]).mean())),
+                 fmt='rs', capsize=4, elinewidth=2, ecolor='r', color='r',markersize=12)
+    ax1.errorbar(20, CV_T_Tuc[ind3].mean(), xerr=np.row_stack([10, 10]), yerr=np.row_stack(
+        ((CV_T_Tuc[ind3] - low_T_Tuc[ind3]).mean(), (high_T_Tuc[ind3] - CV_T_Tuc[ind3]).mean())),
+                 fmt='rs', capsize=4, elinewidth=2, ecolor='r', color='r',markersize=12)
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+    ax1.set_ylabel(r'$\rm T_b$ (keV)',font1)
+    ax1.set_xlabel('Period (hours)',font1)
+    ax1.tick_params(labelsize=16)
+
+    if save:
+        plt.savefig(path_out + 'CV_Temp.pdf', bbox_inches='tight', pad_inches=0.05)
+    if show:
+        plt.show()
+
 if __name__=="__main__":
     # plot_CV_all(save=1,show=1)
-    # plot_dist_profile(save=1,show=1)
-    plot_src_lc_singleobs(figurepath=path_out,save=1,show=1)
+    # plot_dist_profile(save=0,show=1)
+    # plot_src_lc_singleobs(figurepath=path_out,save=1,show=1)
     # plot_CR_all()
     # plot_CR_GCLW(save=1,show=1)
+    plot_CV_Temp(save=0,show=1)

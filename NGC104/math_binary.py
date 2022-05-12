@@ -48,9 +48,9 @@ def read_fromfit():
 def plot_M2_R():
     (c1,c2,c3,c4,c5)=(0.5126,0.7388,0.6710,0.7349,0.3983)
     q=np.linspace(0.01,1.0,1000)
-    period_list=np.linspace(10,16,6)
+    period_list=np.linspace(6,16,5)
     color_list=['r','orange','y','green','blue','g','purple']
-    M1=1.4*c.M_sun
+    M1=0.8*c.M_sun
     M2=q*M1
     RL_on_a=c1*q**c2/(c3*q**c4+np.log(1+q**c5))
     for i in range(len(period_list)):

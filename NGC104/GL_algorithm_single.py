@@ -281,7 +281,7 @@ def write_result(dataname):
     print(CR)
     (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
                                             flux_filter=10,expT_filter=1000,
-                                            if_flux_high=0, if_expT_high=True,obsID=None)
+                                            if_flux_high=0, if_expT_high=True,obsID=[2735,2736,2737,2738])
     epoch_info = epoch_info_use  ##这里随意改
 
     src_evt_use =hawk.filter_obs(src_evt, useid)
@@ -291,7 +291,7 @@ def write_result(dataname):
     energy=src_evt[:,1]
     time = hawk.filter_energy(time, energy, [200, 8000])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./50000,1./10000,1.e-7)
+    w_range=2*np.pi*np.arange(1./3000,1./1000,1.e-6)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=20,parallel=True)
     endtime = datetime.datetime.now()
@@ -342,7 +342,7 @@ def get_result_fromid(id_range):
     #            fmt='%10.2f %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    get_result_fromid(['314'])
+    get_result_fromid(['245'])
     # a=np.arange(1,79,1)
     # for i in a:
     #     get_result_fromid([i])

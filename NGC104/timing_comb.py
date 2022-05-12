@@ -16,9 +16,9 @@ import scipy
 import hawkeye as hawk
 
 def load_data(dataname,ecf=90):
-    path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(ecf)
+    # path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(ecf)
     # path_Tuc='/Users/baotong/Desktop/period_NGC3201/txt_all/txt_all_obs_p{0}/'.format(ecf)
-    # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
+    path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
     path = path_Tuc
     dataname = '{0}.txt'.format(dataname)
     epoch_file = path + 'epoch_src_' + dataname
@@ -69,17 +69,17 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
     return lc_all
 
 def main_process():
-    dataname='345'
-    bin_len = 4000.
-    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90)
+    dataname='481'
+    bin_len = 1000.
+    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=50)
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
-    period = 48780.49
+    period = 14388.49
     net_p = 0.97
 
     time = src_evt_use[:, 0]
 
-    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[500,8000])
+    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[200,8000])
     hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.0)
     # plt.close()
     hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=20,shift=0.,
@@ -95,6 +95,6 @@ def main_process():
     figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
     # (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq=freq,outpath=figurepath, outname=str(dataname),save=0,show=1)
     # print('Period=',format(out_period))
-    # hawk.plot_singleobs_lc(lc,period=period,ifsin=0,figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',dataname=dataname,save=0,show=1)
+    hawk.plot_singleobs_lc(lc,period=period,ifsin=0,figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',dataname=dataname,save=0,show=1)
 if __name__=='__main__':
     main_process()
