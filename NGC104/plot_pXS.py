@@ -614,10 +614,71 @@ def plot_CV_Temp(save=0,show=1):
     if show:
         plt.show()
 
+def plot_surface_density(save=0,show=1):
+    cat=fits.open('/Users/baotong/Desktop/period_Tuc/Cheng2019.fit')
+    ra=cat[1].data['RAJ2000'];dec=cat[1].data['DEJ2000'];F058=cat[1].data['F0_5-8']
+    [ra_center,dec_center,rhl,rc]=pos_all['47Tuc']
+    c1 = SkyCoord(ra * u.deg, dec * u.deg, frame='fk5')
+    c2 = SkyCoord(ra_center * u.deg, dec_center * u.deg, frame='fk5')
+    dist_all = c1.separation(c2)
+    dist_all=dist_all.arcmin
+    dist=np.array([8.47522594,49.89957386,23.63156505,35.67687066,58.05747122,3.39603853,3.94875538,15.18944144,
+                   10.12621419,10.80148101,21.69163174,3.32388461,20.65438152,53.67657374,16.24158616,
+                   14.81336603,4.48256703,270.8604792])
+    dist=dist/60
+    print(np.sort(dist))
+    bins=np.logspace(-1.4,0.8,6)
+    # bins=np.array([0.04,0.2,0.6,1.0,5.0])
+    print(bins)
+    hist1=plt.hist(dist,bins)
+    plt.close()
+    num1=hist1[0]
+    y=num1
+    x=[(bins[i]+bins[i+1])/2 for i in range(len(bins)-1)]
+    area=[(bins[i+1]**2-bins[i]**2)*np.pi for i in range(len(bins)-1)]
+    y_err = np.array(poisson_conf_interval(y, interval='frequentist-confidence'))
+    y_err[0] = y - y_err[0]
+    y_err[1] = y_err[1] - y
+    y=y/area
+    y_err=y_err/area
+    xerr=[(bins[i+1]-bins[i])/2 for i in range(len(bins)-1)]
+    print('x=',x)
+    print('y=',y)
+    plt.errorbar(x,y,xerr=xerr,yerr=y_err,fmt='bs', capsize=4, elinewidth=2, ecolor='b', color='b',markersize=4,label='periodic binaries')
+
+    index_faint=np.where(F058<1e-6);index_bright=np.where(F058>1e-6)
+    bins1=np.array([0.01,0.08,0.2,0.3,0.4,0.5,0.7,1.0,2.0,3.0,4.0,5.0,6.0,7.0])
+    bins1=np.linspace(0.01,7.0,12)
+    x1=[(bins1[i]+bins1[i+1])/2 for i in range(len(bins1)-1)]
+    x1err = [(bins1[i + 1] - bins1[i]) / 2 for i in range(len(bins1) - 1)]
+    area1 = [(bins1[i + 1] ** 2 - bins1[i] ** 2) * np.pi for i in range(len(bins1) - 1)]
+    histfaint=plt.hist(dist_all[index_faint],bins1)
+    plt.close()
+    histbright=plt.hist(dist_all[index_bright],bins1)
+    plt.close()
+    y1=histfaint[0];y2=histbright[0]
+    y1_err = np.array(poisson_conf_interval(y1, interval='frequentist-confidence'))
+    y1_err[0] = y1 - y1_err[0];y1_err[1] = y1_err[1] - y1
+    y2_err = np.array(poisson_conf_interval(y2, interval='frequentist-confidence'))
+    y2_err[0] = y2 - y2_err[0];y2_err[1] = y2_err[1] - y2
+    y1=y1/area1;y2=y2/area1
+    y1_err=y1_err/area1;y2_err=y2_err/area1
+    print('y2=',y2)
+
+    plt.errorbar(x1,y1,xerr=x1err,yerr=y1_err,fmt='ro', capsize=2, elinewidth=2, ecolor='r', color='r',markersize=4,label='Faint group')
+    plt.errorbar(x1,y2,xerr=x1err,yerr=y2_err,fmt='go', capsize=2, elinewidth=2, ecolor='g', color='g',markersize=4,label='Bright group')
+    plt.errorbar(x,y,xerr=xerr,yerr=y_err,fmt='ks', capsize=2, elinewidth=2, ecolor='k', color='k',markersize=4,label='Periodic binaries')
+    plt.legend()
+    plt.semilogy()
+    plt.xlabel('R (arcmin)',font1)
+    plt.ylabel('Number of source per arcmin2',font1)
+    plt.tick_params(labelsize=16)
+    plt.show()
 if __name__=="__main__":
     # plot_CV_all(save=1,show=1)
     # plot_dist_profile(save=0,show=1)
     # plot_src_lc_singleobs(figurepath=path_out,save=1,show=1)
     # plot_CR_all()
     # plot_CR_GCLW(save=1,show=1)
-    plot_CV_Temp(save=0,show=1)
+    # plot_CV_Temp(save=0,show=1)
+    plot_surface_density()

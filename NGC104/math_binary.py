@@ -50,14 +50,14 @@ def plot_M2_R():
     q=np.linspace(0.01,1.0,1000)
     period_list=np.linspace(6,16,5)
     color_list=['r','orange','y','green','blue','g','purple']
-    M1=0.8*c.M_sun
+    M1=0.6*c.M_sun
     M2=q*M1
     RL_on_a=c1*q**c2/(c3*q**c4+np.log(1+q**c5))
     for i in range(len(period_list)):
         period=period_list[i]*3600*u.s
         # print((period**2*c.G*(M1+M2)/(4*np.pi**2))**(1/3.))
         # period=1*3600*u.s
-        a=(period**2*c.G*(M1+M2)/(4*np.pi**2))**(1/3)
+        a=(period**2*c.G*(M1+M2)/(4*np.pi**2))**(1/3)*2
         R2=np.array([get_radius(M2[i].to(u.M_sun).value) for i in range(len(M2))])
         plt.figure(1,(9,6))
         plt.plot(M2.to(u.M_sun).value,RL_on_a*a.to(u.R_sun).value/R2,label=f'P={period.to(u.hour)}',color=color_list[i])

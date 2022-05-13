@@ -62,7 +62,7 @@ def make_phy_reg(srcid,x,y,psfradii,outpath,inpath=None,imgfile=None,coordtype='
                 with open(outpath + '{0}.reg'.format(srcid[i]), 'w+') as f1:
                     reg = 'circle(' + str(reg_x[i]) + ',' + str(reg_y[i]) + ',' + str(reg_r[i]) + ')'
                     f1.writelines(reg)
-                # with open(outpath+'{0}_bkg.reg'.format(i + 1), 'w+') as f2:
+                # with open(outpath+'{0}_bkg.reg'.format(srcid[i]), 'w+') as f2:
                 #     bkgreg='annulus(' + str(reg_x[i]) + ',' + str(reg_y[i]) + ',' + str(2*reg_r[i]) +',' + str(4*reg_r[i])+ ')'
                 #     f2.writelines(bkgreg)
                     # dist = np.sqrt((reg[x] - reg_x[i]) ** 2 + (reg[y] - reg_y[i]) ** 2)
