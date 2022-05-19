@@ -563,7 +563,7 @@ def plot_CV_Temp(save=0,show=1):
     '''
 
     ## plot fig2 ###
-    (fig,ax1)=plt.subplots(ncols=1, nrows=1, figsize=(10,8))
+    (fig,ax1)=plt.subplots(ncols=1, nrows=1, figsize=(9,6))
     for i in range(len(period_LW_CV)):
         if CV_T_LW[i]==40:
             ax1.errorbar(period_LW_CV[i]/3600, CV_T_LW[i],yerr=np.row_stack((CV_T_LW[i]-low_T_LW[i],high_T_LW[i]-CV_T_LW[i])),
@@ -603,6 +603,7 @@ def plot_CV_Temp(save=0,show=1):
     ax1.errorbar(20, CV_T_Tuc[ind3].mean(), xerr=np.row_stack([10, 10]), yerr=np.row_stack(
         ((CV_T_Tuc[ind3] - low_T_Tuc[ind3]).mean(), (high_T_Tuc[ind3] - CV_T_Tuc[ind3]).mean())),
                  fmt='rs', capsize=4, elinewidth=2, ecolor='r', color='r',markersize=12)
+    ax1.legend()
     ax1.set_xscale('log')
     ax1.set_yscale('log')
     ax1.set_ylabel(r'$\rm T_b$ (keV)',font1)
@@ -614,6 +615,41 @@ def plot_CV_Temp(save=0,show=1):
     if show:
         plt.show()
 
+def adapt_bin(dist,cxb):
+    # criteria net>10 and SN>3
+    bin_step=0.01
+    bin_lf=0;bin_rt=bin_lf+bin_step
+    bin_rt_list=[]
+    while bin_rt<np.max(dist):
+        temp_cts=len(np.where((dist<bin_rt) & (dist>bin_lf))[0])
+        temp_area=(bin_rt**2-bin_lf**2)*np.pi
+        net_cts=temp_cts-cxb*temp_area
+        if net_cts<0 or temp_cts==0:
+            bin_rt+=bin_step
+            continue
+        else:
+            SN=net_cts/np.sqrt(temp_cts)
+            if net_cts>5 or SN >2:
+                bin_rt_list.append(bin_rt)
+                bin_lf=bin_rt;bin_rt+=bin_step
+                continue
+            else:
+                bin_rt+=bin_step
+                continue
+
+    return bin_rt_list
+
+def f(x,a,b):
+    logS=a*x+b  #S~V^a
+    return logS
+def spectrafit(x,y,error):
+    # popt, pcov = op.curve_fit(f, np.log(x), np.log(y),absolute_sigma=True,sigma=np.log(error))
+    popt, pcov = op.curve_fit(f, np.log(x), np.log(y))
+    perr = np.sqrt(np.diag(pcov))
+    logydata=f(np.log(x),popt[0],popt[1])
+    ydata=np.exp(logydata)
+    return (popt,perr)
+
 def plot_surface_density(save=0,show=1):
     cat=fits.open('/Users/baotong/Desktop/period_Tuc/Cheng2019.fit')
     ra=cat[1].data['RAJ2000'];dec=cat[1].data['DEJ2000'];F058=cat[1].data['F0_5-8']
@@ -622,31 +658,125 @@ def plot_surface_density(save=0,show=1):
     c2 = SkyCoord(ra_center * u.deg, dec_center * u.deg, frame='fk5')
     dist_all = c1.separation(c2)
     dist_all=dist_all.arcmin
+
+    # dist=np.array([8.47522594,49.89957386,23.63156505,35.67687066,58.05747122,3.39603853,3.94875538,15.18944144,
+    #                10.12621419,10.80148101,21.69163174,3.32388461,20.65438152,53.67657374,16.24158616,
+    #                14.81336603,4.48256703,270.8604792])
     dist=np.array([8.47522594,49.89957386,23.63156505,35.67687066,58.05747122,3.39603853,3.94875538,15.18944144,
-                   10.12621419,10.80148101,21.69163174,3.32388461,20.65438152,53.67657374,16.24158616,
+                   10.12621419,10.80148101,21.69163174,3.32388461,53.67657374,
                    14.81336603,4.48256703,270.8604792])
     dist=dist/60
-    print(np.sort(dist))
-    bins=np.logspace(-1.4,0.8,6)
-    # bins=np.array([0.04,0.2,0.6,1.0,5.0])
+    cheng_profile=pd.read_excel(path+'profile.xlsx')
+    x_f=cheng_profile.iloc[0:16,0];x_f_err=cheng_profile.iloc[0:16,1]
+    y_f=cheng_profile.iloc[0:16,2];y_f_err=cheng_profile.iloc[0:16,3]
+    x_f_cxb=cheng_profile.iloc[0:16,4];y_f_cxb=cheng_profile.iloc[0:51,5]
+    # y1_net=y1
+    # for i in range(len(x1)):
+    #     index=np.argmin(x1_cxb-x1[i])
+    #     y1_net[i]-=y1cxb[index]
+    # x2=cheng_profile.iloc[0:13,15];x2err=cheng_profile.iloc[0:13,16]
+    # y2=cheng_profile.iloc[0:13,17];y2err=cheng_profile.iloc[0:13,18]
+    # x2_cxb=x2;y2cxb=np.zeros(len(x2))+0.25
+    # y2_net=y2-y2cxb
+
+    index_faint=np.where(F058<1e-6);index_bright=np.where(F058>1e-6)
+    print(len(index_bright[0]),len(index_faint[0]))
+    bin_rt_list=adapt_bin(dist_all[index_bright],0.25)
+    bin_rt_list=np.concatenate(([0],bin_rt_list))
+    # print('bin_rt_list',bin_rt_list)
+    x1=[(bin_rt_list[i]+bin_rt_list[i+1])/2 for i in range(len(bin_rt_list)-1)]
+    x1err = [(bin_rt_list[i + 1] - bin_rt_list[i]) / 2 for i in range(len(bin_rt_list) - 1)]
+    area1 = [(bin_rt_list[i + 1] ** 2 - bin_rt_list[i] ** 2) * np.pi for i in range(len(bin_rt_list) - 1)]
+    histfaint=plt.hist(dist_all[index_faint],bin_rt_list)
+    plt.close()
+    histbright=plt.hist(dist_all[index_bright],bin_rt_list)
+    plt.close()
+    y1=histfaint[0];y2=histbright[0]
+    y1_err = np.array(poisson_conf_interval(y1, interval='frequentist-confidence'))
+    y1_err[0] = y1 - y1_err[0];y1_err[1] = y1_err[1] - y1
+    y2_err = np.array(poisson_conf_interval(y2, interval='frequentist-confidence'))
+    y2_err[0] = y2 - y2_err[0];y2_err[1] = y2_err[1] - y2
+    y1=y1/area1
+    y1_net=y1
+    for i in range(len(x1)-1):
+        index=np.argmin(x_f_cxb-x1[i+1])
+        y1_net[i]-=y_f_cxb[index]
+    # print(y1_net)
+    y2_net=y2/area1-0.25
+    y1_err=y1_err/area1;y2_err=y2_err/area1
+
+    bins=bin_rt_list
     print(bins)
+    bins=[0,0.1,0.2,0.5,1.5,6.11]
     hist1=plt.hist(dist,bins)
     plt.close()
     num1=hist1[0]
     y=num1
+    print(y)
     x=[(bins[i]+bins[i+1])/2 for i in range(len(bins)-1)]
     area=[(bins[i+1]**2-bins[i]**2)*np.pi for i in range(len(bins)-1)]
     y_err = np.array(poisson_conf_interval(y, interval='frequentist-confidence'))
     y_err[0] = y - y_err[0]
     y_err[1] = y_err[1] - y
+    print(y_err)
     y=y/area
     y_err=y_err/area
     xerr=[(bins[i+1]-bins[i])/2 for i in range(len(bins)-1)]
     print('x=',x)
     print('y=',y)
-    plt.errorbar(x,y,xerr=xerr,yerr=y_err,fmt='bs', capsize=4, elinewidth=2, ecolor='b', color='b',markersize=4,label='periodic binaries')
+    print('y1_err=',y1_err)
+    (popt, perr) = spectrafit(x1[0:6], y1_net[0:6], y1_err[0][0:6])
+    print('popt=',popt)
+    print('perr=',perr)
 
-    index_faint=np.where(F058<1e-6);index_bright=np.where(F058>1e-6)
+    x1=np.concatenate(([1e-2],x1))
+    plt.figure(1, (8, 8))
+    plt.plot(x1[0:9], np.exp(f(np.log(x1[0:9]), popt[0], popt[1])),'-.',color='r')
+    # plt.fill_between(x1[0:7],np.exp(f(np.log(x1[0:7]), popt[0]-perr[0], popt[1]-perr[1])),
+    #                  np.exp(f(np.log(x1[0:7]), popt[0]+perr[0], popt[1]+perr[1])),facecolor = 'r', alpha = 0.4)
+    x1 = x1[1:]
+    (popt, perr) = spectrafit(x1[0:6], y2_net[0:6], y2_err[0][0:6])
+    x1=np.concatenate(([1e-2],x1))
+    plt.plot(x1[0:9], np.exp(f(np.log(x1[0:9]), popt[0], popt[1])),'-.',color='g')
+    # plt.fill_between(x1[0:7],np.exp(f(np.log(x1[0:7]), popt[0]-perr[0], popt[1]-perr[1])),
+    #                  np.exp(f(np.log(x1[0:7]), popt[0]+perr[0], popt[1]+perr[1])),facecolor = 'g', alpha = 0.4)
+    # x1 = x1[1:]
+    (popt, perr) = spectrafit(x[0:4], y[0:4]*10, y_err[0][0:4])
+    x = np.concatenate(([1e-2], x))
+    plt.plot(x[0:5], np.exp(f(np.log(x[0:5]), popt[0], popt[1])),'-.',linewidth=2,color='k')
+    # plt.fill_between(x[0:4],np.exp(f(np.log(x[0:4]), popt[0]-perr[0], popt[1]-perr[1])),
+    #                  np.exp(f(np.log(x[0:4]), popt[0]+perr[0], popt[1]+perr[1])),facecolor = 'k', alpha = 0.4)
+    x1 = x1[1:];x=x[1:]
+    plt.errorbar(x1,y1_net,xerr=x1err,yerr=y1_err,fmt='ro', capsize=1, elinewidth=1, ecolor='r', color='r',markersize=4,label='Faint group')
+    plt.errorbar(x1,y2_net,xerr=x1err,yerr=y2_err,fmt='go', capsize=1, elinewidth=1, ecolor='g', color='g',markersize=4,label='Bright group')
+    plt.errorbar(x,y*10,xerr=xerr,yerr=y_err*10,fmt='ks', capsize=2, elinewidth=2, ecolor='k', color='k',markersize=8,label=r'$\rm Periodic~sources\times10$')
+    plt.plot([3.17,3.17],[0,1000],'--')
+    plt.plot([3.17/8.8,3.17/8.8],[0,1000],'--')
+    plt.text(3.17/8.8,1400,r'$r_c$',font1,horizontalalignment='center',verticalalignment='center')
+    plt.text(3.17,1400,r'$r_h$',font1,horizontalalignment='center',verticalalignment='center')
+    plt.legend()
+    plt.semilogy()
+    plt.semilogx()
+    plt.xlim(1e-2,7)
+    plt.ylim(1e-2,5e3)
+    plt.xlabel('R (arcmin)',font1)
+    plt.ylabel(r'$\rm Number~of~source~per~arcmin^2$',font1)
+    plt.tick_params(labelsize=16)
+    if save:
+        plt.savefig(path_out + 'profile_3group.pdf', bbox_inches='tight', pad_inches=0.05)
+    if show:
+        plt.show()
+    '''
+    plt.errorbar(x1,y1_net,xerr=x1err,yerr=y1err,fmt='ro', capsize=2, elinewidth=2, ecolor='r', color='r',markersize=4,label='Faint group')
+    plt.errorbar(x2,y2_net,xerr=x2err,yerr=y2err,fmt='go', capsize=2, elinewidth=2, ecolor='g', color='g',markersize=4,label='Bright group')
+    plt.errorbar(x,y,xerr=xerr,yerr=y_err,fmt='ks', capsize=2, elinewidth=2, ecolor='k', color='k',markersize=4,label='Periodic binaries')
+    plt.legend()
+    plt.semilogy()
+    plt.xlabel('R (arcmin)',font1)
+    plt.ylabel('Number of source per arcmin2',font1)
+    plt.tick_params(labelsize=16)
+    plt.show()
+
     bins1=np.array([0.01,0.08,0.2,0.3,0.4,0.5,0.7,1.0,2.0,3.0,4.0,5.0,6.0,7.0])
     bins1=np.linspace(0.01,7.0,12)
     x1=[(bins1[i]+bins1[i+1])/2 for i in range(len(bins1)-1)]
@@ -674,11 +804,12 @@ def plot_surface_density(save=0,show=1):
     plt.ylabel('Number of source per arcmin2',font1)
     plt.tick_params(labelsize=16)
     plt.show()
+    '''
 if __name__=="__main__":
     # plot_CV_all(save=1,show=1)
     # plot_dist_profile(save=0,show=1)
     # plot_src_lc_singleobs(figurepath=path_out,save=1,show=1)
     # plot_CR_all()
     # plot_CR_GCLW(save=1,show=1)
-    # plot_CV_Temp(save=0,show=1)
-    plot_surface_density()
+    # plot_CV_Temp(save=1,show=1)
+    plot_surface_density(save=1,show=1)
