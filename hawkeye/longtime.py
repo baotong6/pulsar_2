@@ -17,6 +17,7 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
     t_mid=(t_start+t_end)/2
     obsID = epoch_info[:, 2]
     expT = epoch_info[:, 3]
+    # expT=t_end-t_start
     cts=[];bkg_cts=[]
     if not bkg_file:
         for i in range(len(obsID)):
@@ -36,6 +37,8 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
     plt.figure(1)
     plt.semilogy()
     plt.errorbar(t_mid,CR,CR_ERR,fmt='o',capsize=3, elinewidth=1, ecolor='red')
+    for i in range(len(t_mid)):
+        plt.text(t_mid[i],CR[i]*1.2,str(int(obsID[i])))
     if show:
         plt.show()
 

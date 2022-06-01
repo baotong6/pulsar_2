@@ -233,7 +233,7 @@ def merge_txt(src_id,epoch_info,inpath,outpath,suffix,bkg=1,outname='txt_all_obs
         if bkg:
             res_bkg_temp=np.loadtxt(inpath+'txt_{0}{1}/'.format(obs_ID_all[i],suffix)+str(src_id)+'_bkg.txt')
             if len(res_bkg_temp) == 0: continue
-            if res_bkg_temp.ndim == 1: res_bkg_temp = np.array(res_bkg_temp)
+            if res_bkg_temp.ndim == 1: res_bkg_temp = np.array([res_bkg_temp])
             res_bkg_t.append(list(res_bkg_temp[:, 0]))
             res_bkg_E.append(list(res_bkg_temp[:, 1]))
             res_bkg_ID.append(list((res_bkg_temp[:, 2])))

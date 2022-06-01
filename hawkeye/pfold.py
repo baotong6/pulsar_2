@@ -47,7 +47,7 @@ def get_T_in_mbins(epoch_file,w,m,fi):
                 T_in_perbin[int(np.mod((intN_bin_t_start[i] + k), m))] += tbin
         else:
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
-    return T_in_perbin+1e-5
+    return T_in_perbin
 
 def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,label='test',text=None,save=False,show=True):
     turns=trans(time,p_test,shift)
@@ -71,7 +71,8 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     T_in_perbin = funcs.get_T_in_mbins(epoch_info, 2 * np.pi / p_test, bin, shift * 2 * np.pi)
 
     correct_gap = T_in_perbin / (sum(T_in_perbin) / len(T_in_perbin))
-    # print('correct_gap=',correct_gap)
+    print('correct_gap=',correct_gap)
+    correct_gap=correct_gap+1e-5
     y2 /= np.concatenate((correct_gap, correct_gap))
     y2_err = np.array(poisson_conf_interval(y2, interval='frequentist-confidence'))
     y2_err[0] = y2 - y2_err[0]

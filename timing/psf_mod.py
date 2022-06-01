@@ -9,11 +9,11 @@ import string
 
 #path='/Volumes/halo/GC/merge_data/xdata/'
 # path='/Volumes/pulsar/47Tuc/merge_data/xdata/'
-path='/Volumes/pulsar/M30/merge_data/xdata/'
+path='/Volumes/pulsar/NGC6266/merge_data/xdata/'
 band=['5']
 #band=['2','3','4']
 for k in band:
-    psfmap='expweighted_50_mean_i'+k+'.psfmap'
+    psfmap='expweighted_90_mean_i'+k+'.psfmap'
     hdul_psf=fits.open(path+psfmap)
     psf90=hdul_psf[0].data
     psf90=psf90.T

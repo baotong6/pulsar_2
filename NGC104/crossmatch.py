@@ -30,11 +30,13 @@ def load_data():
 
 def match_twofits():
     path='/Users/baotong/Desktop/period_Tuc/'
-    file1=fits.open(path+'xray_properties-592.fits')
-    ra_1=file1[1].data['RAdeg']
-    dec_1=file1[1].data['DEdeg']
 
-    file2=fits.open(path+'Cheng2019.fit')
+
+    file1=fits.open(path+'cheng2019.fit')
+    ra_1=file1[1].data['RAJ2000']
+    dec_1=file1[1].data['DEJ2000']
+
+    file2=fits.open(path+'2019spectra.fit')
     ra_2=file2[1].data['RAJ2000']
     dec_2=file2[1].data['DEJ2000']
 
@@ -52,7 +54,7 @@ def match_twofits():
     print(idx[sep_constraint])
     match_result=np.column_stack((np.arange(1,len(ra_2)+1,1),idx+1,judge))
 
-    np.savetxt(path+'match_old_newfits.txt',match_result,fmt='%10d %10d %10d')
+    np.savetxt(path+'match_spectra.txt',match_result,fmt='%10d %10d %10d')
     return idx[sep_constraint]
 
 if __name__=='__main__':
@@ -68,7 +70,7 @@ if __name__=='__main__':
 
     idx, d2d, d3d = match_coordinates_sky(matchcoord=c1, catalogcoord=c2, nthneighbor=1)
     print(idx)
-    max_sep =0.5* u.arcsec
+    max_sep =1* u.arcsec
     sep_constraint = d2d < max_sep
     c_matches = c1[sep_constraint]
     catalog_matches = c2[idx[sep_constraint]]
@@ -95,8 +97,8 @@ if __name__=='__main__':
     # plt.errorbar(x,y,xerr=x_err,yerr=y_err, fmt='co', capsize=4, elinewidth=2, ecolor='red', color='green')
     # plt.xlabel('Arcsec')
     # plt.ylabel('Number of sources per unit arcsec^2')
-
-    print(catalog_matches)
-    print(d2d_matches.arcsec)
-
-    plt.show()
+    # print(catalog_matches)
+    # print(d2d_matches.arcsec)
+    #
+    # plt.show()
+    match_twofits()

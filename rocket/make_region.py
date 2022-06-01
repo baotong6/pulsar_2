@@ -55,7 +55,7 @@ def make_phy_reg(srcid,x,y,psfradii,outpath,inpath=None,imgfile=None,coordtype='
                     f1.writelines(reg)
             return None
         else:
-            print(reg_x)
+            # print(reg_x)
             os.system(f'rm {outpath}all.reg')
             os.system(f'rm {outpath}all_bkg.reg')
             for i in range(len(srcid)):
