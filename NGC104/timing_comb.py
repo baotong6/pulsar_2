@@ -17,7 +17,7 @@ import hawkeye as hawk
 
 def load_data(dataname,ecf=90):
     # path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(ecf)
-    path_Tuc='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_p{0}/'.format(ecf)
+    path_Tuc='/Users/baotong/Desktop/period_omg/txt_all_obs_p{0}/'.format(ecf)
     # path_Tuc='/Users/baotong/Downloads/'
     # path_Tuc='/Users/baotong/Desktop/period_NGC3201/txt_all/txt_all_obs_p{0}/'.format(ecf)
     # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
@@ -34,8 +34,8 @@ def load_data(dataname,ecf=90):
     CR/=ecf/100.
 
     (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                            flux_filter=6,expT_filter=1000,
-                                            if_flux_high=0, if_expT_high=1,obsID=None)
+                                            flux_filter=60,expT_filter=1000,
+                                            if_flux_high=0, if_expT_high=1,obsID=[13727,13726])
 
     # [953,955,956, 2736, 3385,2738,16527,15747, 16529,15748]
     # [78, 953,   954,   955,   956,  2735,  3384,  2736,  3385,  2737,3386,  2738,  3387,
@@ -73,12 +73,12 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
     return lc_all
 
 def main_process():
-    dataname='157'
-    bin_len = 500
+    dataname='186'
+    bin_len = 2000
     (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90)
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
-    period =1.30995*86400
+    period =49504.9505
     net_p = 0.77
 
     time = src_evt_use[:, 0]
