@@ -81,6 +81,7 @@ def get_epoch_time_series(cts_rate,period,amp,epoch,model,ifvary_value=0,varydel
     # path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
     # epoch = np.loadtxt(path+'epoch_src_384.txt')
     # epoch = np.loadtxt('LW_epoch.txt')
+    if epoch.ndim==1:epoch=np.array([epoch])
     tstart=epoch[:,0]
     tstop=epoch[:,1]
     exp_time_epoch=epoch[:,-1]

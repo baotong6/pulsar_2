@@ -8,9 +8,9 @@ import os
 import string
 
 #path='/Volumes/halo/GC/merge_data/xdata/'
-path='/Volumes/pulsar/47Tuc/merge_data/xdata/'
+path='/Volumes/pulsar/NGC6304/merge_data/xdata/'
 # path='/Volumes/pulsar/CDFS/merge_data/xdata/'
-band=['4']
+band=['5']
 #band=['2','3','4']
 for k in band:
     psfmap='expweighted_75_mean_i'+k+'.psfmap'

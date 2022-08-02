@@ -26,5 +26,5 @@ def xony_poserr(x,y):
 # (u,u_err)=xony_poserr(6,7)
 # print(u,u_err)
 if __name__=="__main__":
-    (u,u_err)=xony_poserr(6,7)
+    (u,u_err)=xony_poserr(4,20)
     print(u,u_err)

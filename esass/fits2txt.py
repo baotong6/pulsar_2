@@ -161,13 +161,13 @@ def get_psfradius(srcID,ra,dec,obsid,inpath,ecf=0.5,if_SN_radius=False):
                 psf_value=psfmap_ecf[psf_x,psf_y]  ##不太准，所以不用
                 psf_value *= 80
 
-            #     psf_bettervalue=[]
-            #     f = interpolate.interp2d(np.arange(0.5,21.5,1),np.arange(0.5,21.5,1),psfmap_ecf,kind='cubic')
-            #     for i in range(len(img_x)):
-            #         psf_bettervalue.append(f(img_x[i],img_y[i])[0])
-            #     # psf_bettervalue=np.array(psf_bettervalue)
-            #     psf_bettervalue_list.append(psf_bettervalue)
-            # psf_bettervalue_list=np.array(psf_bettervalue_list)*80
+                psf_bettervalue=[]
+                f = interpolate.interp2d(np.arange(0.5,21.5,1),np.arange(0.5,21.5,1),psfmap_ecf,kind='cubic')
+                for i in range(len(img_x)):
+                    psf_bettervalue.append(f(img_x[i],img_y[i])[0])
+                psf_bettervalue=np.array(psf_bettervalue)
+                psf_bettervalue_list.append(psf_bettervalue)
+            psf_bettervalue_list=np.array(psf_bettervalue_list)*80
 
             return psf_bettervalue_list
     if not if_SN_radius:

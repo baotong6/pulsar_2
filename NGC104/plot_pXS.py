@@ -114,6 +114,7 @@ def plot_CV_all(save=0,show=1):
     spin_IP/=3600.
     orb_all=np.concatenate((orb_DN,orb_IP,orb_Polar))
     orb_all=orb_all[np.where(orb_all>0)]
+    print('Too long period CV',len(orb_all[np.where(orb_all>12.)]))
     print('CV number',len(orb_all))
     print('short period CV',len(orb_all[np.where(orb_all<7700/3600.)]))
     print('long period CV',len(orb_all[np.where(orb_all>11448.0 / 3600)]))
@@ -121,10 +122,10 @@ def plot_CV_all(save=0,show=1):
     period_Tuc=period[np.where(type=='CV')]
     period_Tuc/=3600.
 
-    (ra, dec, seq, period, L, Lmin, Lmax)=load_LW('result_LW')
-    period_LW=period[np.where((period>3600)&(period<40000))]
+    (ra, dec, seq, period, L, Lmin, Lmax,type)=load_LW('result_LW')
+    period_LW=period[np.where((period>3900)&(period<40000))]
     period_LW/=3600.
-
+    print(period_LW)
     # fig, axes = plt.subplots(2, 1, figsize=(15, 10), sharex='all')
     fig, (ax1, ax2) = plt.subplots(ncols=1, nrows=2, sharex='all',gridspec_kw={'height_ratios': [2, 1]}, figsize=(15, 10))
     # ax1=fig.add_subplot(211)
@@ -134,9 +135,9 @@ def plot_CV_all(save=0,show=1):
          hatch='/', edgecolor='k',fill=True)
     ax1.hist(period_LW, bins=bins_2, histtype='step', lw=3, color='blue', linestyle='-')
     # ax1.hist(spin_IP, bins = bins_spin, histtype = 'step',lw=1.5, color = 'purple',linestyle='-')
-    ax1.legend(['Field CVs', 'CVs in 47 Tuc', 'CVs in Galactic Bulge'])
+    ax1.legend(['CVs in Solar Neighborhood', 'CVs in 47 Tuc', 'CVs in Galactic Bulge'])
 
-    P_min = 7./6.
+    P_min = 1.373333333
     P_gap = [7740.0 / 3600., 11448.0 / 3600.]
     ax1.set_ylim(8e-1, 360)
     ax1.set_xlim(0.5, 60)
@@ -168,7 +169,7 @@ def plot_CV_all(save=0,show=1):
     ax2.tick_params(labelsize=16)
     # ax2.set_yscale('log')
     if save:
-        plt.savefig(path_out + '47Tuc_NP.eps', bbox_inches='tight', pad_inches=0.05)
+        plt.savefig(path_out + '47Tuc_NP.pdf', bbox_inches='tight', pad_inches=0.05)
     if show:
         plt.show()
 
@@ -202,19 +203,20 @@ def plot_NP(save=1,show=1):
 
 def plot_dist_profile(save=0,show=1):
     (ra, dec, seq, period, L, Lmin, Lmax, type,L_1_8)=read_excel('47Tuc')
+    print(L)
     (ra_AB03, dec_AB03, seq_AB03, period_AB03, L_AB03, Lmin_AB03, Lmax_AB03, type_AB03,L_1_8_AB)=read_excel('47Tuc_AB')
     [ra_center,dec_center,rhl,rc]=pos_all['47Tuc']
     c1 = SkyCoord(ra * u.deg, dec * u.deg, frame='fk5')
     c2 = SkyCoord(ra_center * u.deg, dec_center * u.deg, frame='fk5')
     dist = c1.separation(c2)
     dist = dist.arcmin
-    print(seq)
-    print(dist*60)
+    # print(seq)
+    # print(dist*60)
     c3= SkyCoord(ra_AB03 * u.deg, dec_AB03 * u.deg, frame='fk5')
     dist_AB03 = c3.separation(c2)
     dist_AB03 = dist_AB03.arcmin
 
-    L=L_1_8
+    # L=L_1_8
     ##换成1-8keV的光度
 
     period_CV=period[np.where(type=='CV')]
@@ -236,41 +238,45 @@ def plot_dist_profile(save=0,show=1):
 
 
     (ra, dec, seq, period, L, Lmin, Lmax,type)=load_LW('result_LW')
-    print(type)
+    # print(type)
     period_LW_CV=period[np.where(type=='CV')]
     L_LW_CV=L[np.where(type=='CV')]
-
+    L_LW_CV=L_LW_CV*1.11423
 
 
     fig=plt.figure(1,figsize=(15,10))
     ax2=fig.add_subplot(211)
-    ax2.scatter(period_CV/3600.,L_CV,marker='v',s=80,color='w',linewidths=2,edgecolors='red')
-    ax2.scatter(period_LB/3600.,L_LB,marker='*',s=80,color='w',linewidths=2,edgecolors='green')
-    ax2.scatter(period_AB/3600.,L_AB,marker='o',s=80,color='w',linewidths=2,edgecolors='purple')
-    ax2.scatter(14366.89/3600.,8.2266E+28,marker='^',s=80,color='w',linewidths=2,edgecolors='c')
-    ax2.scatter(period_LW_CV/3600.,L_LW_CV*1e31,marker='v',s=80,color='w',linewidths=2,edgecolors='black')
+    ax2.scatter(period_CV/3600.,L_CV,marker='v',s=80,color='w',linewidths=2,edgecolors='red',label='CV')
+    ax2.scatter(period_LB/3600.,L_LB,marker='*',s=80,color='w',linewidths=2,edgecolors='green',label='LMXB')
+    ax2.scatter(period_AB/3600.,L_AB,marker='o',s=80,color='w',linewidths=2,edgecolors='purple',label='AB')
+    # ax2.scatter(14366.89/3600.,4.32236E+30,marker='^',s=80,color='w',linewidths=2,edgecolors='c',label='Src-No.481')
+    ax2.scatter(period_LW_CV/3600.,L_LW_CV*1e31,marker='v',s=80,color='w',linewidths=2,edgecolors='black',label='CV in Galactic Bulge')
 
     ax2.set_yscale('log')
     ax2.set_xscale('log')
     ax2.set_ylabel(r'Luminosity ($\rm erg~s^{-1}$)',font1)
     ax2.tick_params(labelsize=16)
-    ax2.legend(['CV','LMXB','AB','Src-No.481','CV in Galactic Bulge'],loc='best')
+    ax2.legend()
+    # ax2.legend(['CV','LMXB','AB','Src-No.481','CV in Galactic Bulge'],loc='best')
     P_gap = [7740.0 / 3600., 11048.0 / 3600.]
     P_min = [4902.0 / 3600., 4986.0/3600]
-    y1 = [0, 1e35]
+    y1 = [0, 2e33]
     # ax2.text(7900 / 3600., 5e36, 'period gap')
 
     ax2.text(P_gap[0] + 0.25, y1[1], r'$\rm P_{gap}$',fontsize=18)
     ax2.text(P_min[1] - 0.15, y1[1], r'$\rm P_{min}$',fontsize=18)
-    ax2.set_ylim(ymax=4e35)
+    ax2.set_ylim(ymax=4e33)
+    ax2.set_xlim(xmin=0.95,xmax=35)
     ax2.fill_between(P_gap, y1[1], facecolor='yellow', alpha=0.2)
     ax2.fill_between(P_min, y1[1], facecolor='grey', alpha=0.2)
+    ax2.set_xticks([1,10,20,30])
+    ax2.set_xticklabels(['1','10','20','30'])
 
     ax3=fig.add_subplot(212)
-    ax3.scatter(period_CV/3600.,dist_CV,marker='v',s=80,color='w',linewidths=2,edgecolors='red')
-    ax3.scatter(period_LB/3600.,dist_LB,marker='*',s=80,color='w',linewidths=2,edgecolors='green')
-    ax3.scatter(period_AB/3600.,dist_AB,marker='o',s=80,color='w',linewidths=2,edgecolors='purple')
-    ax3.scatter(14366.89/3600.,270.86/60,marker='^',s=80,color='w',linewidths=2,edgecolors='c')
+    ax3.scatter(period_CV/3600.,dist_CV,marker='v',s=80,color='w',linewidths=2,edgecolors='red',label='CV')
+    ax3.scatter(period_LB/3600.,dist_LB,marker='*',s=80,color='w',linewidths=2,edgecolors='green',label='LMXB')
+    ax3.scatter(period_AB/3600.,dist_AB,marker='o',s=80,color='w',linewidths=2,edgecolors='purple',label='AB')
+    # ax3.scatter(14366.89/3600.,270.86/60,marker='^',s=80,color='w',linewidths=2,edgecolors='c',label='Src-No.481')
     # ax3.scatter(period_AB03/3600.,dist_AB03,marker='o',s=80,color='w',linewidths=2,edgecolors='purple')
 
     ax3.plot([P_min[0],30],[rhl/60,rhl/60],'--')
@@ -281,7 +287,7 @@ def plot_dist_profile(save=0,show=1):
     ax3.text(P_min[0]-0.1,rhl/60,r'$\rm r_h$',fontsize=15)
     ax3.text(P_min[0]-0.1,rc/60,r'$\rm r_c$',fontsize=15)
     ax3.text(P_min[0] - 0.1, 1.2, r'$\rm R_{in}$', fontsize=15)
-    ax3.text(P_min[0]-0.1,30,r'$\rm R_{out}$',fontsize=15)
+    ax3.text(P_min[0]-0.15,30,r'$\rm R_{out}$',fontsize=15)
 
     ax3.set_yscale('log')
     ax3.set_xscale('log')
@@ -289,13 +295,15 @@ def plot_dist_profile(save=0,show=1):
     ax3.set_xlabel('Period (hours)',font1)
     ax3.tick_params(labelsize=16)
 
-    ax2.get_shared_x_axes().join(ax2, ax3)
+    # ax2.get_shared_x_axes().join(ax2, ax3)
     y2 = [0, 4]
     # ax2.text(7900 / 3600., 5e36, 'period gap')
     ax3.fill_between(P_min, 40, facecolor='grey', alpha=0.2)
     ax3.fill_between(P_gap, 40, facecolor='yellow', alpha=0.2)
     ax3.fill_between([P_min[0],30],y1=1.7,y2=40,facecolor='blue',alpha=0.1)
-
+    ax3.set_xlim(xmin=0.95,xmax=35)
+    ax3.set_xticks([1,10,20,30])
+    ax3.set_xticklabels(['1','10','20','30'])
     # plt.figure(2)
     # plt.hist(dist_CV*60,bins=20,histtype='step',lw=2,color='red',cumulative=1,density=1,linestyle='--')
     # plt.hist(dist_AB03*60, bins=30, histtype = 'step', lw = 3, color = 'blue', cumulative = 1, density = 1, linestyle = '-')
@@ -629,7 +637,7 @@ def adapt_bin(dist,cxb):
             continue
         else:
             SN=net_cts/np.sqrt(temp_cts)
-            if net_cts>5 or SN >2:
+            if net_cts>5 or SN >3:
                 bin_rt_list.append(bin_rt)
                 bin_lf=bin_rt;bin_rt+=bin_step
                 continue
@@ -651,8 +659,12 @@ def spectrafit(x,y,error):
     return (popt,perr)
 
 def plot_surface_density(save=0,show=1):
-    cat=fits.open('/Users/baotong/Desktop/period_Tuc/Cheng2019.fit')
-    ra=cat[1].data['RAJ2000'];dec=cat[1].data['DEJ2000'];F058=cat[1].data['F0_5-8']
+    cat=fits.open('/Users/baotong/Desktop/period_Tuc/cheng2019_Tuc.fit')
+    ra=cat[1].data['RAJ2000'];dec=cat[1].data['DEJ2000'];F058=cat[1].data['F0_5-8'];L058=cat[1].data['L0_5-8']
+    ## filtering periodic sources ##
+    filter_index=np.array([217,414,185,366,423,232,263,331,273,317,162,252,290,198,312,229])-1
+    ra=np.delete(ra,filter_index);dec=np.delete(dec,filter_index);F058=np.delete(F058,filter_index);L058=np.delete(L058,filter_index)
+    ##--------------------------##
     [ra_center,dec_center,rhl,rc]=pos_all['47Tuc']
     c1 = SkyCoord(ra * u.deg, dec * u.deg, frame='fk5')
     c2 = SkyCoord(ra_center * u.deg, dec_center * u.deg, frame='fk5')
@@ -665,6 +677,9 @@ def plot_surface_density(save=0,show=1):
     dist=np.array([8.47522594,49.89957386,23.63156505,35.67687066,58.05747122,3.39603853,3.94875538,15.18944144,
                    10.12621419,10.80148101,21.69163174,3.32388461,53.67657374,
                    14.81336603,4.48256703,270.8604792])
+    # dist=np.array([49.89957386,23.63156505,35.67687066,58.05747122,15.18944144,
+    #                10.12621419,10.80148101,3.32388461,53.67657374,
+    #                14.81336603,4.48256703])
     dist=dist/60
     cheng_profile=pd.read_excel(path+'profile.xlsx')
     x_f=cheng_profile.iloc[0:16,0];x_f_err=cheng_profile.iloc[0:16,1]
@@ -680,9 +695,12 @@ def plot_surface_density(save=0,show=1):
     # y2_net=y2-y2cxb
 
     index_faint=np.where(F058<1e-6);index_bright=np.where(F058>1e-6)
-    print(len(index_bright[0]),len(index_faint[0]))
+    # index_faint = np.where(L058 < 5e30);index_bright = np.where(L058 > 5e30)
+    print('bright group:',len(index_bright[0]))
+    print('faint group:',len(index_faint[0]))
     bin_rt_list=adapt_bin(dist_all[index_bright],0.25)
     bin_rt_list=np.concatenate(([0],bin_rt_list))
+    bin_rt_list=bin_rt_list[:-1];bin_rt_list[-1]=3.17  ## convert the hist range to FoV
     # print('bin_rt_list',bin_rt_list)
     x1=[(bin_rt_list[i]+bin_rt_list[i+1])/2 for i in range(len(bin_rt_list)-1)]
     x1err = [(bin_rt_list[i + 1] - bin_rt_list[i]) / 2 for i in range(len(bin_rt_list) - 1)]
@@ -696,23 +714,21 @@ def plot_surface_density(save=0,show=1):
     y1_err[0] = y1 - y1_err[0];y1_err[1] = y1_err[1] - y1
     y2_err = np.array(poisson_conf_interval(y2, interval='frequentist-confidence'))
     y2_err[0] = y2 - y2_err[0];y2_err[1] = y2_err[1] - y2
+    print('y2=',y2)
     y1=y1/area1
     y1_net=y1
     for i in range(len(x1)-1):
         index=np.argmin(x_f_cxb-x1[i+1])
         y1_net[i]-=y_f_cxb[index]
-    # print(y1_net)
+    print(y1_net)
     y2_net=y2/area1-0.25
     y1_err=y1_err/area1;y2_err=y2_err/area1
-
-    bins=bin_rt_list
-    print(bins)
-    bins=[0,0.1,0.2,0.5,1.5,6.11]
+    print('bins_group:',bin_rt_list)
+    bins=[0,0.1,0.2,0.36,1.0]
     hist1=plt.hist(dist,bins)
     plt.close()
     num1=hist1[0]
     y=num1
-    print(y)
     x=[(bins[i]+bins[i+1])/2 for i in range(len(bins)-1)]
     area=[(bins[i+1]**2-bins[i]**2)*np.pi for i in range(len(bins)-1)]
     y_err = np.array(poisson_conf_interval(y, interval='frequentist-confidence'))
@@ -722,34 +738,39 @@ def plot_surface_density(save=0,show=1):
     y=y/area
     y_err=y_err/area
     xerr=[(bins[i+1]-bins[i])/2 for i in range(len(bins)-1)]
-    print('x=',x)
-    print('y=',y)
-    print('y1_err=',y1_err)
-    (popt, perr) = spectrafit(x1[0:6], y1_net[0:6], y1_err[0][0:6])
+    (popt, perr) = spectrafit(x1[0:3], y1_net[0:3], y1_err[0][0:3])
+    print('Faint group')
+    print('popt=',popt)
+    print('perr=',perr)
+    x1=np.concatenate(([1e-2],x1))
+    plt.figure(1, (8, 8))
+    plt.plot(x1[0:4], np.exp(f(np.log(x1[0:4]), popt[0], popt[1])),'-.',color='r')
+    # plt.fill_between(x1[0:7],np.exp(f(np.log(x1[0:7]), popt[0]-perr[0], popt[1]-perr[1])),
+    #                  np.exp(f(np.log(x1[0:7]), popt[0]+perr[0], popt[1]+perr[1])),facecolor = 'r', alpha = 0.4)
+    x1 = x1[1:]
+    (popt, perr) = spectrafit(x1[0:3], y2_net[0:3], y2_err[0][0:3])
+    print('Bright group')
     print('popt=',popt)
     print('perr=',perr)
 
     x1=np.concatenate(([1e-2],x1))
-    plt.figure(1, (8, 8))
-    plt.plot(x1[0:9], np.exp(f(np.log(x1[0:9]), popt[0], popt[1])),'-.',color='r')
-    # plt.fill_between(x1[0:7],np.exp(f(np.log(x1[0:7]), popt[0]-perr[0], popt[1]-perr[1])),
-    #                  np.exp(f(np.log(x1[0:7]), popt[0]+perr[0], popt[1]+perr[1])),facecolor = 'r', alpha = 0.4)
-    x1 = x1[1:]
-    (popt, perr) = spectrafit(x1[0:6], y2_net[0:6], y2_err[0][0:6])
-    x1=np.concatenate(([1e-2],x1))
-    plt.plot(x1[0:9], np.exp(f(np.log(x1[0:9]), popt[0], popt[1])),'-.',color='g')
+    plt.plot(x1[0:4], np.exp(f(np.log(x1[0:4]), popt[0], popt[1])),'-.',color='g')
     # plt.fill_between(x1[0:7],np.exp(f(np.log(x1[0:7]), popt[0]-perr[0], popt[1]-perr[1])),
     #                  np.exp(f(np.log(x1[0:7]), popt[0]+perr[0], popt[1]+perr[1])),facecolor = 'g', alpha = 0.4)
     # x1 = x1[1:]
-    (popt, perr) = spectrafit(x[0:4], y[0:4]*10, y_err[0][0:4])
+    (popt, perr) = spectrafit(x[0:3], y[0:3], y_err[0][0:3])
     x = np.concatenate(([1e-2], x))
-    plt.plot(x[0:5], np.exp(f(np.log(x[0:5]), popt[0], popt[1])),'-.',linewidth=2,color='k')
+    plt.plot(x[0:4], np.exp(f(np.log(x[0:4]), popt[0], popt[1])),'-.',linewidth=2,color='k')
+
+    print('Periodic group')
+    print('popt=',popt)
+    print('perr=',perr)
     # plt.fill_between(x[0:4],np.exp(f(np.log(x[0:4]), popt[0]-perr[0], popt[1]-perr[1])),
     #                  np.exp(f(np.log(x[0:4]), popt[0]+perr[0], popt[1]+perr[1])),facecolor = 'k', alpha = 0.4)
     x1 = x1[1:];x=x[1:]
     plt.errorbar(x1,y1_net,xerr=x1err,yerr=y1_err,fmt='ro', capsize=1, elinewidth=1, ecolor='r', color='r',markersize=4,label='Faint group')
     plt.errorbar(x1,y2_net,xerr=x1err,yerr=y2_err,fmt='go', capsize=1, elinewidth=1, ecolor='g', color='g',markersize=4,label='Bright group')
-    plt.errorbar(x,y*10,xerr=xerr,yerr=y_err*10,fmt='ks', capsize=2, elinewidth=2, ecolor='k', color='k',markersize=8,label=r'$\rm Periodic~sources\times10$')
+    plt.errorbar(x,y,xerr=xerr,yerr=y_err,fmt='ks', capsize=2, elinewidth=2, ecolor='k', color='k',markersize=8,label=r'$\rm Periodic~CVs$')
     plt.plot([3.17,3.17],[0,1000],'--')
     plt.plot([3.17/8.8,3.17/8.8],[0,1000],'--')
     plt.text(3.17/8.8,1400,r'$r_c$',font1,horizontalalignment='center',verticalalignment='center')
@@ -805,11 +826,12 @@ def plot_surface_density(save=0,show=1):
     plt.tick_params(labelsize=16)
     plt.show()
     '''
+
 if __name__=="__main__":
-    # plot_CV_all(save=1,show=1)
-    # plot_dist_profile(save=0,show=1)
+    plot_CV_all(save=1,show=1)
+    # plot_dist_profile(save=1,show=1)
     # plot_src_lc_singleobs(figurepath=path_out,save=1,show=1)
     # plot_CR_all()
     # plot_CR_GCLW(save=1,show=1)
     # plot_CV_Temp(save=1,show=1)
-    plot_surface_density(save=1,show=1)
+    # plot_surface_density(save=1,show=1)

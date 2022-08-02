@@ -80,7 +80,7 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,bkg=1,ecf=9
                               singlename=singlename)
         if bkg:
             srcid_list, x_list, y_list, psf_list = srcid, phy_x, phy_y, src_radius
-
+            if type(srcid_list)==list:srcid_list=np.array(srcid_list)
             for n in range(srcid_list.size):
                 f = open(path_out + 'region_{}/region_{}/{}_bkg.reg'.format(obs_ID_all[i],ecf,srcid_list[n]), 'w+')
                 x = x_list[n]

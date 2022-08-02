@@ -247,7 +247,7 @@ def get_T_in_mbins(epoch_info,w,m,fi):
 
 #
 # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
-path_Tuc='/Users/baotong/Desktop/period_M30/txt_all_obs_p90/'
+path_Tuc='/Users/baotong/Desktop/period_NGC6304/txt_all_obs_p90/'
 # path_Tuc='/Users/baotong/Desktop/period_NGC3201/txt_all/txt_all_obs_p90/'
 # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
 path = path_Tuc
@@ -291,7 +291,7 @@ def write_result(dataname):
     energy=src_evt[:,1]
     time = hawk.filter_energy(time, energy, [500, 8000])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./3000,1./100,1.e-6)
+    w_range=2*np.pi*np.arange(1./3000,1./100,1.e-5)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=20,parallel=True)
     endtime = datetime.datetime.now()
@@ -338,13 +338,13 @@ def get_result_fromid(id_range):
     print(result)
     print(path)
     # np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result, fmt='%10d %10.2f %10.2f %10.5f %10.5f %10d %10.5f %10.5f')
-    np.savetxt('/Users/baotong/Desktop/period_M30/result_GL/'+'result_3k_{0}.txt'.format(id_range[0]), result,
+    np.savetxt('/Users/baotong/Desktop/period_NGC6304/result_GL/'+'result_3k_{0}.txt'.format(id_range[0]), result,
                fmt='%10d %10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
     # get_result_fromid(['30'])
-    # a=np.arange(1,85,1)
-    a=[14,16,22,1,13,20,2,12,51,29,67,17,47,50,70,73,30,64,71,68]
+    a=np.arange(1,184,1)
+    # a=[14,16,22,1,13,20,2,12,51,29,67,17,47,50,70,73,30,64,71,68]
     for i in a:
         get_result_fromid([i])
 

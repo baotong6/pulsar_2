@@ -41,6 +41,7 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
         plt.text(t_mid[i],CR[i]*1.2,str(int(obsID[i])))
     if show:
         plt.show()
+    else:plt.close()
 
     if iffold:
         plt.figure(2)

@@ -17,7 +17,9 @@ import hawkeye as hawk
 
 def load_data(dataname,ecf=90):
     # path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(ecf)
-    path_Tuc='/Users/baotong/Desktop/period_omg/txt_all_obs_p{0}/'.format(ecf)
+    # path_Tuc = '/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
+    path_Tuc = '/Users/baotong/Desktop/period_NGC6304/txt_all_obs_p90/'
+    # path_Tuc='/Users/baotong/Desktop/period_omg/txt_all_obs_p{0}/'.format(ecf)
     # path_Tuc='/Users/baotong/Downloads/'
     # path_Tuc='/Users/baotong/Desktop/period_NGC3201/txt_all/txt_all_obs_p{0}/'.format(ecf)
     # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
@@ -34,8 +36,8 @@ def load_data(dataname,ecf=90):
     CR/=ecf/100.
 
     (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                            flux_filter=60,expT_filter=1000,
-                                            if_flux_high=0, if_expT_high=1,obsID=[13727,13726])
+                                            flux_filter=20,expT_filter=1000,
+                                            if_flux_high=0, if_expT_high=1,obsID=None)
 
     # [953,955,956, 2736, 3385,2738,16527,15747, 16529,15748]
     # [78, 953,   954,   955,   956,  2735,  3384,  2736,  3385,  2737,3386,  2738,  3387,
@@ -73,12 +75,12 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
     return lc_all
 
 def main_process():
-    dataname='186'
-    bin_len = 2000
+    dataname='40'
+    bin_len = 100
     (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90)
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
-    period =49504.9505
+    period =100.46885
     net_p = 0.77
 
     time = src_evt_use[:, 0]
@@ -86,7 +88,7 @@ def main_process():
     time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[500,8000])
     hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.0)
     # plt.close()
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=30,shift=0.,
+    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=30,shift=0.3,
                     label=dataname,text='Seq.232 (W37)',save=0,show=1)
 
     # plt.hist(time,bins=300,histtype='step')
@@ -94,7 +96,7 @@ def main_process():
     lc=hawk.get_hist(time,len_bin=bin_len,tstart=epoch_info_use[:,0][0],tstop=epoch_info_use[:,1][-1])
     T_tot=epoch_info_use[:,1][-1]-epoch_info_use[:,0][0]
     freq = np.arange(1 / T_tot, 0.5/ bin_len, 1 / (10* T_tot))
-    freq = freq[np.where(freq > 1 / 40000.)]
+    freq = freq[np.where(freq > 1 / 50000.)]
 
     figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/'
     # (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq=freq,outpath=figurepath, outname=str(dataname),save=0,show=1)

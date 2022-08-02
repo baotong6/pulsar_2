@@ -26,12 +26,17 @@ def select_src_bypos(srcID_list,ra,dec,ra_c,dec_c,inter_radius,outpath=None,outn
     dist = c1.separation(c2)
     dist = dist.arcsec
     inter_srcID = srcID_list[np.where(dist < inter_radius)[0]]
+    counts=[]
+    for i in range(len(inter_srcID)):
+        evt=np.loadtxt(outpath+f'{inter_srcID[i]}.txt')
+        counts.append(len(evt))
+    print(counts)
     if save:
         if not(outpath) or not(outname):
             print('please provide outpath and outname if save')
             return inter_srcID
-        np.savetxt(outpath + '{0}'.format(outname), inter_srcID, fmt='%10d')
-
+        outevt=np.column_stack((inter_srcID,counts,dist[np.where(dist < inter_radius)[0]]))
+        np.savetxt(outpath + '{0}'.format(outname), outevt, fmt='%10d  %10d %10.5f')
     return inter_srcID
 
 def where_region_annulus(x, y, reg):

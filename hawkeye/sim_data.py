@@ -65,14 +65,13 @@ def get_time_series(T_START,N_cts,T_stop,period=300.,amp=0.7, model='sin',eqw=0.
         t=np.sort(t)
         return t
 
-def get_epoch_time_series(cts_rate,period,amp, model):
+def get_epoch_time_series(cts_rate,period,amp, model,epoch_info):
     t=[]
-    path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
-    epoch = np.loadtxt(path+'epoch_src_384.txt')
+    if epoch_info.ndim==1:epoch_info=np.array([epoch_info])
     # epoch = np.loadtxt('LW_epoch.txt')
-    tstart=epoch[:,0]
-    tstop=epoch[:,1]
-    exp_time_epoch=epoch[:,-1]
+    tstart=epoch_info[:,0]
+    tstop=epoch_info[:,1]
+    exp_time_epoch=epoch_info[:,-1]
     if model=='const':
         for i in range(len(tstart)):
             #VI=10
@@ -84,6 +83,6 @@ def get_epoch_time_series(cts_rate,period,amp, model):
             t.append(get_time_series(tstart[i],cts,tstop[i],period,amp,model=model))
     t=list(chain.from_iterable(t))
     t = np.array(t)
-    # t = t + np.random.rand(len(t)) * 3.2 - 1.6
+    t = t + np.random.rand(len(t)) * 3.2 - 1.6
     return t
 

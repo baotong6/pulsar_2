@@ -138,84 +138,6 @@ def compute_Om1w(Tlist, m_max, w, fa, fbin, ni,epoch_info):  # compute odds-rati
             Om1w[m, wi] = compute_Om1(w[wi], Tlist, m + 1, fa[m], fbin, ni,epoch_info)
     return Om1w
 
-def compute_GL(Tlist,epoch_info, m_max=20, w_range=None, ni=10, parallel=False):
-    # initialize output values
-    O_period = None
-    p_period = None
-    m_opt = None
-    S = None
-    w = None
-    w_peak = None
-    w_mean = None
-    w_conf = None
-    N = float(np.size(Tlist))  # need float value to avoid int/int
-    if N > 0:
-        # compute GL algorithm
-        fbin = precompute_binmult(N)
-        v = m_max - 1
-        T = float(np.max(Tlist)-np.min(Tlist))  # duration of the observation
-        if w_range is None:  # use default frequencies
-            w_hi = 5*np.pi * N / T  # max default frequency
-
-            w_lo = np.minimum(20, N / 10) * np.pi / T  # min default frequency
-            dw = np.pi / T / 10  # step size
-            w = np.arange(w_lo, w_hi, dw)
-            if np.size(w) < 2:
-                print
-                "error "
-                raise ValueError('bad arrival time list')
-        else:  # use user supplied frequency vector
-            w = w_range
-            w_hi = np.max(w_range)
-            w_lo = np.min(w_range)
-            dw=w[2]-w[1]
-        if w_lo == 0:
-            # cannot have w_lo =0
-            print("minimum frequency cannot be 0!\n")
-            return
-
-        fa = np.zeros(m_max)
-        for m in range(0, m_max):  # precompute factors for each m
-            fa[m] = compute_factor(N, m + 1, v)
-        if parallel:
-            Om1w = compute_Om1wPar(Tlist, m_max, w, fa, fbin, ni,epoch_info)
-        else:
-            Om1w = compute_Om1w(Tlist, m_max, w, fa, fbin, ni,epoch_info)
-
-        pw = 1./ (w*np.log(w_hi / w_lo))
-        O1m = np.zeros(m_max)
-        for i in range(0, m_max):  # intgreate odd ratios across frequencies
-            O1m[i] = np.trapz(pw * Om1w[i], w)
-
-        m_opt = np.argmax(O1m) # find optimum bin number, i.e largest odds-ratio
-        S = Om1w[m_opt] / w  # compute Spectral probability
-        m_opt = m_opt + 1  # start bin index with 1
-        C = np.trapz(S, w)  # compute normalization
-        S = S / C  # normalized probability
-        O_period = np.sum(O1m[1:])  # integrated odds ratio
-        p_period = O_period / (1 + O_period)  # likelihood of periodic event
-        cdf = np.array(S)
-        plt.plot(w,cdf)
-        plt.show()
-        for i in range(0, np.size(S)):
-            cdf[i] = np.trapz(S[0:i], w[0:i])
-
-        wr = np.extract(np.logical_and(cdf > .0025, cdf < .9975), w)
-        w_peak = w[np.argmax(S)]
-        w_mean = np.trapz(S * w, w)
-        if np.size(wr) > 0:
-            print('exist')
-            w_conf = [np.min(wr), np.max(wr)]
-            if np.min(wr)==np.max(wr):
-                print('asymmetric')
-                w_conf=[np.min(wr)-dw, np.max(wr)+dw]
-        else:
-            w_conf = [w_peak-dw, w_peak+dw]
-        return O_period, p_period, m_opt, S, w, w_peak, w_mean, w_conf,cdf
-    else:
-        # throw an error
-        print("No valid arrival time array provided!\n")
-        return O_period, p_period, m_opt, S, w, w_peak, w_mean, w_conf
 
 def get_T_in_mbins(epoch_info,w,m,fi):
     T=2*np.pi/w
@@ -245,90 +167,34 @@ def get_T_in_mbins(epoch_info,w,m,fi):
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
 
-#
-# path_eSASS = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
-# path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p90/'
-# path = path_Tuc
-# path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
-# print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
-def filter_obs(src_evt,useid):
-    src_evt_use = src_evt[np.where(src_evt[:-1] == useid[0])[0]]
-    i=1
-    while i < len(useid):
-        id=useid[i]
-        src_evt_use_temp=src_evt[np.where(src_evt[:-1]==id)[0]]
-        src_evt_use = np.concatenate((src_evt_use, src_evt_use_temp))
-        i+=1
-    return src_evt_use
 
-def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
-    epoch_info=np.loadtxt(epoch_file)
-    epoch_info=epoch_info
-    if epoch_info.ndim == 1:
-        epoch_info=np.array([epoch_info])
-    src_evt=np.loadtxt(data_file)
-    if src_evt.ndim<2:
+def compute_GLvary(Tlist,epoch_info,m_max=100,ni=10,parallel=False):
+    ## for single obs, epoch_info should be [[tstart,tstop]]
+
+    N = float(np.size(Tlist))  # need float value to avoid int/int
+    if N > 0:
+        T = float(np.max(Tlist) - np.min(Tlist))  # duration of the observation
+        w=2*np.pi/T
+        fa = np.zeros(m_max)
+        v = m_max - 1
+        fbin = precompute_binmult(N)
+        for m in range(0, m_max):  # precompute factors for each m
+            fa[m] = compute_factor(N, m + 1, v)
+        if parallel:
+            Om1w = compute_Om1wPar(Tlist, m, w, fa, fbin, ni, epoch_info)
+        else:
+            Om1w = compute_Om1w(Tlist, m, w, fa, fbin, ni, epoch_info)
+
+        Opw=np.sum(Om1w)
+        return (Opw,Om1w)
+    else:
+        print('wtf! no events!')
         return None
-
-    if if_filter:
-        CR=hawk.plot_longT_V(src_evt=src_evt, bkg_file=None,epoch_info=epoch_info,show=False)
-        plt.close()
-        print(CR)
-        (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                                flux_filter=2,expT_filter=1000,
-                                                if_flux_high=0, if_expT_high=True,obsID=None)
-        epoch_info = epoch_info_use  ##这里随意改
-
-        src_evt_use =hawk.filter_obs(src_evt, useid)
-        src_evt=src_evt_use
-
-    time=src_evt[:,0]
-    energy=src_evt[:,1]
-    starttime = datetime.datetime.now()
-    time = hawk.filter_energy(time, energy, [500, 8000])
-    counts = len(time)
-    print('counts=',counts)
-    GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=12,parallel=True)
-    endtime = datetime.datetime.now()
-    srcid=dataname
-    runtime=(endtime - starttime).seconds
-    Prob=GL_R[1]
-    wpeak=GL_R[5]
-    wmean=GL_R[6]
-    mopt=GL_R[2]
-    wconf_lo=GL_R[7][0]
-    wconf_hi=GL_R[7][1]
-    period=2*np.pi/wpeak
-
-    return [int(srcid),runtime,Prob,period,wpeak,wmean,mopt,wconf_lo,wconf_hi,counts]
-
-
-def get_result_fromid(id_range):
-    # path = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
-    path_Tuc = '/Users/baotong/Desktop/period_NGC6304/txt_all_obs_p90/'
-    # path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(75)
-    # path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
-    # path_out='/Users/baotong/Desktop/period_NGC6266/txt_all_obs_p90/'
-
-    path=path_Tuc
-    # obsid = 700163
-    res_all=[]
-    for id in id_range:
-        dataname=str(id)
-        # data_file = path + f'{dataname}_{obsid}.txt'
-        # epoch_file = path + f'epoch_47Tuc_{obsid}.txt'
-        data_file = path + f'{dataname}.txt'
-        epoch_file = path + f'epoch_src_{dataname}.txt'
-        w_range = 2 * np.pi * np.arange(1 / 200., 1 / 80, 1e-5)
-        result = hawk.GL.write_result(data_file, epoch_file,w_range, dataname=dataname,if_filter=True)
-        # print(result)
-        result_new=np.reshape(np.array(result),(1,10))
-        print(result_new)
-        # np.savetxt(path_out+'result_1h_3h_{0}.txt'.format(dataname), result_new,
-        #            fmt='%10s %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
-
 if __name__ == '__main__':
-    id_range=[40]
-    get_result_fromid(id_range)
+    ##ni 是积分loop，越小越准，但是越慢
+    ##m_max是分bin的最大个数，m取0到m_max
+    ##输出Om1w是Odds ratio的一个table，T/m为每个bin的时间，最高的一个odds ratio对应的时标即为光变typical时标
+    ## Opw是odds ratio的和，一般来说，大于1就是光变源
+    (Opw,Om1w)=compute_GLvary(Tlist,epoch_info,m_max=100,ni=10,parallel=True)
 
 #choose_id(1, 3)

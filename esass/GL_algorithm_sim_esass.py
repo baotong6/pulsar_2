@@ -33,23 +33,23 @@ import matplotlib.pyplot as plt
 import multiprocessing as mp
 import functools
 import datetime
-import GL_algorithm_esass as GL
-import funcs_sim_timeseries as funcs_sim
+import esass.GL_algorithm_esass as GL
+import esass.funcs_sim_timeseries as funcs_sim
 import sys
 
 def write_result(dataname,cts_num,amp_num):
     path='/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/'
-    epoch_file = path + 'epoch_47Tuc.txt'
+    epoch_file = path + 'epoch_47Tuc_700163.txt'
     epoch_info=np.loadtxt(epoch_file)
     cts_rate_standard=0.01
     amp_standard=1.0
-    time = funcs_sim.get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period =3600.,
-                                           amp =amp_standard*amp_num,epoch=epoch_info,model = 'sin',varydelta=5)
+    time = funcs_sim.get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period =7200.,
+                                           amp =amp_standard*amp_num,epoch=epoch_info,model = 'sin',varydelta=0)
     # time = funcs_sim.get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period =3600.,
     #                                        amp =amp_standard*amp_num,epoch=epoch_info,model = 'sin')
     print(len(time))
 
-    w_range = 2 * np.pi * np.arange(1. /10000, 1. /3000., 5e-7)
+    w_range = 2 * np.pi * np.arange(1. /10000, 1. /3000., 1e-6)
     starttime = datetime.datetime.now()
     GL_R = GL.compute_GL(time, epoch_file,w_range=w_range, m_max=12, parallel=True)
     endtime = datetime.datetime.now()
@@ -67,7 +67,7 @@ def write_result(dataname,cts_num,amp_num):
     return [srcid, runtime, Prob, wpeak, mopt, wconf_lo, wconf_hi,O_per_w,p_per_w,N_cts]
 
 def get_result_fromid(dataname,cts_num,amp_num):
-    path_out='/Users/baotong/eSASS/data/raw_data/47_Tuc/simulation/vary_delta_GL/'
+    path_out='/Users/baotong/eSASS/data/raw_data/47_Tuc/simulation/GL_25k/period_2h/'
     result_srcid=int(dataname)
     res = write_result(dataname = dataname,cts_num=cts_num,amp_num=amp_num)
     #result_srcid=res[0]
@@ -89,8 +89,8 @@ def get_result_fromid(dataname,cts_num,amp_num):
                fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f %10d')
 
 if __name__ == '__main__':
-    cts_range = [1.5]
-    amp_range = [0.2, 0.3, 0.4, 0.5]
+    cts_range = [1.0,2.0,3.0,4.0]
+    amp_range = [0.2]
     for x in range(len(cts_range)):
         cts_num=cts_range[x]
         for y in range(len(amp_range)):
