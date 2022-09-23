@@ -108,7 +108,7 @@ def plot_P_L(save=0,show=1):
     for i in range(len(gcname)-1):
         gc_srcid=np.where(type==gcname[i])[0]
         ax1.scatter(period[gc_srcid]/3600,L[gc_srcid],marker=label[i],color=color_list[i],label=gcname[i],s=50)
-        ax2.scatter(period[gc_srcid] / 3600, dist[gc_srcid] / pos_all[gcname[i]][3], marker=label[i],
+        ax2.scatter(period[gc_srcid] / 3600, dist[gc_srcid] / pos_all[gcname[i]][2], marker=label[i],
                     color=color_list[i], label=gcname[i], s=50)
     ax1.plot([P_min, P_min], [0, 1e33], '--',color='grey')
     ax1.plot([P_gap[0], P_gap[0]], [0, 1e33], '-',lw=2.,color='orange')
@@ -116,7 +116,7 @@ def plot_P_L(save=0,show=1):
     ax1.loglog()
     ax1.set_ylabel(r'Luminosity ($\rm erg~s^{-1}$)',hawk.font1)
     # ax1.set_xlabel('Period (h)',hawk.font1)
-    ax1.set_xlim(1,17)
+    ax1.set_xlim(1,28)
     ax1.tick_params(labelsize=18)
     # ax1.legend()
     ax1.sharex(ax2)
@@ -125,8 +125,8 @@ def plot_P_L(save=0,show=1):
     ax2.plot([P_gap[1], P_gap[1]], [0, 10], '-',lw=2.,color='orange')
     ax2.set_xlabel('Period (h)',hawk.font1)
     ax2.set_ylabel(r'R/$r_{h}$',hawk.font1)
-    ax2.set_xlim(1,17)
-    ax2.set_ylim(2e-2,30)
+    ax2.set_xlim(1,28)
+    ax2.set_ylim(1e-2,20)
     ax2.tick_params(labelsize=18)
     ax2.loglog()
     ax2.legend(loc='upper center',ncol=7,handletextpad=0.1,columnspacing=0.1,handlelength=1.5,edgecolor='grey')
@@ -161,5 +161,5 @@ def plot_spec():
     plt.loglog()
     plt.show()
 if __name__=='__main__':
-    plot_P_L(save=0,show=1)
+    plot_P_L(save=1,show=1)
     # plot_spec()

@@ -48,3 +48,29 @@ ax2.plot((-d,d),(1-d,1+d), **kwargs) # bottom-right diagonal
 # the diagonal lines will move accordingly, and stay right at the tips
 # of the spines they are 'breaking'
 plt.show()
+
+## wiritten by suzhao ##
+fig = plt.figure(figsize=[4,3], dpi=160)
+ax = fig.add_subplot(111)
+ax.scatter(sample_a, e, s=0.2, c='k')
+ax.set_xlim(0, 6.3)
+ax.set_ylim(0, 1.)
+ax.set_xlabel(r"$a~\rm [pc]$")
+ax.set_ylabel(r"$e$")
+
+display_to_fig = fig.transFigure.inverted().transform
+ax_to_display = ax.transAxes.transform
+
+left, bottom = display_to_fig(ax_to_display([0, 1]))
+width, height = (display_to_fig(ax_to_display([1, 0.2])) - display_to_fig(ax_to_display([0, 0])))
+ax2 = fig.add_axes([left, bottom, width, height], sharex=ax)
+ax.tick_params(axis='x', which='major', top=True)
+ax2.tick_params(axis='x', which='major', labelbottom=False)
+ax2.hist(sample_a, density=True, color='k', fill=None, bins=20)
+
+left, bottom = display_to_fig(ax_to_display([1, 0]))
+width, height = (display_to_fig(ax_to_display([0.2, 1.0])) - display_to_fig(ax_to_display([0, 0])))
+ax3 = fig.add_axes([left, bottom, width, height], sharey=ax)
+ax.tick_params(axis='y', which='major', right=True)
+ax3.tick_params(axis='y', which='major', labelleft=False)
+ax3.hist(e, density=True, color='k', fill=None, bins=20, orientation='horizontal')

@@ -10,7 +10,7 @@ font1 = {'family': 'Normal',
          'weight': 'normal',
          'size': 18, }
 plt.rc('legend',fontsize=14 )
-def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=None,shift=None,show=True):
+def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=None,shift=None,show=False):
     if epoch_info.ndim == 1:epoch_info=np.array([epoch_info])
     t_start = epoch_info[:, 0]
     t_end = epoch_info[:, 1]

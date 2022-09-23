@@ -1,7 +1,11 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
 import numpy as np
+import matplotlib.pyplot as plt
 from stingray.events import EventList
+import scipy.stats as stats
+import random
+
 
 def get_T_in_mbins(epoch_info,w,m,fi):
     T=2*np.pi/w
@@ -32,7 +36,6 @@ def get_T_in_mbins(epoch_info,w,m,fi):
     return T_in_perbin
 
 def choose_obs(epoch_info,flux_info=None,flux_filter=0,expT_filter=0,if_flux_high=True,if_expT_high=True,obsID=None):
-
     if obsID:
         filter=[]
         for i in range(len(obsID)):
@@ -96,6 +99,14 @@ def filter_obs(src_evt,useid,bkg_evt=None):
             i+=1
         return (src_evt_use, bkg_evt_use)
 
+def filter_time_t1t2(time,t1,t2):
+    index1=np.where(time>(time[0]+t1))
+    index2=np.where(time<(time[0]+t2))
+    indexall=np.intersect1d(index1,index2)
+
+    return time[indexall]
+
+
 def get_hist(t, len_bin,tstart=0,tstop=0):
     ###将输入的time信息，按照len_bin的长度输出为lc
     if tstart==0 and tstop==0:
@@ -141,3 +152,79 @@ def read_epoch(epoch_file):
     OBSID=epoch[:,2]
     exptime=epoch[:,3]
     return (TSTART, TSTOP, OBSID, exptime)
+
+
+def get_Z2(time,freq):
+    N=len(time)
+    def turns(t,f):
+        ti=t-t[0]
+        v=f
+        p=1.0/v
+        # pdot=-vdot/(v*v)
+        # vddot = 2.0 * pdot * pdot / (p * p * p)
+        freq = v # + ti * vdot + ti * ti / 2.0 * vddot
+        turns=v*ti
+        INT_turns=np.trunc(turns)
+        turns=turns-INT_turns
+        turns = 2.0*np.pi*turns #+ vdot * ti * ti / 2.0 + vddot * ti * ti * ti / 6.0
+        return turns
+    #print time
+    Z2=[]
+
+    for fi in freq:
+        Z2.append((2.0 / N)*(sum(np.cos(turns(time,fi)))**2+sum(np.sin(turns(time,fi))**2)))
+    cts=len(time)
+    return (Z2,cts)
+
+def plot_Z2(time,freq):
+    T_tot=1e5
+    freq=np.arange(1/T_tot,0.5/100,1/(5*T_tot))
+    freq=freq[np.where(freq>1/10000)]
+    v=len(freq)
+    [Z2,cts]=get_Z2(time,freq)
+    Z2=np.array(Z2)
+    (p99_Z2,p90_Z2)=get_Z2_thres(v)
+    plt.figure(1,(7,7))
+    plt.semilogx(freq,[p99_Z2 for i in range(len(Z2))],'--',color='black')
+    plt.semilogx(freq,[p90_Z2 for i in range(len(Z2))],'--',color='red')
+    plt.plot([1/1754.38596,1/1754.38596],[0,50],'--')
+    plt.step(freq,Z2,color='black')
+    plt.text(0.0005,p99_Z2+1,"99%")
+    plt.text(0.0005,p90_Z2+1,"90%")
+    plt.show()
+
+def get_Z2_thres(v):
+    # 采样频率数
+    v = 3e7
+    ##(1-p)**N=0.99
+    # 置信度99%
+    p99 = 1 - 0.99 ** (1.0 / v)
+    p90 = 1 - 0.90 ** (1.0 / v)
+    x1 = []
+    y1 = []
+    x2 = []
+    y2 = []
+    for x in np.linspace(1, 1000, 5000):
+        if stats.chi2.cdf(x, 2) != 0:
+            y1.append(np.abs((1 - stats.chi2.cdf(x, 2)) - p99))
+            y2.append(np.abs((1 - stats.chi2.cdf(x, 2)) - p90))
+            # print y1
+            x1.append(x)
+            x2.append(x)
+        else:
+            break
+    y1 = np.array(y1)
+    x1 = np.array(x1)
+    y2 = np.array(y2)
+    x2 = np.array(x2)
+    p99_Z2=x1[np.where(y1 == min(y1))][0]
+    p90_Z2=x1[np.where(y2 == min(y2))][0]
+    # print min(y1)
+    # print(x1[np.where(y1 == min(y1))])
+    # print("%e" % (1 - stats.chi2.cdf(x1[np.where(y1 == min(y1))], 2)))
+    # print(p99)
+    # print min(y2)
+    # print(x1[np.where(y2 == min(y2))])
+    # print("%e" % (1 - stats.chi2.cdf(x1[np.where(y2 == min(y2))], 2)))
+    # print(p90)
+    return (p99_Z2,p90_Z2)

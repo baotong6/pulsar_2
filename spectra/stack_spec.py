@@ -11,7 +11,6 @@ from scipy.interpolate import lagrange
 from scipy import interpolate
 from scipy.optimize import curve_fit
 import pandas as pd
-import read_csv as data
 src_ID = ['1180', '1182', '1628', '1538', '2961', '1487', '1514']
 # src_ID = ['2560', '1502', '2532', '1206', '3067', '1624', '2508',
 #           '3357', '2841', '1219', '2672', '2422', '1853', '3120', '1133', '2730',

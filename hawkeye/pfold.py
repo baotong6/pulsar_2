@@ -86,7 +86,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     plt.step(np.concatenate(([0], x2)), np.concatenate(([y2[0]], y2)), color='red',linewidth=1.5)
     plt.errorbar(x2 - 0.5 / bin, y2, yerr=y2_err, fmt='.', capsize=1, elinewidth=1.5, ecolor='red',linewidth=1.5)
     if text:plt.text(0.05,0.95, '{0}, P={1:.2f}s'.format(text,p_test), fontsize=18,fontweight='semibold',transform=ax1.transAxes)
-    plt.text(1.6,0.03*np.max(y2),'C={0}'.format(str(len(time))),fontsize=18)
+    # plt.text(1.6,0.03*np.max(y2),'C={0}'.format(str(len(time))),fontsize=18)
 
     ax2 = ax1.twinx()
     yhigh = (np.max(y2) + np.max(y2) ** 0.5) * 1.05 / np.mean(y2)

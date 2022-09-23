@@ -34,6 +34,7 @@ import multiprocessing as mp
 import functools
 import datetime
 import hawkeye as hawk
+import rednoise
 
 starttime = datetime.datetime.now()
 
@@ -195,8 +196,8 @@ def compute_GL(Tlist,epoch_info, m_max=20, w_range=None, ni=10, parallel=False):
         O_period = np.sum(O1m[1:])  # integrated odds ratio
         p_period = O_period / (1 + O_period)  # likelihood of periodic event
         cdf = np.array(S)
-        plt.plot(w,cdf)
-        plt.show()
+        # plt.plot(w,cdf)
+        # plt.show()
         for i in range(0, np.size(S)):
             cdf[i] = np.trapz(S[0:i], w[0:i])
 
@@ -262,11 +263,12 @@ def filter_obs(src_evt,useid):
     return src_evt_use
 
 def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
-    epoch_info=np.loadtxt(epoch_file)
-    epoch_info=epoch_info
+    if type(data_file)==np.ndarray:src_evt=data_file
+    else:src_evt=np.loadtxt(data_file)
+    if type(epoch_file)==np.ndarray:epoch_info=np.array(epoch_file)
+    else:epoch_info=np.loadtxt(epoch_file)
     if epoch_info.ndim == 1:
         epoch_info=np.array([epoch_info])
-    src_evt=np.loadtxt(data_file)
     if src_evt.ndim<2:
         return None
 
@@ -275,8 +277,8 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
         plt.close()
         print(CR)
         (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                                flux_filter=2,expT_filter=1000,
-                                                if_flux_high=0, if_expT_high=True,obsID=None)
+                                                flux_filter=2,expT_filter=10000,
+                                                if_flux_high=0, if_expT_high=True,obsID=[953,955,2736,2738,16527,15747,16529,17420,15748,16528])
         epoch_info = epoch_info_use  ##这里随意改
 
         src_evt_use =hawk.filter_obs(src_evt, useid)
@@ -286,6 +288,7 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
     energy=src_evt[:,1]
     starttime = datetime.datetime.now()
     time = hawk.filter_energy(time, energy, [500, 8000])
+    # time=hawk.filter_time_t1t2(time,t1=50000,t2=1300000)
     counts = len(time)
     print('counts=',counts)
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=12,parallel=True)
@@ -299,36 +302,62 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
     wconf_lo=GL_R[7][0]
     wconf_hi=GL_R[7][1]
     period=2*np.pi/wpeak
+    result=np.column_stack((int(srcid),runtime,Prob,period,wpeak,wmean,mopt,wconf_lo,wconf_hi,counts))
+    path_out = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/rednoise/232_sim_byconst/'
+    np.savetxt(path_out + 'result_10h_{0}.txt'.format(dataname), result,
+               fmt='%10d %10.5f %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
+
 
     return [int(srcid),runtime,Prob,period,wpeak,wmean,mopt,wconf_lo,wconf_hi,counts]
 
 
-def get_result_fromid(id_range):
-    # path = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
-    path_Tuc = '/Users/baotong/Desktop/period_NGC6304/txt_all_obs_p90/'
-    # path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(75)
-    # path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
-    # path_out='/Users/baotong/Desktop/period_NGC6266/txt_all_obs_p90/'
-
-    path=path_Tuc
-    # obsid = 700163
-    res_all=[]
-    for id in id_range:
-        dataname=str(id)
-        # data_file = path + f'{dataname}_{obsid}.txt'
-        # epoch_file = path + f'epoch_47Tuc_{obsid}.txt'
-        data_file = path + f'{dataname}.txt'
-        epoch_file = path + f'epoch_src_{dataname}.txt'
-        w_range = 2 * np.pi * np.arange(1 / 200., 1 / 80, 1e-5)
-        result = hawk.GL.write_result(data_file, epoch_file,w_range, dataname=dataname,if_filter=True)
-        # print(result)
-        result_new=np.reshape(np.array(result),(1,10))
-        print(result_new)
-        # np.savetxt(path_out+'result_1h_3h_{0}.txt'.format(dataname), result_new,
-        #            fmt='%10s %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
+# def get_result_fromid(id_range):
+#     # path = '/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_psf75_700163/'
+#     # path_Tuc = '/Users/baotong/Desktop/period_terzan5/txt_all_obs_p90/'
+#     path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(90)
+#     # path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
+#     # path_out='/Users/baotong/Desktop/period_NGC6266/txt_all_obs_p90/'
+#     path=path_Tuc
+#     # obsid = 700163
+#     res_all=[]
+#     for id in id_range:
+#         dataname=str(id)
+#         # data_file = path + f'{dataname}_{obsid}.txt'
+#         # epoch_file = path + f'epoch_47Tuc_{obsid}.txt'
+#         data_file = path + f'{dataname}.txt'
+#         epoch_file = path + f'epoch_src_{dataname}.txt'
+#         w_range = 2 * np.pi * np.arange(1 / 50000., 1 / 10000, 1e-7)
+#         result = hawk.GL.write_result(data_file, epoch_file,w_range, dataname=dataname,if_filter=True)
+#         # print(result)
+#         result_new=np.reshape(np.array(result),(1,10))
+#         print(result_new)
+#         path_out='/Users/baotong/Desktop/aas/pXS_Tuc/figure/rednoise/198_sim_byconst/'
+#         np.savetxt(path_out+'result_10h_{0}.txt'.format(dataname), result_new,
+#                    fmt='%10s %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    id_range=[40]
-    get_result_fromid(id_range)
+    # id_range=[215]
+    # get_result_fromid(id_range)
+
+    # sim src ##
+    idlist = [217, 414, 185, 366, 423, 232, 263, 331, 273, 317, 162, 252, 283, 290, 198, 312, 229]
+    path = '/Users/baotong/Desktop/period_Tuc/txt_startover/txt_all_obs_p90/'
+    # for srcid in idlist[15:16]:
+    for k in range(0,500):
+        for srcid in [232]:
+            # epoch_file = path + 'epoch_src_' + str(srcid) + '.txt'
+            # evt_all = rednoise.simulate_srcinfo(srcid)
+            # src_evt = np.column_stack((evt_all.time, np.zeros(len(evt_all.time)) + 1000.))
+            w_range = 2 * np.pi * np.arange(1 / 50000., 1 / 10000, 1e-7)
+            # # print(src_evt)
+
+            # const ##
+            (src_evt_use,epoch_info_use)=rednoise.load_data(srcid,ifobsid=[953, 955, 2736, 2737, 2738,16527, 15747,16529,17420,15748, 16528])
+            t_sim=rednoise.simulate_const(src_evt_use,epoch_info_use)
+            #
+            src_evt = np.column_stack((t_sim, np.zeros(len(t_sim)) + 1000.))
+            #
+            res = write_result(src_evt, epoch_info_use, w_range, dataname=f'{k+1}', if_filter=False)
+            print(res)
 
 #choose_id(1, 3)

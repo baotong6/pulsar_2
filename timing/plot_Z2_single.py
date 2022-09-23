@@ -20,7 +20,7 @@ import random
 #path='/Volumes/halo/chandra_obs_hr_m04_for_baotong/'
 #path='/Users/baotong/xmm/0109110101/'
 #path='/Users/baotong/Desktop/period/'
-path='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
+path='/Users/baotong/Desktop/period_M28/txt_all_obs_0.5_8_ep4/'
 #dataname="Muno4.txt"
 #dataname="Muno6.txt"
 p99_Z2 = 67.74654931

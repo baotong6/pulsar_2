@@ -104,16 +104,12 @@ def optimize_psdmodel(ps,whitenoise=100,show=0,label='test',save=0,figurepath=No
     # _fitter_to_model_params(plc, [amplitude, alpha, white_noise])
     # print(plc)
     # psd_shape = plc(ps.freq)
-
     # flat prior for the power law index
     p_alpha = lambda alpha: ((0 <= alpha) & (alpha <= 4))
-
     # flat prior for the power law amplitude
-    p_amplitude = lambda amplitude: ((1e-3 <= amplitude) & (amplitude <= 10.0))
-
+    p_amplitude = lambda amplitude: ((1e-3 <= amplitude) & (amplitude <= 1000.0))
     # normal prior for the white noise parameter
     p_whitenoise = lambda white_noise: scipy.stats.norm(whitenoise, 0.05).pdf(white_noise)
-
     priors = {}
     priors["alpha_0"] = p_alpha
     priors["amplitude_0"] = p_amplitude
@@ -121,7 +117,6 @@ def optimize_psdmodel(ps,whitenoise=100,show=0,label='test',save=0,figurepath=No
     lpost = PSDPosterior(ps.freq, ps.power, plc, priors=priors, m=ps.m)
     # test_pars = [0.002, 0.5,0.29]
     # starting_pars = [0.002, 0.5, 0.29]
-    #
     test_pars = [0.002, 0.5,whitenoise]
     starting_pars = [0.002, 0.5,whitenoise]
     print("log-prior: " + str(lpost.logprior(test_pars)))
@@ -177,7 +172,7 @@ def sim_lc_onesrc(srcid,ep):
         else:
             lc_all = lc_all.join(lc_evt)
 
-    return lc_all
+    return
 
 def read_SAS_lc():
     # 1,2,3分别代表mos1,mos2,pn的light curve，也可以加起来用，记为_all;
