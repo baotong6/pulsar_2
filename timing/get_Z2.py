@@ -15,6 +15,11 @@ import scipy.signal as ss
 import scipy.stats as stats
 import random
 
+def get_Z2_threshold(v=1e5):
+    ## v为采样频率数
+    p99=1-0.99**(1/v)
+    p90=1-0.99**(1/v)
+
 #采样频率数
 v=3e7
 ##(1-p)**N=0.99

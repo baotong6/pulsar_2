@@ -133,14 +133,12 @@ ndim = 3 # number of parameters in the model
 nwalkers = 100  # number of MCMC walkers
 nburn = 200  # "burn-in" period to let chains stabilize
 nsteps = 1000  # number of MCMC steps to take
-
 # set theta near the maximum likelihood, with
 np.random.seed(0)
 starting_guesses = np.random.random((nwalkers, ndim))
 starting_guesses[:,0]+=-1.7
 # Here's the function call where all the work happens:
 # we'll time it using IPython's %time magic
-
 
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args = [xdata, ydata,yerr])
 sampler.run_mcmc(starting_guesses, nsteps)
@@ -150,7 +148,6 @@ print("done")
 # we'll throw-out the burn-in points and reshape:
 
 # sampler.chain返回数组维度为(nwalkers, nsteps, ndim)
-
 sampler.chain
 emcee_trace = sampler.chain[:, nburn:, :].reshape(-1, ndim).T
 # print(emcee_trace.shape)

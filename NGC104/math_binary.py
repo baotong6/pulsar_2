@@ -50,7 +50,7 @@ def plot_M2_R():
     q=np.linspace(0.01,1.0,1000)
     period_list=np.linspace(6,16,5)
     color_list=['r','orange','y','green','blue','g','purple']
-    M1=1.0*c.M_sun
+    M1=1.4*c.M_sun
     M2=q*M1
     RL_on_a=c1*q**c2/(c3*q**c4+np.log(1+q**c5))
     for i in range(len(period_list)):
@@ -63,7 +63,7 @@ def plot_M2_R():
         plt.plot(M2.to(u.M_sun).value,RL_on_a*a.to(u.R_sun).value/R2,label=f'P={period.to(u.hour)}',color=color_list[i])
         plt.xlabel(r'$\rm M_2 (M_\odot)$', font1)
         plt.ylabel(r'$\rm R_{RL}/R_2$', font1)
-        plt.plot([M2.to(u.M_sun).value.min(),1],[1,1],'--')
+        plt.plot([M2.to(u.M_sun).value.min(),(M1/c.M_sun).value],[1,1],'--')
     plt.text(M2.to(u.M_sun).value.min(),1.1,r'$\rm R_{RL}=R_2$',font1)
     plt.tick_params(labelsize=18)
     plt.legend()

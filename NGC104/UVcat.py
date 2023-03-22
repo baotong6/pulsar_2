@@ -50,9 +50,9 @@ def read_uv_cat(filename):
 def read_chandra_cat(filename):
     cat_file=fits.open(filename)
     cat_data=cat_file[1].data
-    ra=cat_data['RAdeg']
-    dec=cat_data['DEdeg']
-    pos_err=cat_data['PosErr']
+    ra=cat_data['RAJ2000']
+    dec=cat_data['DEJ2000']
+    pos_err=cat_data['ePos']
 
     return (ra,dec,pos_err)
 
@@ -89,7 +89,7 @@ def plot_HR_cat():
     print(np.sort(F606W))
     ra3=ra3[index];dec3=dec3[index];F275W=F275W[index];F336W=F336W[index]
     color=F275W-F336W
-    plt.scatter(color,F275W,marker='.', s=0.1,color='green')
+    plt.scatter(color,F275W,marker='o', s=0.1,color='green')
     plt.gca().invert_yaxis()
     plt.show()
 
@@ -97,32 +97,34 @@ def plot_close_HR(xrayid,band1,band2,band3,info,save=0,show=1):
     # color=band1-band2
     # plot x=color,y=band3
     # (ra3, dec3, F275W, F336W, F435W, F606W, F814W) = read_uv_cat(path + 'ngc0104/ngc104_meth1.txt')
-    (ra1,dec1,pos_err)=read_chandra_cat(path+'xray_properties-592.fits')
+    (ra1,dec1,pos_err)=read_chandra_cat(path+'cheng2019_Tuc.fit')
     # index=np.where((band1>-99)&(band2>-99)&(band3>-99))
     # ra3=ra3[index];dec3=dec3[index];band1=band1[index];band2=band2[index];band3=band3[index]
     color=info[band1]-info[band2]
     ra3=info['ra3'];dec3=info['dec3']
     id3=np.arange(1,len(ra3)+1,1)
-    (c_matches, catalog_matches, d2d_matches,sep_constraint)=match_two_cat([ra1[xrayid-1]],[dec1[xrayid-1]],ra3,dec3,rad=pos_err[xrayid-1]+0.1)
+    # (c_matches, catalog_matches, d2d_matches,sep_constraint)=match_two_cat([ra1[xrayid-1]],[dec1[xrayid-1]],ra3,dec3,rad=pos_err[xrayid-1])
+    (c_matches, catalog_matches, d2d_matches, sep_constraint) = match_two_cat([ra1[xrayid - 1]], [dec1[xrayid - 1]],
+                                                                              ra3, dec3, rad=0.71)
     print(pos_err[xrayid-1])
     print(c_matches,catalog_matches,d2d_matches,id3[sep_constraint])
     sgbindex=np.where((color[sep_constraint]>1.0)&(info[band3][sep_constraint]<16.5))[0]
     sgbid3=id3[sep_constraint][sgbindex]
     close_dist=d2d_matches[sgbindex]
     plt.figure(1,(6,10))
-    plt.title(f'{xrayid},rad={pos_err[xrayid-1]} arcsec')
-    plt.xlim(-2,8)
+    plt.title(f'{xrayid}',font1)
+    plt.xlim(-1,3)
     plt.ylim(10,24)
-    plt.plot([1.0,1.0],[10,23],'--')
-    plt.plot([-1,8],[16.5,16.5], '--')
-    plt.scatter(color, info[band3], marker='.', s=0.1, color='green')
+    # plt.plot([1.0,1.0],[10,23],'--')
+    # plt.plot([-1,8],[16.5,16.5], '--')
+    plt.scatter(color, info[band3], marker='o', s=0.1, color='green')
     plt.scatter(color[sep_constraint],info[band3][sep_constraint],marker='*',s=200,color='red')
     plt.gca().invert_yaxis()
     plt.xlabel(f'{band1} - {band2}',font1)
     plt.ylabel(f'{band3}',font1)
     plt.tick_params(labelsize=18)
     if save:
-        plt.savefig('/Users/baotong/Desktop/period_Tuc/ngc0104/figure/' + f'match_IR_{xrayid}.pdf',bbox_inches='tight', pad_inches=0.01)
+        plt.savefig('/Users/baotong/Desktop/period_Tuc/ngc0104/figure/' + f'match_IR_{xrayid}.png',bbox_inches='tight', pad_inches=0.01)
     if show:plt.show()
     else:plt.close()
 
@@ -137,8 +139,8 @@ def plot_pure_HR(sgbid3,band1,band2,band3,info,save=0,show=1,outname=None):
     plt.figure(2,(6,10))
     plt.xlim(-4,5)
     plt.ylim(14,28)
-    plt.plot([1.0,1.0],[10,23],'--')
-    plt.plot([-1,8],[18,18], '--')
+    # plt.plot([1.0,1.0],[10,23],'--')
+    # plt.plot([-1,8],[18,18], '--')
     plt.scatter(color, info[band3], marker='.', s=0.1, color='green')
     plt.scatter(color[sgbid3-1],info[band3][sgbid3-1],marker='*',s=200,color='red')
     plt.gca().invert_yaxis()
@@ -149,6 +151,7 @@ def plot_pure_HR(sgbid3,band1,band2,band3,info,save=0,show=1,outname=None):
         plt.savefig('/Users/baotong/Desktop/period_Tuc/ngc0104/figure/' + f'match_UV_{outname}.pdf',bbox_inches='tight', pad_inches=0.01)
     if show:plt.show()
     else:plt.close()
+
 def astrometry(xrayidlist):
     ra_xray=[];dec_xray=[];
     ra_HST=[];dec_HST=[]
@@ -178,12 +181,13 @@ def random_match(info,xrayid,rad,band1,band2,band3):
 
 
 if __name__=='__main__':
-    (ra3, dec3, F275W, F336W, F435W, F606W, F814W) = read_uv_cat(path + 'ngc0104/ngc104_meth1.txt')
+    (ra3, dec3, F275W, F336W, F435W, F606W, F814W) = read_uv_cat(path + 'ngc0104/ngc104_meth3.txt')
     info={'ra3':ra3,'dec3':dec3,'F275W':F275W,'F336W':F336W,'F435W':F435W,'F606W':F606W,'F814W':F814W}
-    xrayid_list=[453,206,402,462,364,304,350,283,321,345,258]
+    xrayid_list=[252,290,312,229]
     for xrayid in xrayid_list:
-        (sgbid3,close_dist)=plot_close_HR(xrayid=xrayid,band1='F435W',band2='F606W',band3='F606W',info=info,save=1,show=0)
+        (sgbid3,close_dist)=plot_close_HR(xrayid=xrayid,band1='F606W',band2='F814W',band3='F606W',info=info,save=1,show=1)
+        (sgbid3,close_dist)=plot_close_HR(xrayid=xrayid,band1='F606W',band2='F814W',band3='F606W',info=info,save=1,show=1)
         print(sgbid3,close_dist)
-        plot_pure_HR(sgbid3=sgbid3, band1='F275W',band2='F336W',band3='F275W',info=info,save=1,show=0,outname=xrayid)
+        plot_pure_HR(sgbid3=sgbid3, band1='F275W',band2='F336W',band3='F275W',info=info,save=1,show=1,outname=xrayid)
     # (ra_xray,ra_HST,dec_xray,dec_HST,d_RA,d_dec)=astrometry(xrayidlist=[453,206,402,304,321,258])
     # print(d_RA*3600,d_dec*3600)

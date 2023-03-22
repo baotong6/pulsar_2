@@ -332,16 +332,16 @@ def filter_obs(src_evt,useid):
 def write_result(dataname,cts_num,amp_num):
     # time=np.loadtxt(path+ str(dataname)+'.txt')[:,0]
     # epoch_file = path + 'epoch_src_' + str(dataname) + '.txt''
-    cts_rate_standard=2e-4
+    cts_rate_standard=0.1
     amp_standard=1.0
     path_Tuc='/Users/baotong/Desktop/period_Tuc/txt_all_obs_p{0}/'.format(90)
     path=path_Tuc
     epoch_file='epoch_src_217.txt'
     epoch_info=np.loadtxt(path+epoch_file)
-    time = hawk.get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period =3600*1.5,
+    time = hawk.get_epoch_time_series(cts_rate = cts_rate_standard*cts_num, period =205.02498,
                                       amp =amp_standard*amp_num , model = 'sin',epoch_info=epoch_info)
     counts=len(time)
-    w_range = 2 * np.pi * np.arange(1. / 10000, 1. /3000., 1e-7)
+    w_range = 2 * np.pi * np.arange(1. / 250, 1. /200., 1e-6)
     starttime = datetime.datetime.now()
     GL_R = compute_GL(time, epoch_info,w_range=w_range, m_max=12, parallel=True)
     endtime = datetime.datetime.now()
@@ -379,10 +379,10 @@ def get_result_fromid(path_out,dataname,cts_num,amp_num):
     np.savetxt(path_out+'result_{0}_{1}/result_sim_{2}.txt'.format(str(cts_num),str(amp_num),str(dataname)), result,
                fmt='%10d %10.2f %10.5f %10.10f %10.5f %10.5f %10d %10.10f %10.10f %10d')
 if __name__ == '__main__':
-    id_range=np.arange(1,101,1);
-    cts_range=[4.0]
-    amp_range=[0.6,0.7,0.8]
-    path_out='/Users/baotong/Desktop/period_Tuc/simulation/result_sin/result_5400s/'
+    id_range=np.arange(30,100,1)
+    cts_range=[1.0]
+    amp_range=[0.1]
+    path_out='/Users/baotong/Desktop/period_Tuc/simulation/result_sin/result_205s/'
     for cts_num in cts_range:
         for amp_num in amp_range:
             for i in range(len(id_range)):

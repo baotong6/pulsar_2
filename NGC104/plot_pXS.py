@@ -95,6 +95,7 @@ def plot_RK_CV():
     # plt.show()
     return (fig,ax1)
 
+
 def plot_CV_all(save=0,show=1):
     bins=np.logspace(np.log10(0.5), np.log10(30), 41)
     bins_2 =np.logspace(np.log10(0.8), np.log10(100), 41)

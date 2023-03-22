@@ -67,5 +67,4 @@ if __name__=='__main__':
     #     else:keyword=['RA','DEC',gcname[i]]
     #     extract_info(path='/Users/baotong/Desktop/period_' + gcname[i] + '/', catname=catname[i],
     #                  keyword=keyword)
-    # plot_somefig()
     plot_somefig()

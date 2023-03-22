@@ -80,13 +80,15 @@ def plot_lc(source_id,period=None):
     # path='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
     path='/Users/baotong/Desktop/period_Tuc/txt_startover/txt_all_obs_p{0}/'.format(90)
 
-    (evt_file,epoch_file)=rednoise.load_data(source_id,ecf=90,ifobsid=None)
+    (evt_file,epoch_file)=rednoise.load_data(source_id,ecf=90,ifobsid=[2735,2736],ifexpT=None)
+    # expvalue=[2.63e7,2.63e7,2.63e7,2.63e7,1.61e7,1.97e7,9.7e6]
+
     obs_id=epoch_file[:,2]
     evt_id=evt_file[:,2]
     evt_list=evt_file[:,0]
     period =period
-    bin_len=period/10.
-    # bin_len=7000.
+    # bin_len=period/8
+    bin_len=2000.
     x_all = [];
     y_all = [];
     xerr_all = [];
@@ -115,6 +117,7 @@ def plot_lc(source_id,period=None):
         x_all.append(x);y_all.append(y);xerr_all.append(xerr);yerr_all.append(yerr)
 
     ## plot the max point phase ##
+
     plt.figure(2)
     for i in range(0, len(x_all)):
         maxf_time=x_all[i][np.argmax(y_all[i])]
@@ -131,14 +134,16 @@ def plot_lc(source_id,period=None):
         return_time=np.concatenate((return_time,x_all[i]))
         return_flux=np.concatenate((return_flux,y_all[i]))
     ## 把数组拉平，称为return_time
-
+    ##=== MJD=== ##
     plt.figure(1,figsize=(12,4))
-    plt.errorbar(x_all[0], y_all[0], xerr=xerr_all[0], yerr=yerr_all[0],fmt='.', capsize=1)
+    plt.errorbar(x_all[0], np.array(y_all[0])*25.423, xerr=xerr_all[0],
+                 yerr=np.array(yerr_all[0])*25.423,fmt='.', capsize=1)
 
+    ### sine function ####
     def fmax(x, a, b):
-        return a * np.sin(x * 2 * np.pi / period-0.2) + b
+        return a * np.sin(x * 2 * np.pi / period-0.0*2*np.pi) + b
 
-    xsin=np.linspace(x_all[0][0],x_all[-1][-1],100000)
+    xsin=np.linspace(x_all[0][0],x_all[-1][-1],10000000)
     ysin=0.001*np.sin(2*np.pi/period*xsin)+0.01
     # plt.plot(xsin,ysin)
     for i in range(1,len(x_all)):
@@ -148,8 +153,9 @@ def plot_lc(source_id,period=None):
             gap = (np.mod(x_all[i][0], period) / period - np.mod(x_all[i - 1][-1], period) / period) * period+period
         # print(gap)
         x_all[i] =x_all[i]- x_all[i][0] + x_all[i - 1][-1] + gap
-        plt.errorbar(x_all[i],y_all[i],xerr=xerr_all[i],yerr=yerr_all[i],fmt='.', capsize=1)
-        plt.fill_between([x_all[i-1][-1],x_all[i][0]],np.max(return_flux),facecolor='yellow',alpha=0.2)
+        plt.errorbar(x_all[i],np.array(y_all[i])*25.423,xerr=xerr_all[i],
+                     yerr=np.array(yerr_all[i])*25.423,fmt='.', capsize=1)
+        plt.fill_between([x_all[i-1][-1],x_all[i][0]],np.max(return_flux*25.423),facecolor='yellow',alpha=0.2)
 
     x_all_list=x_all[0];y_all_list=y_all[0]
     for i in range(1,len(x_all)):
@@ -161,19 +167,23 @@ def plot_lc(source_id,period=None):
     # for i in range(len(xperiod)):
     #     plt.plot([xperiod[i],xperiod[i]],[0,np.max(return_flux)],'--',c='grey')
     # plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])], fita[0], fita[1]),'--',c='r')
-    plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])], 0.0035, 0.0035),'-',c='grey')
+    print(xsin)
+    plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])] ,0.003,0.003)*25.423,'-',c='grey')
+    plt.ylim(0,2)
     plt.xlabel('Time',hawk.font1)
-    plt.ylabel('Counts rate',hawk.font1)
+    plt.ylabel(r'Photon flux ($\rm 10^{-4}~ph~s^{-1}~cm^{-2}$)',hawk.font1)
     plt.tick_params(labelsize=16)
     figurepath='/Users/baotong/Desktop/aas/pXS_Tuc_mod1/figure/'
-    # plt.savefig(figurepath+f'{source_id}_long_gap.pdf',bbox_inches='tight', pad_inches=0.1)
+    # plt.savefig(figurepath+f'{source_id}_long_gap_org.pdf',bbox_inches='tight', pad_inches=0.1)
     plt.show()
     return [return_time,return_flux]
 
+
+
 def plot_phase_obs(source_id,period):
     path='/Users/baotong/Desktop/period_Tuc/txt_startover/txt_all_obs_p{0}/'.format(90)
+    (evt_file,epoch_file)=rednoise.load_data(source_id,ecf=90,ifobsid=None,ifexpT=10000)
 
-    (evt_file,epoch_file)=rednoise.load_data(source_id,ecf=90,ifobsid=None)
     obs_id=epoch_file[:,2]
     evt_id=evt_file[:,2]
     evt_list=evt_file[:,0]
@@ -246,6 +256,6 @@ def plot_phase_obs(source_id,period):
         # axes[i].set_yscale('log')
     plt.show()
 if __name__=="__main__":
-    plot_lc('290',period=46082.95)
-    plot_phase_obs('290',period=46082.95)
+    plot_lc('185',period=8517.19)
+    # plot_phase_obs('290',period=46082.9493)
     # print(poisson_conf(10000,6,0.15))

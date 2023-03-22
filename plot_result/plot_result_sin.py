@@ -93,21 +93,21 @@ def make_plot():
 
     plt.savefig('Detection_{0}.eps'.format(str(int(period_real))))
     plt.show()
-make_plot()
+# make_plot()
 
-def plot_dither_40():
-    path='/Users/baotong/Desktop/period_LW/simulation/40_dither/'
+def plot_single():
+    path='/Users/baotong/Desktop/period_Tuc/simulation/result_sin/result_205s/result_1.0_0.1/'
     detect=0
     threshold=0.9
-    period_real=5074.
-
-    for i in range(1,101):
+    period_real=205.02
+    period_list=[]
+    for i in range(1,100):
         temp_info = np.loadtxt(path + 'result_sim_{0}.txt'.format(i))
-        if temp_info[2] > threshold and 0.2 * period_real < temp_info[4] < 1.2 * period_real:
+        if temp_info[2] > threshold and 0.9 * period_real < temp_info[3] < 1.1 * period_real:
             detect+=1
-
+            period_list.append(temp_info[3])
     print(detect)
+    print(np.std(period_list))
 
-
-
-#plot_dither_40()
+if __name__ == '__main__':
+    plot_single()

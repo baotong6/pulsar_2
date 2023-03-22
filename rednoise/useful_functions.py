@@ -307,6 +307,14 @@ def read_epoch(epoch_file):
     exptime=epoch[:,3]
     return (TSTART,TSTOP,OBSID,exptime)
 
+def sim_evtlist(lc):
+    num_evt_bin=np.random.poisson(lc.counts)
+    evt_all=[]
+    i=0
+    while i < len(num_evt_bin):
+        evt_all=np.concatenate((evt_all,(np.random.uniform(lc.time[i]-lc.dt/2,lc.time[i]+lc.dt/2,num_evt_bin[i]))))
+        i+=1
+    return evt_all
 
 def plot_psd(lc,norm='frac',show=1,ifexpTfilter=0):
     ps = Powerspectrum(lc,norm=norm)

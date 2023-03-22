@@ -74,9 +74,9 @@ def optimize_psdmodel(ps,whitenoise=100,show=0,label='test',save=0,figurepath=No
         plt.show()
     return smoothbkplc
 
-def model_curvefit(ps,ifperiod=0,whitenoise=100,show=0,label='test',save=0,figurepath=None,outfigname=None):
+def model_curvefit(ps,ifperiod=0,whitenoise=100,show=0,label='test',save=0,maskfreq=None,figurepath=None,outfigname=None):
     x=ps.freq;y=ps.power
-    print(y)
+
     def break_po_c(x, delta,alpha,gamma,N,N_p):
         ## by default for CVs in (Revnivtsev+,2010)
         ## p=(3.36e-2Hz,4,-1/4,notsure)
@@ -94,6 +94,7 @@ def model_curvefit(ps,ifperiod=0,whitenoise=100,show=0,label='test',save=0,figur
         :return:
         """
         return N * x ** (-1) * (1 + (x / delta) ** alpha) ** gamma+N_p
+
     gmodel = Model(break_po_c,nan_policy='raise')
     print(f'parameter names: {gmodel.param_names}')
     print(f'independent variables: {gmodel.independent_vars}')
@@ -103,21 +104,35 @@ def model_curvefit(ps,ifperiod=0,whitenoise=100,show=0,label='test',save=0,figur
 
     params = gmodel.make_params(delta=2e-3,alpha=4,gamma=-1/4,N=0,N_p=whitenoise)
     params['delta'].vary=False;params['alpha'].vary=False;params['gamma'].vary=False
-    gmodel.set_param_hint('N', min=1e-5,max=1000)
-    gmodel.set_param_hint('N_p', min=1e-5,max=whitenoise*100)
+    gmodel.set_param_hint('N', min=1e-6,max=1e-3)
+    gmodel.set_param_hint('N_p', min=whitenoise*0.99,max=whitenoise*1.01)
 
     gmodel.set_param_hint('delta', min=1e-3,max=1e-2)
     gmodel.set_param_hint('alpha', min=4,max=4+1e-2)
     gmodel.set_param_hint('gamma', min=-1/4,max=-1/4+1e-2)
-    result = gmodel.fit(y, x=x, delta=2e-3,alpha=4,gamma=-1/4,N=2,N_p=whitenoise)
 
+    if maskfreq:
+        mask_index=np.argmin(np.abs(x-maskfreq))
+        y_mask=np.concatenate((y[0:mask_index-1],y[mask_index+2:]))
+        x_mask=np.concatenate((x[0:mask_index-1],x[mask_index+2:]))
+        result=gmodel.fit(y_mask, x=x_mask,delta=2e-3,alpha=4,
+                          gamma=-1/4,N=1e-4,N_p=whitenoise,
+                           weights=1/x_mask, method='leastsq')
+        x_plot=x_mask;y_plot=y_mask
+    else:
+        result = gmodel.fit(y, x=x, delta=2e-3,alpha=4,gamma=-1/4,N=2,N_p=whitenoise)
+        x_plot = x;y_plot = y
     # print(result.fit_report())
-    plt.step(x, y,label='PSD')
+    plt.figure(1,figsize=(8,7))
+    plt.title(f'{outfigname[0:3]}')
+    plt.step(x, y,label='PSD',color='blue')
+    if maskfreq:
+        plt.step(x_mask, y_mask, label='mask PSD',color='orange')
     # plt.plot(x, result.init_fit, '--', label='initial fit')
-    plt.plot(x, result.best_fit, '-',label=r'$\rm Model: P(\nu)=N \nu^{-1}(1+(\frac{\nu}{\nu_0})^4)^{-1/4}+C$')
+    plt.plot(x_plot, result.best_fit, '-',label=r'$\rm Model: P(\nu)=N \nu^{-1}(1+(\frac{\nu}{\nu_0})^4)^{-1/4}+C$')
     # plt.plot([1/ifperiod,1/ifperiod],[0,1000],'->',label='Period')
-    plt.annotate("", xy=(1/ifperiod, y.max() * 0.5),
-                xytext=(1/ifperiod, y.max()), color="red",
+    plt.annotate("", xy=(1/ifperiod, y_plot.max() * 0.5),
+                xytext=(1/ifperiod, y_plot.max()), color="red",
                 weight="bold",
                 arrowprops=dict(arrowstyle="->", connectionstyle="arc3", color="red"))
 
@@ -125,9 +140,9 @@ def model_curvefit(ps,ifperiod=0,whitenoise=100,show=0,label='test',save=0,figur
     plt.xlabel('Frequency (Hz)', func.font2)
     plt.ylabel(r'$\rm Power~([rms/mean]^2 Hz^{-1})$',font=func.font2)
     plt.tick_params(labelsize=16)
-    plt.legend()
     # plt.legend(['PSD',r'$\rm Model: P(\nu)=N \nu^{-1}(1+(\frac{\nu}{\nu_0})^4)^{-1/4}+C$','Poisson noise'])
-    plt.loglog()
+    # plt.loglog()
+    plt.semilogx()
     plt.legend()
     if save:
         plt.savefig(figurepath + '{0}.pdf'.format(outfigname), bbox_inches='tight', pad_inches=0.0)
@@ -173,10 +188,9 @@ def test_simple():
     model_curvefit(ps_real.freq,ps_real.power)
     print('white_noise=',2/CR)
 
-
 def check_fD():
-    N=500
-    path='/Users/baotong/Desktop/aas/pXS_Tuc/figure/rednoise/232_sim_byconst/'
+    N=100
+    path='/Users/baotong/Desktop/aas/pXS_Tuc/figure/rednoise/312_sim_bypsdplussin_bin100/result_amp_0.4/'
     list_id=[];list_prob=[];list_period=[]
     for i in range(N):
         filename=f'result_10h_{i+1}.txt'
@@ -184,15 +198,34 @@ def check_fD():
         list_id.append(res[0])
         list_prob.append(res[2])
         list_period.append(res[3])
-    list_prob=np.array(list_prob)
-    fD=len(np.where(list_prob>0.99)[0])/N
+    list_prob=np.array(list_prob);list_period=np.array(list_period)
+    # fD = len(np.where(list_prob > 0.99)[0]) / N
+    real_period=48780.48
+    fD=len(np.where((list_prob>0.99)&(np.abs(list_period-real_period)<0.01*real_period))[0])/N
+    # print(np.where((list_prob>0.9)&(np.abs(list_period-48780.49)<500))[0])
     print(fD)
+    # plt.hist(list_period-48780.49,bins=20,histtype='step')
+    # index=np.where((list_prob>0.9)&(np.abs(list_period-48780.49)<50))
+    # plt.hist(list_period[index]-48780.49,bins=2,histtype='step',lw=2, linestyle='-',facecolor='c',
+    #      hatch='/', edgecolor='k',fill=True)
+    # plt.show()
+
 
 if __name__=='__main__':
-    # (src_evt_use,epoch_info_use)=rednoise.load_data(217)
-    # print(epoch_info_use)
-    # lc=rednoise.get_hist(t=src_evt_use[:,0],len_bin=50,tstart=epoch_info_use[:,0][0],tstop=epoch_info_use[:,1][-1])
+    # id=273
+    # figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/rednoise/'
+    #
+    # (src_evt_use,epoch_info_use)=rednoise.load_data(id,ifobsid=[2738])
+    # lc=rednoise.get_hist(t=src_evt_use[:,0],len_bin=100,tstart=epoch_info_use[:,0][0],tstop=epoch_info_use[:,1][-1])
+    # CR = np.mean(lc.counts) / lc.dt
+    # print(CR)
     # psd=rednoise.plot_psd(lc,norm='frac')
-    # optimize_psdmodel(psd, whitenoise=100, show=1, label='test', save=0, figurepath=None, outfigname=None)
+    # # optimize_psdmodel(psd, whitenoise=100, show=1, label='test', save=0, figurepath=None, outfigname=None)
+    # (model, fitresult) = rednoise.model_curvefit(psd, ifperiod=16824.25, whitenoise=2 / CR,
+    #                                              label=str(id) + '_2738',maskfreq=1/16824.25, show=1, save=1,figurepath=figurepath,
+    #                                              outfigname=str(id) + '_2738')
+    # print(np.array(list(fitresult.best_values.values())))
+    # np.savetxt(figurepath + str(id) + '_2738.txt', np.array(list(fitresult.best_values.values())))
+
     # test_simple()
     check_fD()

@@ -262,7 +262,7 @@ def filter_obs(src_evt,useid):
         i+=1
     return src_evt_use
 
-def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
+def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False,pathout=None):
     if type(data_file)==np.ndarray:src_evt=data_file
     else:src_evt=np.loadtxt(data_file)
     if type(epoch_file)==np.ndarray:epoch_info=np.array(epoch_file)
@@ -278,7 +278,7 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
         print(CR)
         (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
                                                 flux_filter=2,expT_filter=10000,
-                                                if_flux_high=0, if_expT_high=True,obsID=[953,955,2736,2738,16527,15747,16529,17420,15748,16528])
+                                                if_flux_high=0, if_expT_high=True,obsID=None)
         epoch_info = epoch_info_use  ##这里随意改
 
         src_evt_use =hawk.filter_obs(src_evt, useid)
@@ -303,8 +303,8 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
     wconf_hi=GL_R[7][1]
     period=2*np.pi/wpeak
     result=np.column_stack((int(srcid),runtime,Prob,period,wpeak,wmean,mopt,wconf_lo,wconf_hi,counts))
-    path_out = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/rednoise/232_sim_byconst/'
-    np.savetxt(path_out + 'result_10h_{0}.txt'.format(dataname), result,
+    # path_out = '/Users/baotong/Desktop/aas/pXS_Tuc/figure/rednoise/312_sim_bypsdplussin/'
+    np.savetxt(pathout + 'result_10h_{0}.txt'.format(dataname), result,
                fmt='%10d %10.5f %10.5f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 
@@ -338,26 +338,37 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False):
 if __name__ == '__main__':
     # id_range=[215]
     # get_result_fromid(id_range)
-
     # sim src ##
     idlist = [217, 414, 185, 366, 423, 232, 263, 331, 273, 317, 162, 252, 283, 290, 198, 312, 229]
     path = '/Users/baotong/Desktop/period_Tuc/txt_startover/txt_all_obs_p90/'
+    # ecf = 75
+    # path = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf{ecf}_0.2_5/'
     # for srcid in idlist[15:16]:
-    for k in range(0,500):
-        for srcid in [232]:
-            # epoch_file = path + 'epoch_src_' + str(srcid) + '.txt'
-            # evt_all = rednoise.simulate_srcinfo(srcid)
-            # src_evt = np.column_stack((evt_all.time, np.zeros(len(evt_all.time)) + 1000.))
-            w_range = 2 * np.pi * np.arange(1 / 50000., 1 / 10000, 1e-7)
-            # # print(src_evt)
-
+    # for amp in [0.5]:
+    w_range = 2 * np.pi * np.arange(1 / 50000., 1 / 10000, 1e-8)
+    for k in range(0,100):
+        for srcid in [423]:
+            epoch_file = path + 'epoch_src_' + str(srcid) + '.txt'
+            (evt_all,lc_all) = rednoise.RNplusSIN.sim_onesrc_psdandsin(srcid,period=45310.38,ifobsid=[2736,2737,
+                                                                                                      2738,16527, 15747,
+                                                                                                      16529,17420,15748,16528],amp=0.5)
+            # evt_all=rednoise.RNplusSIN.sim_onesrc_psdandeclipse(srcid,period=31200.27,ifobsid=None,width=0.2,amp=0.99)
+            # (evt_all,lc_all) = rednoise.powerlw2evt.simulate_srcinfo(srcid,ifobsid=[700011,700163,700013,700014],path_provide=path)
+            # (evt_all, lc_all) = rednoise.powerlw2evt.simulate_srcinfo(srcid, ifobsid=[2738],
+            #                                                           path_provide=path)
+            src_evt = np.column_stack((evt_all.time, np.zeros(len(evt_all.time)) + 1000.))
             # const ##
-            (src_evt_use,epoch_info_use)=rednoise.load_data(srcid,ifobsid=[953, 955, 2736, 2737, 2738,16527, 15747,16529,17420,15748, 16528])
-            t_sim=rednoise.simulate_const(src_evt_use,epoch_info_use)
-            #
-            src_evt = np.column_stack((t_sim, np.zeros(len(t_sim)) + 1000.))
-            #
-            res = write_result(src_evt, epoch_info_use, w_range, dataname=f'{k+1}', if_filter=False)
-            print(res)
+            # (src_evt_use,epoch_info_use)=rednoise.load_data(srcid,ifobsid=None)
+            # t_sim=rednoise.simulate_const(src_evt_use,epoch_info_use)
+            # src_evt = np.column_stack((t_sim, np.zeros(len(t_sim)) + 1000.))
 
-#choose_id(1, 3)
+            # res = write_result(src_evt, epoch_file, w_range, dataname=f'{k+1}', if_filter=False,
+            #                    pathout='/Users/baotong/Desktop/aas/pXS_Tuc/figure/rednoise/312_sim_bypsdplussin_bin100/'+f'result_amp_{amp}/range_upto_60k/')
+            res = write_result(src_evt, epoch_file, w_range, dataname=f'{k+1}', if_filter=False,
+                               pathout='/Users/baotong/Desktop/period_Tuc/simulation/result_rd_sin/232_amp_0.5/')
+            # dataname='423'
+            # hawk.phase_fold(time=src_evt[:,0], epoch_info=epoch_info_use, net_percent=0.98, p_test=res[3],
+            #                 outpath=None, bin=20, shift=0.,
+            #                 label=dataname, text='Seq.{}'.format(dataname), save=0, show=1)
+        print(res)
+#chooseid(1, 3)

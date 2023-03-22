@@ -3,6 +3,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.timeseries import LombScargle
+import stingray as sr
+from stingray.events import EventList
+from stingray.lightcurve import Lightcurve
+from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,AveragedPowerspectrum
+from stingray.simulator import simulator, models
+import rednoise
+from rednoise import useful_functions as func
 
 font1 = {'family': 'Normal',
          'weight': 'normal',
@@ -29,6 +36,7 @@ def get_LS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
     plt.text(freq[np.where(power==np.max(power))][0]*1.3,max_NormLSP*0.95,'P={0:.2f}s'.format(period_peak),fontsize=18,fontweight='semibold')
     plt.plot(freq, power)
     plt.semilogx()
+    # plt.semilogy()
     out_period=1./freq[np.where(power==np.max(power))][0]
     plt.plot([freq[0], freq[-1]], [FP_99, FP_99], '--')
     plt.plot([freq[0], freq[-1]], [FP_95, FP_95], '--')
@@ -44,3 +52,12 @@ def get_LS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
     if show:plt.show()
     else:plt.close()
     return [FP,out_period,max_NormLSP]
+
+if __name__=='__main__':
+    path = '/Users/baotong/Downloads/hzq2/'
+    time=np.load(path+'time_h.npy')
+    flux=np.load(path+'flux_h.npy')
+    freq=np.linspace(12,1e4,10000)
+    lc=Lightcurve(time,flux)
+    psd=rednoise.func.plot_psd(lc)
+    get_LS(time,flux,freq)

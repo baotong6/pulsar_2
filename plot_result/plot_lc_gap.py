@@ -22,12 +22,12 @@ def plot_lc(source_id,period=None):
     # path='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
     path='/Users/baotong/Desktop/period_Tuc/txt_startover/txt_all_obs_p{0}/'.format(90)
 
-    (evt_file,epoch_file)=rednoise.load_data(source_id,ecf=90,ifobsid=[953,955,2735,2736,2737,2738,16527,15747,16529,17420,15748,16528])
+    (evt_file,epoch_file)=rednoise.load_data(source_id,ecf=90,ifobsid=[2735,2736])
     obs_id=epoch_file[:,2]
     evt_id=evt_file[:,2]
     evt_list=evt_file[:,0]
     period =period
-    bin_len=8000
+    bin_len=2000
     x_all = [];
     y_all = [];
     xerr_all = [];
@@ -120,9 +120,9 @@ def get_LS(time, flux,freq):
     # plt.savefig('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}/{1}.eps'.format(k,dataname))
     # plt.close()
 
-[time,flux]=plot_lc('312',period=48780.49)
+[time,flux]=plot_lc('185',period=8517.89)
 
-border = 5000
-vary = np.array([i for i in range(0, border)])
-freq = 1 /20000. + vary * 1.e-8
+# border = 5000
+# vary = np.array([i for i in range(0, border)])
+# freq = 1 /20000. + vary * 1.e-8
 # get_LS(time, flux,freq)
