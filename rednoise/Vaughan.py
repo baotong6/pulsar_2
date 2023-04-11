@@ -166,14 +166,12 @@ def mcmcfit(xdata,ydata,yerr=None,CR=None):
     # Here we'll set up the computation. emcee combines multiple "walkers",
     # each of which is its own MCMC chain. The number of trace results will
     # be nwalkers * nsteps
-
     # 设置计算参数。emcee组合了多个"walkers"，每个都有自己的MCMC链。
     # 跟踪结果的数量为 nwalkers * nsteps
     ndim = 2  # number of parameters in the model
     nwalkers = 100  # number of MCMC walkers
     nburn = 200  # "burn-in" period to let chains stabilize
     nsteps = 1000  # number of MCMC steps to take
-
     # set theta near the maximum likelihood, with
     np.random.seed(0)
     # starting_guesses = np.random.random((nwalkers, ndim))
@@ -188,16 +186,14 @@ def mcmcfit(xdata,ydata,yerr=None,CR=None):
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xdata, ydata, yerr])
     sampler.run_mcmc(starting_guesses, nsteps)
     print("done")
-
     # sampler.chain is of shape (nwalkers, nsteps, ndim)
     # we'll throw-out the burn-in points and reshape:
-
     # sampler.chain返回数组维度为(nwalkers, nsteps, ndim)
     sampler.chain
     emcee_trace = sampler.chain[:, nburn:, :].reshape(-1, ndim).T
     # print(emcee_trace.shape)
     print(emcee_trace)
-    plot_MCMC_results(xdata, ydata, emcee_trace,CR=CR)
+    # plot_MCMC_results(xdata, ydata, emcee_trace,CR=CR)
     # plt.show()
     flat_samples = sampler.get_chain(discard=100, thin=15, flat=True)
     corner.corner(flat_samples,truths=[0.01,2/CR])
@@ -234,5 +230,21 @@ def gogogo():
     else:
         mcmcfit(xdata,ydata,CR=CR)
     return None
+
+def apply_Vaughan(lc,epoch_info,model,maskfreq=0):
+    expT = np.sum(epoch_info[:, 3])
+    CR = np.mean(lc.counts) / lc.dt
+    psd = rednoise.plot_psd(lc, norm='frac', show=0, ifexpTfilter=expT)
+    xdata=np.array(psd.freq);ydata=np.array(psd.power)
+    maskfreq=0
+    if maskfreq:
+        mask_index = np.argmin(np.abs(xdata - maskfreq))
+        y_mask = np.concatenate((ydata[0:mask_index - 1], ydata[mask_index + 1:]))
+        x_mask = np.concatenate((xdata[0:mask_index - 1], xdata[mask_index + 1:]))
+        x_mask = np.concatenate((xdata[0:mask_index - 1], xdata[mask_index + 1:]))
+        mcmcfit(x_mask,y_mask,CR=CR)
+    else:
+        mcmcfit(xdata,ydata,CR=CR)
+
 if __name__=='__main__':
     gogogo()

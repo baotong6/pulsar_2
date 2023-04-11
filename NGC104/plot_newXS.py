@@ -347,7 +347,96 @@ def plot_P_L_type(save=0,show=1):
     if show:
         plt.show()
     return period
+def plot_P_L_threereg(save=0,show=1):
+    result_GC = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'all')
+    idex_GC = np.where(result_GC['judge'] == 'CV')[0]
+    period_GC = np.array(result_GC['period_all'])[idex_GC]
+    type_GC = np.array(result_GC['GC'])[idex_GC]
+    L_GC = np.array(result_GC['L'])[idex_GC]
 
+    (ra, dec, seq, period_LW, L_LW, Lmin, Lmax, type) = plot_pXS.load_LW('result_LW')
+    # period_LW = period[np.where((period > 3900) & (period < 40000))]
+    L_LW = L_LW * 1.11423*1e31
+    path_table = '/Users/baotong/Desktop/period/table/'
+    result_NSC = pd.read_excel(path_table + 'final_all_del.csv', 'result_NSC_IG')
+    ID_NSC = result_NSC['seq']
+    period_NSC = result_NSC['P']
+    L_NSC = result_NSC['L']
+    L_NSC=L_NSC*1.3*1e31
+    ##-----P_L-----##
+    # P_gap = [7740.0 / 3600., 11048.0 / 3600.]
+    # P_min = [4902.0 / 3600., 4986.0/3600]
+    # y1 = [0, 2e33]
+    # # ax2.text(7900 / 3600., 5e36, 'period gap')
+    # plt.text(P_gap[0] + 0.25, y1[1], r'$\rm P_{gap}$',fontsize=18)
+    # plt.text(P_min[1] - 0.15, y1[1], r'$\rm P_{min}$',fontsize=18)
+    # plt.ylim(ymin=8e30,ymax=1e33)
+    # plt.xlim(xmin=0.95,xmax=20)
+    #
+    # plt.fill_between(P_gap, y1[1], facecolor='yellow', alpha=0.2)
+    # plt.fill_between(P_min, y1[1], facecolor='grey', alpha=0.2)
+    #
+    # plt.scatter(period_GC/3600.,L_GC,marker='o',label='Globular cluster')
+    # plt.scatter(period_LW/3600., L_LW, marker='x',label='LW')
+    # plt.scatter(period_NSC/3600., L_NSC, marker='^',label='NSC')
+    # plt.loglog()
+    # plt.show()
+
+    ##--------hist--------##
+    path_fits = '/Users/baotong/Desktop/period_LW/'
+    RK = fits.open(path_fits + 'RK14.fit')
+    orb = RK[1].data['Orb_Per']
+    type1 = RK[1].data['Type1'];
+    type2 = RK[1].data['Type2'];
+    type3 = RK[1].data['Type3']
+    orb = orb * 24;
+    spin = RK[1].data['_3___Per']
+    orb_DN = orb[np.where(type1 == 'DN')]
+    orb_Polar = orb[np.where((type2 == 'AM') | (type3 == 'AM'))]
+    orb_IP = orb[np.union1d(np.where((type2 == 'IP') | (type2 == 'DQ')), np.where((type3 == 'IP') | (type3 == 'DQ')))]
+    spin_IP = spin[np.union1d(np.where((type2 == 'IP') | (type2 == 'DQ')), np.where((type3 == 'IP') | (type3 == 'DQ')))]
+    spin_IP /= 3600.
+    orb_all = np.concatenate((orb_DN, orb_IP, orb_Polar))
+    orb_all = orb_all[np.where(orb_all > 0)]
+
+    bins = np.logspace(np.log10(0.5), np.log10(30), 41)
+    bins_2 = np.logspace(np.log10(0.8), np.log10(20), 21)
+    bins_spin = np.logspace(np.log10(3 / 36.), np.log10(2), 31)
+    bins_p = np.logspace(np.log10(0.5), np.log10(12), 16)
+    bins_p=np.concatenate((bins_p,[15,20.,25.,30.]))
+    bins_NSC=np.concatenate(([0.08,0.2,0.4],bins_p))
+
+    fig, (ax1, ax2) = plt.subplots(ncols=1, nrows=2, sharex='all', gridspec_kw={'height_ratios': [2, 1]},
+                                   figsize=(9, 6))
+    ax1.hist(orb_all, bins=bins, histtype='step', lw=2, color='red', linestyle='--')
+    ax1.hist(period_NSC/3600,bins=bins_NSC,histtype='step',lw=4,color='blue',linestyle='-')
+    ax1.hist(period_GC/3600, bins=bins_p, histtype='step', lw=2, linestyle='-',facecolor='grey',
+         hatch='/', edgecolor='k',fill=False)
+    ax1.hist(period_LW/3600, bins=bins_p, histtype='step', lw=3, color='c',linestyle='-')
+
+    ax1.legend(['CVs in Solar Neighborhood', 'CVs in NSC','CVs in GCs', 'CVs in LW'])
+    P_min = 1.373333333
+    P_gap = [7740.0 / 3600., 11448.0 / 3600.]
+    ax1.set_ylim(8e-1, 360)
+    ax1.set_xlim(0.08, 60)
+    ax1.plot([P_min, P_min], [0, 220], '--',color='grey')
+    ax1.plot([P_gap[0], P_gap[0]], [0, 220], '-',lw=2.,color='orange')
+    ax1.plot([P_gap[1], P_gap[1]], [0, 220], '-',lw=2.,color='orange')
+    ax1.text(P_gap[0]+0.3, 250, 'gap',fontsize=14)
+    ax1.text(P_min-0.2, 250, 'minimum',fontsize=14)
+    # ax1.set_xlabel('Period (hours)',font1)
+    ax1.set_ylabel('Number of sources',plot_pXS.font1)
+    ax1.tick_params(labelsize=16)
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+
+    # ax2=fig.add_subplot(212)
+    ax2.hist(orb_all,bins=bins,histtype='step',lw=2,color='red',cumulative=1,density=1,linestyle='--')
+    ax2.hist(period_NSC/3600, bins=bins_NSC, histtype='step', lw=4, color='blue',cumulative=1,density=1, linestyle='-')
+    ax2.hist(period_GC/3600, bins=bins_p, histtype='step', lw=2, linestyle='-',cumulative=1,density=1,facecolor='grey',
+         hatch='/', edgecolor='k',fill=False)
+    ax2.hist(period_LW/3600, bins=bins_p, histtype='step', lw=3, color='c',cumulative=1,density=1, linestyle='-')
+    plt.show()
 def plot_spec():
     label=['x','^','v','o','D','*','s']
     color_list=['r','g','b','k','orange','purple','magenta']
@@ -367,7 +456,6 @@ def plot_spec():
     plt.loglog()
     plt.show()
 
-
 def plot_src_info(save=0,show=1):
     label = ['x', '^', 'v', 'o', 'D', '*', 's','.']
     color_list = ['r', 'g', 'b', 'k', 'orange', 'purple', 'magenta','cyan']
@@ -386,7 +474,8 @@ def plot_src_info(save=0,show=1):
     plt.legend()
     plt.show()
 if __name__=='__main__':
-    plot_P_L(save=0,show=1)
+    # plot_P_L(save=0,show=1)
     # plot_spec()
     # plot_Phist(save=1,show=1)
     # plot_src_info(show=1)
+    plot_P_L_threereg()

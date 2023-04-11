@@ -316,7 +316,7 @@ def sim_evtlist(lc):
         i+=1
     return evt_all
 
-def plot_psd(lc,norm='frac',show=1,ifexpTfilter=0):
+def plot_psd(lc,norm='frac',show=0,ifexpTfilter=0):
     ps = Powerspectrum(lc,norm=norm)
     if ifexpTfilter:  # ifexpTfilter=T_tot
         index=np.where(ps.freq>2/ifexpTfilter)
@@ -339,4 +339,6 @@ def plot_psd(lc,norm='frac',show=1,ifexpTfilter=0):
         ax1.spines[axis].set_linewidth(1.5)
     if show:
         plt.show()
+    else:
+        plt.close()
     return ps

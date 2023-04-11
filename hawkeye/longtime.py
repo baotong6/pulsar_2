@@ -61,11 +61,10 @@ def curvefit_sin(x,y,yerr,period):
     perr = np.sqrt(np.diag(pcov))
     return (popt,perr)
 
-def plot_singleobs_lc(lc,period=None,ifsin=None,figurepath=None,save=0,show=0,dataname=None):
+def plot_singleobs_lc(lc,period=None,ifsin=None,shift=0,figurepath=None,save=0,show=0,dataname=None):
     plt.figure(1,(15,6))
     plt.title(r'$T_0={0}$'.format(lc.time[0]),font1)
     x=lc.time-lc.time[0]
-    shift=0
     y2=lc.counts
     y2_err = np.array(poisson_conf_interval(y2, interval='frequentist-confidence'))
     y2_err[0] = y2 - y2_err[0]

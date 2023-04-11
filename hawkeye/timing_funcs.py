@@ -35,8 +35,8 @@ def get_T_in_mbins(epoch_info,w,m,fi):
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
 
-def choose_obs(epoch_info,flux_info=None,flux_filter=0,expT_filter=0,if_flux_high=True,if_expT_high=True,obsID=None):
-    if obsID:
+def choose_obs(epoch_info,flux_info=None,flux_filter=0,expT_filter=0,if_flux_high=True,if_expT_high=True,obsID=[]):
+    if len(obsID)>0:
         filter=[]
         for i in range(len(obsID)):
             index=np.where(epoch_info[:,2].astype('int')==obsID[i])[0][0]

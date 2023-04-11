@@ -20,6 +20,7 @@ from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,Average
 from stingray.simulator import simulator, models
 import rednoise
 from rednoise import useful_functions as func
+import hawkeye as hawk
 from scipy import integrate
 
 font1=func.font1

@@ -15,9 +15,9 @@ import scipy.signal as ss
 import random
 import pandas as pd
 path_table='/Users/baotong/Desktop/period/table/'
-result_NSC=pd.read_excel(path_table+'final_all_del.csv','result_NSC')
-result_LW=pd.read_excel(path_table+'final_all_del.csv','result_LW')
-result_ND=pd.read_excel(path_table+'final_all_del.csv','result_ND')
+result_NSC=pd.read_excel(path_table+'final_all_del.csv','result_NSC_IG')
+# result_LW=pd.read_excel(path_table+'final_all_del.csv','result_LW')
+# result_ND=pd.read_excel(path_table+'final_all_del.csv','result_ND')
 
 ID_NSC=result_NSC['seq']
 print(ID_NSC)
