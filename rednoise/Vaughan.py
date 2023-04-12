@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Sep 19 18:13:40 2022
-@author: baotong
+@author: wafels
+modified by Tong
 """
 
 import numpy as np
@@ -38,20 +39,19 @@ def func_forCV(x,p):
     """
     # p[1]=1e-3
     return p[0]*x**(-1)*(1+(x/3e-2)**4)**(-1/4.)+p[1]
-# def func_forCV(x,p):
-#     """One dimensional smoothly broken power law model.
-#
-#     Parameters
-#     ----------
-#     amplitude : float
-#         Model amplitude at the break point.
-#     x_break : float
-#         Break point.
-#     Cp : float
-#         Poisson noise
-#     """
-#     # p[1]=1e-3
-#     return p[0]*x**(-p[1])+300
+def powerlaw(x,p):
+    """One dimensional smoothly broken power law model.
+    Parameters
+    ----------
+    amplitude : float
+        Model amplitude at the break point.
+    x_break : float
+        Break point.
+    Cp : float
+        Poisson noise
+    """
+    # p[1]=1e-3
+    return p[0]*x**(-1)+p[1]
 
 def vaughan_2010_T_ISS(iobs, S):
     """Vaughan, 2010, MNRAS, 402, 307. Eq. 17.
@@ -111,7 +111,6 @@ def plot_MCMC_model(ax, xdata, ydata, trace,CR=None):
     # yfit = p0[:, None] * xdata ** (-p1[:,None]) +2/CR
     mu = yfit.mean(0)
     sig = 1 * yfit.std(0)
-    # print(mu)
 
     ax.plot(xfit, mu, '-k',label=r'$\rm Model: P(\nu)=N \nu^{-1}(1+(\frac{\nu}{\nu_0})^4)^{-1/4}+C_p$')
     ax.fill_between(xfit, mu - sig, mu + sig, color = 'lightgray')
@@ -124,13 +123,13 @@ def plot_MCMC_model(ax, xdata, ydata, trace,CR=None):
     ax.loglog()
     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc_mod1/figure/rednoise/'
     # plt.savefig(figurepath + '{0}.pdf'.format('312_2738_psd'), bbox_inches='tight', pad_inches=0.0)
-    plt.show()
+    # plt.show()
 def plot_MCMC_results(xdata, ydata, trace, colors = 'k',CR=None):
     """Plot both the trace and the model together"""
     # fig, ax = plt.subplots(1, 2, figsize = (10, 5))
     fig,ax=plt.subplots(1,1,figsize=(8,7))
     # plot_MCMC_trace(ax[0], xdata, ydata, trace, True, colors = colors)
-    # plot_MCMC_trace2(ax[0], xdata, ydata, trace, True, colors = colors)
+    # plot_MCMC_trace2(ax[1], xdata, ydata, trace, True, colors = colors)
     # plot_MCMC_model(ax[1], xdata, ydata, trace,CR)
     plot_MCMC_model(ax, xdata, ydata, trace, CR)
     # plt.savefig('DEC_3b.eps')
@@ -158,11 +157,11 @@ def log_likelihood(func,p,x, y,yerr=None):
     S=vaughan_2010_T_ISS(iobs=y,S=y_model)
     return S
 
-def log_posterior(p, x, y,yerr=None):
+def log_posterior(p, x, y,model,yerr=None):
 
-    return log_prior(p) + log_likelihood(func_forCV,p, x, y,yerr)
+    return log_prior(p) + log_likelihood(model,p, x, y,yerr)
 
-def mcmcfit(xdata,ydata,yerr=None,CR=None):
+def mcmcfit(xdata,ydata,model,yerr=None,CR=None,show=1):
     # Here we'll set up the computation. emcee combines multiple "walkers",
     # each of which is its own MCMC chain. The number of trace results will
     # be nwalkers * nsteps
@@ -179,11 +178,10 @@ def mcmcfit(xdata,ydata,yerr=None,CR=None):
     starting_guesses[:,0]=np.zeros(nwalkers)+1e-4*np.random.random(nwalkers)
     starting_guesses[:,1]=2/CR+np.random.random(nwalkers)
     # starting_guesses[:,1]=np.random.random(nwalkers)
-    print(starting_guesses)
+    # print(starting_guesses)
     # Here's the function call where all the work happens:
     # we'll time it using IPython's %time magic
-
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xdata, ydata, yerr])
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xdata, ydata, model,yerr])
     sampler.run_mcmc(starting_guesses, nsteps)
     print("done")
     # sampler.chain is of shape (nwalkers, nsteps, ndim)
@@ -191,14 +189,19 @@ def mcmcfit(xdata,ydata,yerr=None,CR=None):
     # sampler.chain返回数组维度为(nwalkers, nsteps, ndim)
     sampler.chain
     emcee_trace = sampler.chain[:, nburn:, :].reshape(-1, ndim).T
-    # print(emcee_trace.shape)
-    print(emcee_trace)
-    # plot_MCMC_results(xdata, ydata, emcee_trace,CR=CR)
-    # plt.show()
+    plot_MCMC_results(xdata, ydata, emcee_trace,CR=CR)
     flat_samples = sampler.get_chain(discard=100, thin=15, flat=True)
-    corner.corner(flat_samples,truths=[0.01,2/CR])
-    plt.show()
 
+    # corner.corner(flat_samples,truths=[0.01,2/CR])
+    a=corner.corner(flat_samples,quantiles=[0.16, 0.5, 0.84],show_titles=True,title_kwargs={"fontsize": 12})
+    mu1=corner.quantile(flat_samples[:,0],q=[0.5])[0]
+    mu2=corner.quantile(flat_samples[:,1],q=[0.5])[0]
+    if show:
+        plt.show()
+    else:
+        plt.close()
+
+    return (mu1,mu2)
 def gogogo():
     # from timing_comb import get_lc_frombkgimg
     # ecf=75
@@ -212,7 +215,6 @@ def gogogo():
     # lc.gti=[[lc.gti[0][0],lc.gti[-1][-1]]]
     # CR = np.mean(lc.counts) / lc.dt
     # psd = rednoise.plot_psd(lc, norm='frac', show=1, ifexpTfilter=expT)
-
     id=229
     (src_evt_use,epoch_info_use)=rednoise.singleobs_psd.load_data(id,ifobsid=[2737])
     expT=np.sum(epoch_info_use[:,3])
@@ -226,10 +228,12 @@ def gogogo():
         y_mask = np.concatenate((ydata[0:mask_index - 1], ydata[mask_index + 1:]))
         x_mask = np.concatenate((xdata[0:mask_index - 1], xdata[mask_index + 1:]))
         x_mask = np.concatenate((xdata[0:mask_index - 1], xdata[mask_index + 1:]))
-        mcmcfit(x_mask,y_mask,CR=CR)
+        result_mu=mcmcfit(x_mask,y_mask,CR=CR)
     else:
-        mcmcfit(xdata,ydata,CR=CR)
-    return None
+        result_mu=mcmcfit(xdata,ydata,CR=CR)
+
+    print(result_mu)
+    return result_mu
 
 def apply_Vaughan(lc,epoch_info,model,maskfreq=0):
     expT = np.sum(epoch_info[:, 3])
@@ -242,9 +246,19 @@ def apply_Vaughan(lc,epoch_info,model,maskfreq=0):
         y_mask = np.concatenate((ydata[0:mask_index - 1], ydata[mask_index + 1:]))
         x_mask = np.concatenate((xdata[0:mask_index - 1], xdata[mask_index + 1:]))
         x_mask = np.concatenate((xdata[0:mask_index - 1], xdata[mask_index + 1:]))
-        mcmcfit(x_mask,y_mask,CR=CR)
+        result_mu=mcmcfit(x_mask,y_mask,model,CR=CR,show=0)
     else:
-        mcmcfit(xdata,ydata,CR=CR)
+        result_mu=mcmcfit(xdata,ydata,model,CR=CR,show=0)
+    frac_rms=np.sqrt(np.var(lc.counts) * lc.counts.size / (lc.counts.size - 1) / np.mean(lc.counts) ** 2)
+    print('frac rms=', frac_rms)
+    print('result_mu:', result_mu)
+    return (result_mu,psd)
 
 if __name__=='__main__':
-    gogogo()
+    id = 290
+    (src_evt_use, epoch_info_use) = rednoise.singleobs_psd.load_data(id, ifobsid=[2737])
+    expT = np.sum(epoch_info_use[:, 3])
+    lc = rednoise.get_hist(t=src_evt_use[:, 0], len_bin=100, tstart=epoch_info_use[:, 0][0],
+                           tstop=epoch_info_use[:, 1][-1])
+    print('2/CR=',2/np.sum(lc.counts)*expT)
+    apply_Vaughan(lc, epoch_info=epoch_info_use, model=powerlaw, maskfreq=0)
