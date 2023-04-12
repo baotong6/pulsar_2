@@ -33,7 +33,6 @@ def load_data(dataname,ecf=90,ifpath=None,ifobsID=[]):
     # epoch_file = path + 'SgrA_S_epoch.txt'
     src_evt=np.loadtxt(path+dataname)
     epoch_info=np.loadtxt(epoch_file)
-    print('epoch_info',epoch_file)
     if epoch_info.ndim==1:epoch_info=np.array([epoch_info])
     CR=hawk.plot_longT_V(src_evt=src_evt, bkg_file=None,epoch_info=epoch_info)
     CR/=ecf/100.
@@ -43,7 +42,6 @@ def load_data(dataname,ecf=90,ifpath=None,ifobsID=[]):
                                             if_flux_high=0, if_expT_high=1,obsID=ifobsID)
 
     src_evt_use =hawk.filter_obs(src_evt, useid)
-    print(useid)
     return (src_evt_use,epoch_info_use)
 
 def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):

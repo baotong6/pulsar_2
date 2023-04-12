@@ -63,7 +63,7 @@ def make_lc_from_psd(psd,cts_rate,dt,epoch_info,poisson=True,frms=0):
     lc.gti=[[lc.time[0],lc.time[-1]]]
     return lc
 
-def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[]):
+def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[],randseed=1):
     ## from one obs(usually the longest one obs) to simulate singleobs_evt
     ## if you need only just some obs to be simulated, make ifoutobs not []
     (src_evt_all, epoch_info_all) = load_data(dataname=dataname, ifpath=path, ifobsID=ifoutobs)
@@ -86,9 +86,9 @@ def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[]):
         epoch_temp = np.array([epoch_info_all[i]])
         w = make_freq_range(dt=dt, epoch_info=epoch_temp)
         psd_model = Vaughan.powerlaw(x=w, p=result_mu)
+        psd_model*=CR_cho**2 ## abs powerspectrum
         if len(t_src) < 2 or epoch_info_all[i][3] < dt:
             continue
-        CR = len(t_src) / epoch_info_all[i][3]
         epoch_temp = np.array([epoch_info_all[i]])
         if len(t_src) < 2 or epoch_info_all[i][3] < dt:
             # print(len(t_src),exptime[i])
@@ -97,10 +97,13 @@ def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[]):
         lc_sim = make_lc_from_psd(psd_model, CR, dt, epoch_info=epoch_temp, frms=frac_rms, poisson=False)
         lc_sim.counts = lc_sim.counts * dt
         lc_sim.counts[np.where(lc_sim.counts < 0)] = 0
+        np.random.seed(randseed)
+        # lc_evt = Lightcurve(time=lc_sim.time, counts=lc_sim.counts)
+        # lc_evt.counts = np.random.poisson(lc_evt.counts)
         evt = EventList()
         EventList.simulate_times(evt,lc=lc_sim)
+        # evt.time = func.sim_evtlist(lc_sim) + epoch_info_use[i][0]
         lc_out = evt.to_lc(dt=dt)
-        # evt.time = func.sim_evtlist(lc_evt) + epoch_info_use[i][0]
         if i == 0:
             lc_all = lc_out
         else:
@@ -113,19 +116,22 @@ def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[]):
     return (evt_all, lc_all)
 
 def GL_simevt(simN=100):
-    path_M31 = '/Users/baotong/Desktop/M31XRB/M31ACIS_txt/txt_all_obs_p90/'
-    dataname='2'
-    ifoutobs=[14197]
+    ##s模拟simN多少组
+    path_M31 = '/Users/baotong/Desktop/M31XRB/M31ACIS_txt/txt_all_obs_p90/'  ##数据的路径
+    dataname='2'  ##源的编号
+    ifoutobs=[14197] #ifoutobs是，你要选的这个源，模拟他的哪些观测的数据。如果是所有的，想办法在别的地方读取一下，别手动敲这么多
+
     (src_evt_all, epoch_info_all) = load_data(dataname=dataname, ifpath=path_M31, ifobsID=ifoutobs)
     w_range=2*np.pi*np.arange(1./10000,1./3000,1.e-7)
+    ## w_range针对你的信号来改，这个没关系，只要和我们table里这个源GL流程的range一致即可
     Prob,wpeak,wmean,mopt,wconf_lo,wconf_hi,simcounts = np.zeros(simN),np.zeros(simN),np.zeros(simN),\
                                                         np.zeros(simN),np.zeros(simN),np.zeros(simN),np.zeros(simN)
     for i in range(simN):
-        (sim_evt_all, sim_lc_all) = singleobs2simevt(path=path_M31, dataname=dataname, dt=200, chosen_obs=None,
-                                                     ifoutobs=ifoutobs)
+        (sim_evt_all, sim_lc_all) = singleobs2simevt(path=path_M31, dataname=dataname, dt=100, chosen_obs=None,
+                                                     ifoutobs=ifoutobs,randseed=i)
+        ## dt最好取大一点，以200为宜，再小的话rms会很大；如果是对短周期来做，就只能取小点。但是无所谓，因为短周期会被泊松噪声dominate
         time=sim_evt_all.time
         GL_R=hawk.GL_algorithm_single.compute_GL(time,epoch_info=epoch_info_all,w_range=w_range,m_max=20,parallel=True)
-        print('prob=',GL_R[1])
         Prob[i]=GL_R[1]
         wpeak[i]=GL_R[5]
         wmean[i]=GL_R[6]
@@ -137,11 +143,6 @@ def GL_simevt(simN=100):
                                 2*np.pi/wconf_lo-2*np.pi/wpeak,2*np.pi/wpeak-2*np.pi/wconf_hi,simcounts))
     np.savetxt('/Users/baotong/Desktop/M31XRB/M31ACIS_txt/rednoise/{0}.txt'.format(dataname),sim_result,
                fmt='%10.5f %10.2f %10.2f %10d %10.5f %10.5f %10d')
+    ##改这里的path来存你的sim结果
 if __name__=='__main__':
-    # path_M31 = '/Users/baotong/Desktop/M31XRB/M31ACIS_txt/txt_all_obs_p90/'
-    # dataname='244'
-    # (src_evt_all, epoch_info_all) = load_data(dataname=dataname, ifpath=path_M31, ifobsID=[])
-    # print('cts_org=',len(src_evt_all[:,0]))
-    # (sim_evt_all, sim_lc_all)=singleobs2simevt(path=path_M31, dataname=dataname,dt=100,chosen_obs=None)
-    # print('cts_sim=',len(sim_evt_all.time))
     GL_simevt(10)
