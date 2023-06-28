@@ -277,8 +277,8 @@ def write_result(data_file,epoch_file,w_range,dataname='1',if_filter=False,patho
         plt.close()
         print(CR)
         (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                                flux_filter=2,expT_filter=10000,
-                                                if_flux_high=0, if_expT_high=True,obsID=None)
+                                                flux_filter=2,expT_filter=1000,
+                                                if_flux_high=0, if_expT_high=True,obsID=[])
         epoch_info = epoch_info_use  ##这里随意改
 
         src_evt_use =hawk.filter_obs(src_evt, useid)

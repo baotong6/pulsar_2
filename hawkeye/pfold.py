@@ -49,7 +49,7 @@ def get_T_in_mbins(epoch_file,w,m,fi):
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
 
-def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,label='test',text=None,save=False,show=True):
+def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,label='test',text=None,textdef=None,save=False,show=True):
     turns=trans(time,p_test,shift)
     loc=np.zeros(bin)
     for index in turns:
@@ -86,6 +86,7 @@ def phase_fold(time,epoch_info,p_test,outpath,bin=20,net_percent=0.9,shift=0.0,l
     plt.step(np.concatenate(([0], x2)), np.concatenate(([y2[0]], y2)), color='red',linewidth=1.5)
     plt.errorbar(x2 - 0.5 / bin, y2, yerr=y2_err, fmt='.', capsize=1, elinewidth=1.5, ecolor='red',linewidth=1.5)
     if text:plt.text(0.05,0.95, '{0}, P={1:.2f}s'.format(text,p_test), fontsize=18,fontweight='semibold',transform=ax1.transAxes)
+    if textdef:plt.text(0.05,0.95,textdef,fontsize=18,fontweight='semibold',transform=ax1.transAxes)
     # plt.text(1.6,0.03*np.max(y2),'C={0}'.format(str(len(time))),fontsize=18)
 
     ax2 = ax1.twinx()

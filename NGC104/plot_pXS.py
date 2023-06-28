@@ -829,10 +829,10 @@ def plot_surface_density(save=0,show=1):
     '''
 
 if __name__=="__main__":
-    plot_CV_all(save=1,show=1)
+    # plot_CV_all(save=1,show=1)
     # plot_dist_profile(save=1,show=1)
     # plot_src_lc_singleobs(figurepath=path_out,save=1,show=1)
     # plot_CR_all()
     # plot_CR_GCLW(save=1,show=1)
     # plot_CV_Temp(save=1,show=1)
-    # plot_surface_density(save=1,show=1)
+    plot_surface_density(save=0,show=1)

@@ -8,6 +8,7 @@ modified by Tong
 
 import numpy as np
 import matplotlib.pyplot as plt
+from astropy.stats import poisson_conf_interval
 from scipy import interpolate
 from scipy.optimize import curve_fit
 import astropy.units as u
@@ -100,7 +101,7 @@ def plot_MCMC_trace2(ax, xdata, ydata, trace, scatter = False, **kwargs):
     ax.set_xlabel('a1')
     ax.set_ylabel('a2')
 
-def plot_MCMC_model(ax, xdata, ydata, trace,CR=None):
+def plot_MCMC_model(ax, xdata, ydata, trace,CR=None,show=0):
     """Plot the linear model and 2sigma contours"""
     # ax.plot(xdata, ydata, 'ok')
     ax.step(xdata, ydata,label='PSD')
@@ -123,15 +124,16 @@ def plot_MCMC_model(ax, xdata, ydata, trace,CR=None):
     ax.loglog()
     figurepath = '/Users/baotong/Desktop/aas/pXS_Tuc_mod1/figure/rednoise/'
     # plt.savefig(figurepath + '{0}.pdf'.format('312_2738_psd'), bbox_inches='tight', pad_inches=0.0)
-    # plt.show()
-def plot_MCMC_results(xdata, ydata, trace, colors = 'k',CR=None):
+    if show:plt.show()
+    else:plt.close()
+def plot_MCMC_results(xdata, ydata, trace, colors = 'k',CR=None,show=0):
     """Plot both the trace and the model together"""
     # fig, ax = plt.subplots(1, 2, figsize = (10, 5))
     fig,ax=plt.subplots(1,1,figsize=(8,7))
     # plot_MCMC_trace(ax[0], xdata, ydata, trace, True, colors = colors)
     # plot_MCMC_trace2(ax[1], xdata, ydata, trace, True, colors = colors)
     # plot_MCMC_model(ax[1], xdata, ydata, trace,CR)
-    plot_MCMC_model(ax, xdata, ydata, trace, CR)
+    plot_MCMC_model(ax, xdata, ydata, trace, CR,show=show)
     # plt.savefig('DEC_3b.eps')
 
 
@@ -161,7 +163,7 @@ def log_posterior(p, x, y,model,yerr=None):
 
     return log_prior(p) + log_likelihood(model,p, x, y,yerr)
 
-def mcmcfit(xdata,ydata,model,yerr=None,CR=None,show=1):
+def mcmcfit(xdata,ydata,model,yerr=None,CR=None,show=0):
     # Here we'll set up the computation. emcee combines multiple "walkers",
     # each of which is its own MCMC chain. The number of trace results will
     # be nwalkers * nsteps
@@ -189,7 +191,7 @@ def mcmcfit(xdata,ydata,model,yerr=None,CR=None,show=1):
     # sampler.chain返回数组维度为(nwalkers, nsteps, ndim)
     sampler.chain
     emcee_trace = sampler.chain[:, nburn:, :].reshape(-1, ndim).T
-    plot_MCMC_results(xdata, ydata, emcee_trace,CR=CR)
+    plot_MCMC_results(xdata, ydata, emcee_trace,CR=CR,show=show)
     flat_samples = sampler.get_chain(discard=100, thin=15, flat=True)
 
     # corner.corner(flat_samples,truths=[0.01,2/CR])
@@ -235,30 +237,32 @@ def gogogo():
     print(result_mu)
     return result_mu
 
-def apply_Vaughan(lc,epoch_info,model,maskfreq=0):
+def apply_Vaughan(lc,epoch_info,model,maskfreq=0,show=0):
     expT = np.sum(epoch_info[:, 3])
     CR = np.mean(lc.counts) / lc.dt
     psd = rednoise.plot_psd(lc, norm='frac', show=0, ifexpTfilter=expT)
     xdata=np.array(psd.freq);ydata=np.array(psd.power)
-    maskfreq=0
     if maskfreq:
         mask_index = np.argmin(np.abs(xdata - maskfreq))
         y_mask = np.concatenate((ydata[0:mask_index - 1], ydata[mask_index + 1:]))
         x_mask = np.concatenate((xdata[0:mask_index - 1], xdata[mask_index + 1:]))
         x_mask = np.concatenate((xdata[0:mask_index - 1], xdata[mask_index + 1:]))
-        result_mu=mcmcfit(x_mask,y_mask,model,CR=CR,show=0)
+        result_mu=mcmcfit(x_mask,y_mask,model,CR=CR,show=show)
     else:
-        result_mu=mcmcfit(xdata,ydata,model,CR=CR,show=0)
-    frac_rms=np.sqrt(np.var(lc.counts) * lc.counts.size / (lc.counts.size - 1) / np.mean(lc.counts) ** 2)
+        result_mu=mcmcfit(xdata,ydata,model,CR=CR,show=show)
+    sigma_range=poisson_conf_interval(lc.counts)
+    sigma=(sigma_range[1:,]-sigma_range[0,:])/2
+    mse=np.mean(sigma**2)
+    frac_rms=np.sqrt((np.var(lc.counts) -mse) /np.mean(lc.counts) ** 2)
     print('frac rms=', frac_rms)
     print('result_mu:', result_mu)
     return (result_mu,psd)
 
 if __name__=='__main__':
-    id = 290
-    (src_evt_use, epoch_info_use) = rednoise.singleobs_psd.load_data(id, ifobsid=[2737])
+    id = 148
+    (src_evt_use, epoch_info_use) = rednoise.singleobs_psd.load_data(id,path_provide='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_p90/', ifobsid=[7460])
     expT = np.sum(epoch_info_use[:, 3])
-    lc = rednoise.get_hist(t=src_evt_use[:, 0], len_bin=100, tstart=epoch_info_use[:, 0][0],
+    lc = rednoise.get_hist(t=src_evt_use[:, 0], len_bin=500, tstart=epoch_info_use[:, 0][0],
                            tstop=epoch_info_use[:, 1][-1])
     print('2/CR=',2/np.sum(lc.counts)*expT)
-    apply_Vaughan(lc, epoch_info=epoch_info_use, model=powerlaw, maskfreq=0)
+    apply_Vaughan(lc, epoch_info=epoch_info_use, model=powerlaw, maskfreq=1/5434.78)

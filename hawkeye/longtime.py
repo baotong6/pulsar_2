@@ -12,6 +12,7 @@ font1 = {'family': 'Normal',
 plt.rc('legend',fontsize=14 )
 def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=None,shift=None,show=False):
     if epoch_info.ndim == 1:epoch_info=np.array([epoch_info])
+    if src_evt.ndim==1:src_evt=np.array([src_evt])
     t_start = epoch_info[:, 0]
     t_end = epoch_info[:, 1]
     t_mid=(t_start+t_end)/2
@@ -19,6 +20,7 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
     expT = epoch_info[:, 3]
     # expT=t_end-t_start
     cts=[];bkg_cts=[]
+    # print('evt=',src_evt)
     if not bkg_file:
         for i in range(len(obsID)):
             cts.append(len(np.where(src_evt[:, 2] == obsID[i])[0]))
@@ -75,7 +77,7 @@ def plot_singleobs_lc(lc,period=None,ifsin=None,shift=0,figurepath=None,save=0,s
         print(popt)
         # y1 = sin_temp(x,popt[0],popt[1],popt[2],popt[3])
         x1=np.linspace(x.min(),x.max(),10000)
-        y1 = sin_temp(x1,period,6.28,8,8)
+        y1 = sin_temp(x1,period,shift*2*np.pi,8,8)
         plt.plot(x1,y1)
     # absolute_sigma = True, sigma = yerr,
     plt.errorbar(x, y2,yerr=y2_err, fmt='co', capsize=4, elinewidth=2, ecolor='red',color='green')

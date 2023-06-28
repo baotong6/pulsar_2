@@ -32,13 +32,13 @@ def input_srcinfo():
 def main_process():
     # rocket.make_region_each_obs(path_in,path_out_reg,ra=ra,dec=dec,wcsimage=wcsimage,obs_ID_all=obs_ID_all,
     #                             ecf=50,srcid=srcID_list,multiple_src=1,bkg=1)
-    rocket.make_region_each_obs(path_in,path_out_reg,ra=[267.0195083],dec=[-24.7809444],wcsimage=wcsimage,obs_ID_all=obs_ID_all,
-                                ecf=50,srcid=['TerO'],multiple_src=0,bkg=1,single_name='TerO')
+    # rocket.make_region_each_obs(path_in,path_out_reg,ra=[267.0195083],dec=[-24.7809444],wcsimage=wcsimage,obs_ID_all=obs_ID_all,
+    #                             ecf=90,srcid=['TerO'],multiple_src=0,bkg=1,single_name='TerO',single_srcradius=0.7)
     # rocket.make_epoch_file(obsid=obs_ID_all,inpath=path_in,outpath=path_out_txt,outname='NGC6304_epoch')
     epoch_info=np.loadtxt(path_out_txt+'terzan5_epoch.txt')
-    ecf=50
+    ecf=90
     for id in obs_ID_all:
-        rocket.get_txt(path_in=path_in,path_in_reg=path_out_reg,path_out=path_out_txt,srcid_list=srcID_list,obs_id=id,ecf=ecf,suffix=f'_p{ecf}')
+    #     rocket.get_txt(path_in=path_in,path_in_reg=path_out_reg,path_out=path_out_txt,srcid_list=srcID_list,obs_id=id,ecf=ecf,suffix=f'_p{ecf}')
         rocket.extract_evtlist_bkg(path_in=path_in,path_in_reg=path_out_reg, path_out=path_out_txt, obs_id=id,
                                    srcid_list=srcID_list, ecf=ecf,suffix=f'_p{ecf}')
     for srcid in srcID_list:

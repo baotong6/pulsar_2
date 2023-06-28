@@ -10,7 +10,7 @@ from scipy.interpolate import lagrange
 from scipy import interpolate
 from scipy.optimize import curve_fit
 import pandas as pd
-# import read_csv as data
+from plot_result import read_csv as data
 # from scipy.interpolate import Spline
 
 path_fits='/Users/baotong/Desktop/period_LW/'
@@ -32,6 +32,9 @@ Lum_LW=np.array([31.26,32.36,31.82,32.35,31.75,31.97
                         ,32.05,31.62,32.92,31.73,32.78,31.97,31.94,30.88])
 orb_LW=data.P_LW/3600.
 orb_NSC=data.P_NSC_IG/3600.
+fore_NSC=np.where(data.fore==0)[0]
+line_NSC=np.where(data.line_NSC_IG==3)[0]
+orb_NSC=orb_NSC[np.intersect1d(fore_NSC,line_NSC)]
 
 def plot_P_N():
     orb_DN=orb[np.where(type1=='DN')]
@@ -63,24 +66,22 @@ def plot_P_N():
     plt.xlim(0.07,100)
     P_min = 4920.0 / 3600.
     P_gap = [7740.0 / 3600., 11448.0 / 3600.]
-
-    #plt.step(NSC_plt[1], np.append(NSC_plt[0], 0), linestyle='-', lw=4, where='post', color='black')
-
-    #plt.step(LW_plt[1],np.append(LW_plt[0],0),linestyle='--',lw=3,where='post',color='brown')
     plt.loglog()
     spin_IP=spin_IP[np.where(spin_IP > 0)]
     # plt.hist(orb,bins=bins,histtype = 'step',color='black')
-    plt.hist(orb_Polar,bins=bins,histtype='step',lw=2,color='blue')
-    plt.hist(orb_DN,bins=bins,histtype = 'step',lw=2,color='red')
-    plt.hist(orb_IP,bins=bins,histtype = 'step',lw=1,color='green')
-    plt.hist(spin_IP, bins = bins_spin, histtype = 'step',lw=1, color = 'purple')
-
+    plt.hist(orb_Polar,bins=bins,histtype='step',lw=2,color='blue',label='Polar')
+    plt.hist(orb_DN,bins=bins,histtype = 'step',lw=2,color='red',label='DN')
+    plt.hist(orb_IP,bins=bins,histtype = 'step',lw=1,color='green',label='IP')
+    plt.hist(spin_IP, bins = bins_spin, histtype = 'step',lw=1, color = 'purple',label='Spin of IP')
+    plt.step(NSC_plt[1], np.append(NSC_plt[0], 0), linestyle='-', lw=4, where='post', color='black',label='NSC')
+    #
+    plt.step(LW_plt[1],np.append(LW_plt[0],0),linestyle='--',lw=3,where='post',color='brown',label='LW')
     print(len(spin_IP))
     print(len(orb_DN))
     #print(len(np.where(spin_IP > 0)[0]))
 
     #plt.legend(['NSC','LW','Polar','DN','IP','Spin of IP'])
-    plt.legend(['Polar', 'DN', 'IP', 'Spin of IP'])
+    plt.legend()
     #print(len(orb_Polar),len(orb_IP),len(orb_DN))
     plt.tick_params(labelsize = 15)
     plt.plot([P_min, P_min], [0, 200], '--',color='grey')
@@ -92,11 +93,11 @@ def plot_P_N():
     plt.xlabel('Period (hours)',fontsize=20)
     plt.ylabel('Number of sources',fontsize=20)
 
-    plt.savefig(path_fig+'N_P.eps')
+    plt.savefig(path_fig+'N_P.pdf',bbox_inches='tight', pad_inches=0.05)
     N=len(orb_IP)+len(orb_Polar)+len(orb_DN)
     #print(N)
     plt.show()
-# plot_P_N()
+plot_P_N()
 
 def plot_P_RK():
     bins=np.logspace(np.log10(0.5), np.log10(100), 51)
@@ -177,4 +178,4 @@ def get_dist_DN():
     print(a)
 #plot_P_N()
 # get_dist_DN()
-plot_P_RK()
+# plot_P_RK()

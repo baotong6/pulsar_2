@@ -61,7 +61,7 @@ def get_time_series(T_START,N_cts,T_stop,period=300.,amp=0.7, model='sin',eqw=0.
     if model=='const':
         T=T_stop-T_START
         lam_0=N_cts/T
-        t=np.random.random(N_cts)*T+T_START
+        t=np.random.random(np.random.poisson(N_cts))*T+T_START
         t=np.sort(t)
         return t
 
@@ -72,17 +72,24 @@ def get_epoch_time_series(cts_rate,period,amp, model,epoch_info):
     tstart=epoch_info[:,0]
     tstop=epoch_info[:,1]
     exp_time_epoch=epoch_info[:,-1]
+    obsid=epoch_info[:,2]
+    obsidout=[]
     if model=='const':
         for i in range(len(tstart)):
+            if type(cts_rate) == list or type(cts_rate) == np.ndarray:
             #VI=10
-            cts = int((cts_rate * (tstop[i] - tstart[i]))*(np.random.random(1)[0]*3.16227766+0.316227766))
-            t.append(get_time_series(tstart[i], cts, tstop[i], period, amp, model=model))
+                cts = int((cts_rate[i] * (tstop[i] - tstart[i])))
+            else:
+                cts = int((cts_rate * (tstop[i] - tstart[i])))
+            tempt=get_time_series(tstart[i], cts, tstop[i], period, amp, model=model)
+            t.append(tempt)
+            obsidout.append([int(obsid[i]) for k in range(len(tempt))])
     else:
         for i in range(len(tstart)):
             cts = int(cts_rate * (tstop[i] - tstart[i]))
             t.append(get_time_series(tstart[i],cts,tstop[i],period,amp,model=model))
-    t=list(chain.from_iterable(t))
-    t = np.array(t)
+    t=list(chain.from_iterable(t));obsidout=list(chain.from_iterable(obsidout))
+    t = np.array(t);obsidout=np.array(obsidout)
     t = t + np.random.rand(len(t)) * 3.2 - 1.6
-    return t
+    return t,obsidout
 

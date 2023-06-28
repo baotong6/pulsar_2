@@ -281,7 +281,7 @@ def write_result(dataname):
     energy=src_evt[:,1]
     #time = filter_energy(time, energy, [200, 500])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./9000,1./8000,1.e-8)
+    w_range=2*np.pi*np.arange(1./9000,1./8000,1.e-7)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=12,parallel=True)
     endtime = datetime.datetime.now()

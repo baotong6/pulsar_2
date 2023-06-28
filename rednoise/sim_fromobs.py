@@ -10,6 +10,7 @@ test everything
 
 import numpy as np
 import matplotlib.pyplot as plt
+from astropy.stats import poisson_conf_interval
 from scipy import interpolate
 from scipy.optimize import curve_fit
 import astropy.units as u
@@ -37,7 +38,7 @@ def make_freq_range(dt,epoch_info):
     return w
 
 def bestpsd(lc,epoch_info):
-    (result_mu,psd)=Vaughan.apply_Vaughan(lc,epoch_info=epoch_info,model=Vaughan.powerlaw)
+    (result_mu,psd)=Vaughan.apply_Vaughan(lc,epoch_info=epoch_info,model=Vaughan.powerlaw,show=1)
     freq=psd.freq
     psd_sim=Vaughan.powerlaw(freq,result_mu)
     # plt.step(freq,psd_sim)
@@ -58,6 +59,8 @@ def make_lc_from_psd(psd,cts_rate,dt,epoch_info,poisson=True,frms=0):
     # lc=sim.simulate(1)
     lc=sim.simulate(psd)
     lc.time=lc.time+TSTART[0]
+    # lc.plot()
+    # plt.show()
     # print('caution',np.where(lc.counts<0))
     lc.counts[np.where(lc.counts < 0)] = 0
     lc.gti=[[lc.time[0],lc.time[-1]]]
@@ -77,7 +80,12 @@ def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[],randseed=1
     dt = dt
     lc_cho = hawk.get_hist(time, len_bin=dt, tstart=epoch_info_use[:, 0][0], tstop=epoch_info_use[:, 1][-1])
     CR_cho = np.sum(lc_cho.counts) / np.sum(epoch_info_use[:, 3])
-    frac_rms = np.sqrt(np.var(lc_cho.counts) * lc_cho.counts.size / (lc_cho.counts.size - 1) / np.mean(lc_cho.counts) ** 2)
+    # frac_rms = np.sqrt(np.var(lc_cho.counts) * lc_cho.counts.size / (lc_cho.counts.size - 1) / np.mean(lc_cho.counts) ** 2)
+    sigma_range=poisson_conf_interval(lc_cho.counts)
+    sigma=(sigma_range[1:,]-sigma_range[0,:])/2
+    mse=np.mean(sigma**2)
+    frac_rms=np.sqrt((np.var(lc_cho.counts) -mse) /np.mean(lc_cho.counts) ** 2)
+    print('frms=',frac_rms)
     (psd_sim,result_mu) = bestpsd(lc_cho, epoch_info=epoch_info_use)
 
     evt_all = EventList()
@@ -115,22 +123,24 @@ def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[],randseed=1
 
     return (evt_all, lc_all)
 
-def GL_simevt(simN=100):
+def GL_simevt(simN=100,outpath=None):
     ##s模拟simN多少组
     path_M31 = '/Users/baotong/Desktop/M31XRB/M31ACIS_txt/txt_all_obs_p90/'  ##数据的路径
-    dataname='2'  ##源的编号
-    ifoutobs=[14197] #ifoutobs是，你要选的这个源，模拟他的哪些观测的数据。如果是所有的，想办法在别的地方读取一下，别手动敲这么多
+    path_GC= '/Users/baotong/Desktop/period_terzan5/txt_all_obs_p90/'
+    dataname='196'  ##源的编号
+    ifoutobs=[] #ifoutobs是，你要选的这个源，模拟他的哪些观测的数据。如果是所有的，想办法在别的地方读取一下，别手动敲这么多
 
-    (src_evt_all, epoch_info_all) = load_data(dataname=dataname, ifpath=path_M31, ifobsID=ifoutobs)
-    w_range=2*np.pi*np.arange(1./10000,1./3000,1.e-7)
+    (src_evt_all, epoch_info_all) = load_data(dataname=dataname, ifpath=path_GC, ifobsID=ifoutobs)
+    w_range=2*np.pi*np.arange(1./50000,1./30000,1.e-7)
     ## w_range针对你的信号来改，这个没关系，只要和我们table里这个源GL流程的range一致即可
     Prob,wpeak,wmean,mopt,wconf_lo,wconf_hi,simcounts = np.zeros(simN),np.zeros(simN),np.zeros(simN),\
                                                         np.zeros(simN),np.zeros(simN),np.zeros(simN),np.zeros(simN)
     for i in range(simN):
-        (sim_evt_all, sim_lc_all) = singleobs2simevt(path=path_M31, dataname=dataname, dt=100, chosen_obs=None,
-                                                     ifoutobs=ifoutobs,randseed=i)
+        (sim_evt_all, sim_lc_all) = singleobs2simevt(path=path_GC, dataname=dataname, dt=2000, chosen_obs=[],
+                                                     ifoutobs=ifoutobs,randseed=np.random.randint(1e5))
         ## dt最好取大一点，以200为宜，再小的话rms会很大；如果是对短周期来做，就只能取小点。但是无所谓，因为短周期会被泊松噪声dominate
         time=sim_evt_all.time
+        print('counts=',len(time))
         GL_R=hawk.GL_algorithm_single.compute_GL(time,epoch_info=epoch_info_all,w_range=w_range,m_max=20,parallel=True)
         Prob[i]=GL_R[1]
         wpeak[i]=GL_R[5]
@@ -139,10 +149,23 @@ def GL_simevt(simN=100):
         wconf_lo[i]=GL_R[7][0]
         wconf_hi[i]=GL_R[7][1]
         simcounts[i]=len(time)
-    sim_result=np.column_stack((Prob,2*np.pi/wpeak,2*np.pi/wmean,mopt,
-                                2*np.pi/wconf_lo-2*np.pi/wpeak,2*np.pi/wpeak-2*np.pi/wconf_hi,simcounts))
-    np.savetxt('/Users/baotong/Desktop/M31XRB/M31ACIS_txt/rednoise/{0}.txt'.format(dataname),sim_result,
-               fmt='%10.5f %10.2f %10.2f %10d %10.5f %10.5f %10d')
+        sim_result_one = [Prob[i], 2 * np.pi / wpeak[i], 2 * np.pi / wmean[i], mopt[i],
+                                      2 * np.pi / wconf_lo[i] - 2 * np.pi / wpeak[i],
+                                      2 * np.pi / wpeak[i] - 2 * np.pi / wconf_hi[i], simcounts[i]]
+        # hawk.phase_fold(time=time, epoch_info=epoch_info_all, net_percent=0.9, p_test=2 * np.pi / wpeak[i], outpath=None,
+        #                 bin=20, shift=0.8,label=dataname, textdef='#{0},P={1:.2f}s,C={2}'.format(dataname, 2 * np.pi / wpeak[i], len(time)),
+        #                 save=0,show=1)
+
+        str_tmp="{0:10.5f} {1:10.2f} {2:10.2f} {3:10.1f} {4:15.5f} {5:15.5f} {6:10.1f}".format(*sim_result_one)
+        print(str_tmp)
+        with open(outpath + '{0}_temp.txt'.format(dataname), 'a+') as f3:
+            f3.writelines(str_tmp+'\n')
+
+    # sim_result=np.column_stack((Prob,2*np.pi/wpeak,2*np.pi/wmean,mopt,
+    #                             2*np.pi/wconf_lo-2*np.pi/wpeak,2*np.pi/wpeak-2*np.pi/wconf_hi,simcounts))
+    # np.savetxt(outpath+'{0}.txt'.format(dataname),sim_result,
+    #            fmt='%10.5f %10.2f %10.2f %10d %10.5f %10.5f %10d')
     ##改这里的path来存你的sim结果
 if __name__=='__main__':
-    GL_simevt(10)
+    outpath='/Users/baotong/Desktop/period_terzan5/rednoise/'
+    GL_simevt(1,outpath=outpath)

@@ -48,9 +48,9 @@ def read_Knigge_model():
     M1 = file[1].data['M1'][index]
     R1 = WD_M_R(M1)
     epsilon = 0.5
-    eta = 10
-    L = 3.8e30 * (epsilon / 0.5) * (M1 / 1) * (10 ** Mdot / (eta * 1e-12))
-
+    eta = 0.5
+    # L = 3.8e30 * (epsilon / 0.5) * (M1 / 1) * (10 ** Mdot / (eta * 1e-12))
+    L = 2.1e32 * (epsilon / 0.5) *(eta / 0.5)* (M1 / 1)**1.8* (10 ** Mdot / 1e-10)
     return (period, L, Mdot)
 
 def load_LW(label):
@@ -113,10 +113,10 @@ def plot_P_L(save=0,show=1):
     ax1.legend(loc='upper right',bbox_to_anchor=(1,0.7), ncol=4, handletextpad=0.1, columnspacing=0.1, handlelength=1.5, edgecolor='grey')
     plt.subplots_adjust(wspace=0, hspace=0.05)
     (period_sim,L_sim,Mdot_sim)=read_Knigge_model()
-    # ax2 = ax1.twinx()
-    # ax2.set_ylabel(r'$\rm Log\dot{M_2}$ ($\rm M_\odot~ \rm year^{-1}$)', hawk.font1)
-    # ax2.scatter(period_sim,Mdot_sim,s=30,marker='.',color='red')
-    # ax2.tick_params(labelsize=18)
+    ax2 = ax1.twinx()
+    ax2.set_ylabel(r'$\rm Log\dot{M_2}$ ($\rm M_\odot~ \rm year^{-1}$)', hawk.font1)
+    ax2.scatter(period_sim,Mdot_sim,s=30,marker='.',color='red')
+    ax2.tick_params(labelsize=18)
 
     path_out = '/Users/baotong/Desktop/aas/GCall/figure/'
     if save:
@@ -124,4 +124,5 @@ def plot_P_L(save=0,show=1):
     if show:
             plt.show()
     return period
-plot_P_L(save=1,show=1)
+if __name__=='__main__':
+    plot_P_L(save=0,show=1)

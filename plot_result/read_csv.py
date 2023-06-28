@@ -24,6 +24,8 @@ P_NSC_IG=result_NSC_IG['P']
 ra_NSC_IG=result_NSC_IG['ra']
 dec_NSC_IG=result_NSC_IG['dec']
 net_percent_NSC_IG=result_NSC_IG['net_percent']
+line_NSC_IG=result_NSC_IG['line']
+fore=result_NSC_IG['fore']
 
 ID_NSC=result_NSC['seq']
 P_NSC=result_NSC['P']
