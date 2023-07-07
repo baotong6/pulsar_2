@@ -246,7 +246,7 @@ def get_T_in_mbins(epoch_info,w,m,fi):
     return T_in_perbin
 
 # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
-path_Tuc='/Users/baotong/Desktop/period_NGC6752/txt_all_obs_p90/'
+path_Tuc='/Users/baotong/Desktop/period_M28/txt_all_obs_p90/'
 path_M31 = '/Users/baotong/Desktop/M31XRB/M31ACIS_txt/txt_all_obs_p90/'
 path_NSC = '/Users/baotong/Desktop/period/txt_all_obs_IG/'
 # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
@@ -295,7 +295,7 @@ def write_result(dataname):
     energy=src_evt[:,1]
     time = hawk.filter_energy(time, energy, [20, 8000])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./50000,1./10000,1.e-8)
+    w_range=2*np.pi*np.arange(1./6000,1./5000,1.e-8)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=20,parallel=True)
     endtime = datetime.datetime.now()
@@ -346,7 +346,7 @@ def get_result_fromid(id_range):
     #            fmt='%10d %10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    get_result_fromid(['96'])
+    get_result_fromid(['450'])
     # a=np.arange(1,184,1)
     # a=[14,16,22,1,13,20,2,12,51,29,67,17,47,50,70,73,30,64,71,68]
     # for i in a:

@@ -18,6 +18,7 @@ import scipy
 from astropy.timeseries import LombScargle
 from tkinter import _flatten
 from NGC104.timing_comb import load_data
+
 def plot_lc(source_id,period=None,path=None,bin_len=None):
     # path='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
 
@@ -87,10 +88,10 @@ def plot_lc(source_id,period=None,path=None,bin_len=None):
     fita, fitb = optimize.curve_fit(fmax, x_all_list, y_all_list, [0.5, 0.01])
 
     xperiod=x_all[0][0]+period*np.arange(0,int(500000/period),1)
-    for i in range(len(xperiod)):
-        plt.plot([xperiod[i],xperiod[i]],[0,0.02],'--',c='grey')
+    # for i in range(len(xperiod)):
+    #     plt.plot([xperiod[i],xperiod[i]],[0,0.005],'--',c='grey')
     # plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])], fita[0], fita[1]),'--',c='r')
-    plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])], 0.002, 0.002),'-',c='grey')
+    plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])], 0.003, 0.002),'-',c='grey')
     plt.xlabel('time')
     plt.ylabel('counts rate')
     plt.show()
@@ -122,8 +123,8 @@ def get_LS(time, flux,freq):
     # plt.savefig('/Users/baotong/Desktop/CDFS/fig_LS_ep{0}/{1}.eps'.format(k,dataname))
     # plt.close()
 
-path_GC='/Users/baotong/Desktop/period_terzan5/txt_all_obs_p{0}/'.format(90)
-[time,flux]=plot_lc('215',period=15723.2704,path=path_GC,bin_len=3000)
+path_GC='/Users/baotong/Desktop/period_M28/txt_all_obs_p{0}/'.format(90)
+[time,flux]=plot_lc('372',period=47846.88995,path=path_GC,bin_len=6500)
 
 # border = 5000
 # vary = np.array([i for i in range(0, border)])

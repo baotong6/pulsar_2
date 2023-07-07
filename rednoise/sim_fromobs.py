@@ -37,15 +37,14 @@ def make_freq_range(dt,epoch_info):
     w = np.arange(2 / T_tot, 0.5 / dt, 1 / T_tot)
     return w
 
-def bestpsd(lc,epoch_info):
-    (result_mu,psd)=Vaughan.apply_Vaughan(lc,epoch_info=epoch_info,model=Vaughan.powerlaw,show=1)
+def bestpsd(lc,epoch_info,maskfreq=0):
+    (result_mu,psd)=Vaughan.apply_Vaughan(lc,epoch_info=epoch_info,model=Vaughan.powerlaw,maskfreq=0,show=1)
     freq=psd.freq
     psd_sim=Vaughan.powerlaw(freq,result_mu)
     # plt.step(freq,psd_sim)
     # plt.loglog()
     # plt.show()
     return (psd_sim,result_mu)
-
 
 def make_lc_from_psd(psd,cts_rate,dt,epoch_info,poisson=True,frms=0):
     if type(epoch_info)==np.ndarray:epoch_info=np.array(epoch_info)
@@ -66,7 +65,7 @@ def make_lc_from_psd(psd,cts_rate,dt,epoch_info,poisson=True,frms=0):
     lc.gti=[[lc.time[0],lc.time[-1]]]
     return lc
 
-def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[],randseed=1):
+def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[],randseed=1,maskfreq=0):
     ## from one obs(usually the longest one obs) to simulate singleobs_evt
     ## if you need only just some obs to be simulated, make ifoutobs not []
     (src_evt_all, epoch_info_all) = load_data(dataname=dataname, ifpath=path, ifobsID=ifoutobs)
@@ -86,7 +85,7 @@ def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[],randseed=1
     mse=np.mean(sigma**2)
     frac_rms=np.sqrt((np.var(lc_cho.counts) -mse) /np.mean(lc_cho.counts) ** 2)
     print('frms=',frac_rms)
-    (psd_sim,result_mu) = bestpsd(lc_cho, epoch_info=epoch_info_use)
+    (psd_sim,result_mu) = bestpsd(lc_cho, epoch_info=epoch_info_use,maskfreq=maskfreq)
 
     evt_all = EventList()
     for i in range(len(epoch_info_all)):
@@ -123,21 +122,20 @@ def singleobs2simevt(path,dataname,dt=500,chosen_obs=None,ifoutobs=[],randseed=1
 
     return (evt_all, lc_all)
 
-def GL_simevt(simN=100,outpath=None):
+def GL_simevt(simN=100,dataname=0,pathin=None,outpath=None):
     ##s模拟simN多少组
-    path_M31 = '/Users/baotong/Desktop/M31XRB/M31ACIS_txt/txt_all_obs_p90/'  ##数据的路径
-    path_GC= '/Users/baotong/Desktop/period_terzan5/txt_all_obs_p90/'
-    dataname='196'  ##源的编号
+    # ##数据的路径
+    # ##源的编号
     ifoutobs=[] #ifoutobs是，你要选的这个源，模拟他的哪些观测的数据。如果是所有的，想办法在别的地方读取一下，别手动敲这么多
 
-    (src_evt_all, epoch_info_all) = load_data(dataname=dataname, ifpath=path_GC, ifobsID=ifoutobs)
-    w_range=2*np.pi*np.arange(1./50000,1./30000,1.e-7)
+    (src_evt_all, epoch_info_all) = load_data(dataname=dataname, ifpath=pathin, ifobsID=ifoutobs)
+    w_range=2*np.pi*np.arange(1./10000,1./5000,1.e-7)
     ## w_range针对你的信号来改，这个没关系，只要和我们table里这个源GL流程的range一致即可
     Prob,wpeak,wmean,mopt,wconf_lo,wconf_hi,simcounts = np.zeros(simN),np.zeros(simN),np.zeros(simN),\
                                                         np.zeros(simN),np.zeros(simN),np.zeros(simN),np.zeros(simN)
     for i in range(simN):
-        (sim_evt_all, sim_lc_all) = singleobs2simevt(path=path_GC, dataname=dataname, dt=2000, chosen_obs=[],
-                                                     ifoutobs=ifoutobs,randseed=np.random.randint(1e5))
+        (sim_evt_all, sim_lc_all) = singleobs2simevt(path=path_GC, dataname=dataname, dt=500, chosen_obs=[],
+                                                     ifoutobs=ifoutobs,randseed=np.random.randint(1e5),maskfreq=1/6432.94)
         ## dt最好取大一点，以200为宜，再小的话rms会很大；如果是对短周期来做，就只能取小点。但是无所谓，因为短周期会被泊松噪声dominate
         time=sim_evt_all.time
         print('counts=',len(time))
@@ -167,5 +165,7 @@ def GL_simevt(simN=100,outpath=None):
     #            fmt='%10.5f %10.2f %10.2f %10d %10.5f %10.5f %10d')
     ##改这里的path来存你的sim结果
 if __name__=='__main__':
-    outpath='/Users/baotong/Desktop/period_terzan5/rednoise/'
-    GL_simevt(1,outpath=outpath)
+    outpath='/Users/baotong/Desktop/M31XRB/rednoise/'
+    path_GC= '/Users/baotong/Desktop/M31XRB/M31ACIS_txt/txt_all_obs_p90/'
+    dataname='18'
+    GL_simevt(1,dataname=dataname,pathin=path_GC,outpath=outpath)

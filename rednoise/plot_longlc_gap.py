@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 import hawkeye as hawk
 import rednoise
-
+from NGC104.timing_comb import load_data
 def judge_GTI(t,GTI):
     outjudge=False
     for i in range(len(GTI)):
@@ -76,30 +76,23 @@ def poisson_conf(loop,N,threshold):
             num += 1
     return num/loop
 
-def plot_lc(source_id,period=None):
+def plot_lc(source_id,period=None,pathin=None,save=0,show=1,binnum=10):
     # path='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_0.5_8/'
-    path='/Users/baotong/Desktop/period_Tuc/txt_startover/txt_all_obs_p{0}/'.format(90)
-
-    (evt_file,epoch_file)=rednoise.load_data(source_id,ecf=90,ifobsid=[2735,2736],ifexpT=None)
+    (evt_file,epoch_file)=load_data(source_id,ifpath=pathin,ecf=90,ifobsID=[14197])
     # expvalue=[2.63e7,2.63e7,2.63e7,2.63e7,1.61e7,1.97e7,9.7e6]
-
     obs_id=epoch_file[:,2]
     evt_id=evt_file[:,2]
     evt_list=evt_file[:,0]
     period =period
-    # bin_len=period/8
-    bin_len=2000.
-    x_all = [];
-    y_all = [];
-    xerr_all = [];
-    yerr_all = []
+    bin_len=period/binnum
+    # bin_len=6500.
+    x_all = [];y_all = [];xerr_all = [];yerr_all = []
     for i in range(len(obs_id)):
         x=[];y=[];xerr=[];yerr=[]
         time=evt_list[np.where(evt_id==obs_id[i])]
         if len(time)<2:
             print('attention')
             continue
-
         k=0;
         while (time[0]+k*bin_len)<time[-1]:
             evt_temp=time[np.where((time>(time[0]+k*bin_len))&(time<(time[0]+(k+1)*bin_len)))]
@@ -117,18 +110,17 @@ def plot_lc(source_id,period=None):
         x_all.append(x);y_all.append(y);xerr_all.append(xerr);yerr_all.append(yerr)
 
     ## plot the max point phase ##
-
-    plt.figure(2)
-    for i in range(0, len(x_all)):
-        maxf_time=x_all[i][np.argmax(y_all[i])]
-
-        phase=np.mod(maxf_time,period)/period
-        plt.scatter(i,phase)
-    phase0=np.mod(x_all[0][np.argmax(y_all[0])],period)/period
-    plt.plot([0,len(x_all)],[phase0-0.5*bin_len/period,phase0-0.5*bin_len/period],'--',color='grey')
-    plt.plot([0,len(x_all)],[phase0+0.5*bin_len/period,phase0+0.5*bin_len/period],'--',color='grey')
-    plt.ylim(0,1.01)
-    plt.show()
+    # plt.figure(2)
+    # for i in range(0, len(x_all)):
+    #     maxf_time=x_all[i][np.argmax(y_all[i])]
+    #
+    #     phase=np.mod(maxf_time,period)/period
+    #     plt.scatter(i,phase)
+    # phase0=np.mod(x_all[0][np.argmax(y_all[0])],period)/period
+    # plt.plot([0,len(x_all)],[phase0-0.5*bin_len/period,phase0-0.5*bin_len/period],'--',color='grey')
+    # plt.plot([0,len(x_all)],[phase0+0.5*bin_len/period,phase0+0.5*bin_len/period],'--',color='grey')
+    # plt.ylim(0,1.01)
+    # plt.show()
     return_time=x_all[0];return_flux=y_all[0]
     for i in range(1,len(x_all)):
         return_time=np.concatenate((return_time,x_all[i]))
@@ -136,12 +128,11 @@ def plot_lc(source_id,period=None):
     ## 把数组拉平，称为return_time
     ##=== MJD=== ##
     plt.figure(1,figsize=(12,4))
-    plt.errorbar(x_all[0], np.array(y_all[0])*25.423, xerr=xerr_all[0],
-                 yerr=np.array(yerr_all[0])*25.423,fmt='.', capsize=1)
-
+    plt.errorbar(x_all[0], np.array(y_all[0])*254.23, xerr=xerr_all[0],
+                 yerr=np.array(yerr_all[0])*254.23,fmt='.', capsize=1)
     ### sine function ####
     def fmax(x, a, b):
-        return a * np.sin(x * 2 * np.pi / period-0.0*2*np.pi) + b
+        return a * np.sin(x * 2 * np.pi / period+0.8*2*np.pi) + b
 
     xsin=np.linspace(x_all[0][0],x_all[-1][-1],10000000)
     ysin=0.001*np.sin(2*np.pi/period*xsin)+0.01
@@ -153,9 +144,9 @@ def plot_lc(source_id,period=None):
             gap = (np.mod(x_all[i][0], period) / period - np.mod(x_all[i - 1][-1], period) / period) * period+period
         # print(gap)
         x_all[i] =x_all[i]- x_all[i][0] + x_all[i - 1][-1] + gap
-        plt.errorbar(x_all[i],np.array(y_all[i])*25.423,xerr=xerr_all[i],
-                     yerr=np.array(yerr_all[i])*25.423,fmt='.', capsize=1)
-        plt.fill_between([x_all[i-1][-1],x_all[i][0]],np.max(return_flux*25.423),facecolor='yellow',alpha=0.2)
+        plt.errorbar(x_all[i],np.array(y_all[i])*254.23,xerr=xerr_all[i],
+                     yerr=np.array(yerr_all[i])*254.23,fmt='.', capsize=1)
+        plt.fill_between([x_all[i-1][-1],x_all[i][0]],np.max(return_flux*254.23),facecolor='yellow',alpha=0.2)
 
     x_all_list=x_all[0];y_all_list=y_all[0]
     for i in range(1,len(x_all)):
@@ -168,17 +159,22 @@ def plot_lc(source_id,period=None):
     #     plt.plot([xperiod[i],xperiod[i]],[0,np.max(return_flux)],'--',c='grey')
     # plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])], fita[0], fita[1]),'--',c='r')
     print(xsin)
-    plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])] ,0.003,0.003)*25.423,'-',c='grey')
-    plt.ylim(0,2)
+    plt.plot(xsin[np.where(xsin<x_all[-1][-1])], fmax(xsin[np.where(xsin<x_all[-1][-1])] ,0.015,0.015)*254.23,'-',c='grey')
+    # plt.ylim(0,1.5)
     plt.xlabel('Time',hawk.font1)
-    plt.ylabel(r'Photon flux ($\rm 10^{-4}~ph~s^{-1}~cm^{-2}$)',hawk.font1)
+    plt.ylabel(r'Photon flux ($\rm 10^{-5}~ph~s^{-1}~cm^{-2}$)',hawk.font1)
     plt.tick_params(labelsize=16)
-    figurepath='/Users/baotong/Desktop/aas/pXS_Tuc_mod1/figure/'
-    # plt.savefig(figurepath+f'{source_id}_long_gap_org.pdf',bbox_inches='tight', pad_inches=0.1)
-    plt.show()
+    figurepath='/Users/baotong/Desktop/aas/GCall/figure/'
+    if save:
+        plt.savefig(figurepath+f'{source_id}_long_gap_org.pdf',bbox_inches='tight', pad_inches=0.1)
+    if show:
+        plt.show()
+    else:
+        plt.close()
     return [return_time,return_flux]
 
-
+def MJDconvert(time):
+    return time / 86400 + 2449352.5 - 2400000.5
 
 def plot_phase_obs(source_id,period):
     path='/Users/baotong/Desktop/period_Tuc/txt_startover/txt_all_obs_p{0}/'.format(90)
@@ -256,6 +252,13 @@ def plot_phase_obs(source_id,period):
         # axes[i].set_yscale('log')
     plt.show()
 if __name__=="__main__":
-    plot_lc('185',period=8517.19)
+    path_GC = '/Users/baotong/Desktop/period_terzan5/txt_all_obs_p{0}/'.format(90)
+    path_M31='/Users/baotong/Desktop/period_M31XRB/M31ACIS_txt/txt_all_obs_p90/'
+    plot_lc('2',period=4521.41  ,pathin=path_M31,save=0,show=1,binnum=7)
+
+    # epochfile=np.loadtxt(path_GC+'epoch_src_372.txt')
+    # time_obs=(epochfile[:,0]+epochfile[:,1])/2
+    # MJD=MJDconvert(time_obs)
+    # print(MJD)
     # plot_phase_obs('290',period=46082.9493)
     # print(poisson_conf(10000,6,0.15))

@@ -13,11 +13,12 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 from scipy import optimize as op
-from astropy.timeseries import LombScargle
+import os
 import hawkeye as hawk
 import NGC104.plot_pXS as plot_pXS
 import GC.localCVs as localCVs
 import NGC104.CV_model as CV_model
+
 pos_all = {'Tuc': [6.0236250, -72.0812833, 3.17 * 60, 3.17 / 8.8 * 60],
            'terzan5': [267.0202083, -24.7790556, 0.72 * 60, 0.72 / 3.4 * 60],
            'M28': [276.1363750, -24.8702972, 1.97 * 60, 1.97 / 8.2 * 60],
@@ -733,6 +734,54 @@ def plot_surface_density(save=0,show=1):
     plt.semilogy()
     plt.show()
 
+def read_GLres_src(save=0,show=1):
+    fig, f1_axes = plt.subplots(ncols=2, nrows=3, sharey='row', sharex='col',
+                                gridspec_kw={'height_ratios': [1, 1,1], 'width_ratios': [1, 1]},
+                                figsize=(12, 15))
+    f1_axes=f1_axes.flatten()
+    for k in range(1,len(gcname)):
+        ax = f1_axes[k-1]
+        label_gc = ['47 Tuc', 'Terzan 5', 'M 28',r'$\omega~cen$', 'NGC 6397', 'NGC 6752', 'NGC 6266']
+        srcid = seq[np.where(type == gcname[k])[0]]
+        path = '/Users/baotong/Desktop/period_' + gcname[k] + '/'
+        for j in range(len(srcid)):
+            prob_GL = []
+            for i in range(100):
+                if os.path.isfile(path+'sim_GL/'+'result_3h_{0}_f{1}.txt'.format(str(srcid[j]),i)):
+                    res=np.loadtxt(path+'sim_GL/'+'result_3h_{0}_f{1}.txt'.format(str(srcid[j]),i))
+                elif os.path.isfile(path+'sim_GL/'+'result_10h_{0}_f{1}.txt'.format(str(srcid[j]),i)):
+                    res=np.loadtxt(path+'sim_GL/'+'result_10h_{0}_f{1}.txt'.format(str(srcid[j]),i))
+                else:
+                    print('None')
+                    continue
+                prob_GL.append(res[2])
+            prob_GL=np.array(prob_GL)
+            bins = np.linspace(0, 1, 21)
+            ax.hist(prob_GL,bins=20,histtype='step',label=f'#{j+1}',lw=2)
+            fD=len(prob_GL[prob_GL>0.95])
+            # print(fD)
+            # print(np.where(prob_GL>0.9)[0])
+        # plt.semilogx()
+        ax.plot([0.95, 0.95], [0, 100], '--',color='grey')
+        ax.text(0.5,60,f'{label_gc[k]}',hawk.font1)
+        # ax.legend()
+        if k==1:ax.legend(loc='center', ncol=3, handletextpad=0.2, columnspacing=0.1, facecolor=None,
+                   edgecolor='grey',handlelength=0.5)
+        elif k==2:ax.legend(loc='upper right', ncol=2, handletextpad=0.2, columnspacing=0.1, facecolor=None,
+                   edgecolor='grey',handlelength=0.5)
+        else:ax.legend(loc='upper right', ncol=1, handletextpad=0.2, columnspacing=0.1, facecolor=None,
+                   edgecolor='grey',handlelength=0.5)
+        # plt.xlabel(r'$P_{\rm GL}$',hawk.font1)
+        # plt.ylabel('Number of trials',hawk.font1)
+        # plt.tick_params(labelsize=16)
+        ax.set_yscale('log')
+        if k==5 or k==6:ax.set_xlabel(r'$P_{\rm GL}$',hawk.font1)
+        if k==1 or k==3 or k==5:ax.set_ylabel('Number of trials',hawk.font1)
+        ax.tick_params(labelsize=16)
+    plt.subplots_adjust(wspace=0, hspace=0.0)
+    if save:plt.savefig('/Users/baotong/Desktop/aas/GCall/figure/'+'hist_sim.pdf',bbox_inches='tight', pad_inches=0.05)
+    if show:plt.show()
+    else:plt.close()
 if __name__ == '__main__':
     # plot_profile()
     # plot_P_L_profile(save=1, show=1)
@@ -744,3 +793,4 @@ if __name__ == '__main__':
     # plot_src_info(show=1)
     # plot_P_L_threereg()
     plot_surface_density(save=0,show=1)
+    # read_GLres_src(save=1,show=1)
