@@ -86,7 +86,7 @@ def main_process(path,dataname,period=None):
     (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[])
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/GCall/figure/fold/'
-    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[50,8000])
+    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[2000,8000])
     print('counts=',len(time))
     ## if filter time ##
     # time=hawk.filter_time_t1t2(time,t1=50000,t2=130000)
@@ -113,5 +113,5 @@ if __name__=='__main__':
     path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
     path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
     # path_M31='/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/'
-    dataname='21'
-    main_process(path=path_M31,dataname=dataname,period=22834.53 )
+    dataname='125'
+    main_process(path=path_M31,dataname=dataname,period=69414.0 )
