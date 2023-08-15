@@ -32,6 +32,12 @@ def spectrafit(x,y,error):
     ydata=np.exp(logydata)
     return (popt,perr)
 
+# 定义三个高斯函数的叠加模型
+def triple_gaussian(x, a1, mu1, sigma1, a2, mu2, sigma2, a3, mu3, sigma3):
+    return (a1*np.exp(-(x-mu1)**2/(2*sigma1**2)) +
+            a2*np.exp(-(x-mu2)**2/(2*sigma2**2)) +
+            a3*np.exp(-(x-mu3)**2/(2*sigma3**2)))
+
 def plot_HR67_SH(save=0,show=1):
     gclist=['M28','NGC6397','terzan5','omg','NGC6752','NGC6266']
     color_list = ['grey', 'g', 'b', 'k', 'orange', 'purple']
@@ -141,13 +147,31 @@ def plot_HR67_hist(save=0,show=1):
         goodindex=np.where(SH>100)[0]
         outindex=np.intersect1d(goodindex,np.where(HR>-0.85)[0])
         print(seq[outindex])
+        print(len(goodindex))
+
+        # 绘制拟合曲线和原始直方图
         plt.figure(1,(9,6))
-        plt.hist(HR[goodindex],bins=20,histtype='step',label=gc,linewidth=3)
+        temphist=plt.hist(HR[goodindex],bins=25,histtype='step',label=gc,linewidth=3)
+        histvalue=temphist[0]
+        bin_centers=(temphist[1][:-1]+temphist[1][1:])/2
+        # 进行三个高斯函数的拟合
+        initial_guess = [5, -0.95, 0.05, 10, -0.9, 0.2, 3, -0.82, 0.02]  # 初始猜测值
+        params, _ = curve_fit(triple_gaussian, bin_centers, histvalue, p0=initial_guess,maxfev=800000)
+        bin_plot=np.linspace(bin_centers[0],bin_centers[-1],1000)
+        plt.plot(bin_plot, triple_gaussian(bin_plot, *params), color='red', label='Fit')
         plt.xticks(size=18)
         plt.yticks(size=18)
         plt.xlabel('HR', hawk.font1)
-        plt.ylabel('Number of bin',hawk.font1)
-        # plt.scatter(HR[goodindex],dist[goodindex],marker='+',s=50)
+        plt.ylabel('Number of sources per bin',hawk.font1)
+        plt.plot([-0.85,-0.85],[0,10],'--',color='red')
+        print(params)
+        # plt.semilogy()
+        plt.figure(2)
+        plt.scatter(HR[goodindex],dist[goodindex],marker='+',s=50)
+        plt.scatter(HR[outindex], dist[outindex], marker='+', s=50,color='cyan')
+        for k in range(len(outindex)):
+            plt.text(HR[outindex[k]], dist[outindex[k]], s=seq[outindex[k]])
+        # plt.legend()
         plt.semilogy()
         plt.show()
 

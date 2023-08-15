@@ -28,7 +28,8 @@ pos_all = {'Tuc': [6.0236250, -72.0812833, 3.17 * 60, 3.17 / 8.8 * 60],
            'NGC6266': [255.303333, -30.113722, 0.92 * 60, 0.92 / 4.2 * 60],
            'M30': [325.092167, -23.179861, 1.03 * 60, 1.03 / 17.2 * 60]}
 
-gcname = ['Tuc', 'terzan5', 'M28', 'omg', 'NGC6397', 'NGC6752', 'NGC6266']
+gcname = ['Tuc', 'terzan5', 'omg','M28', 'NGC6397', 'NGC6752', 'NGC6266','M30']
+# gcname = ['Tuc','omg', 'NGC6266', 'NGC6397', 'terzan5', 'M28', 'NGC6752']
 catname = ['xray_properties-592.fits', 'cheng2019_terzan.fit', 'cheng2020_M28.fit',
            'cheng2020_omg.fit', 'ngc6397_catalog.fits', 'ngc6752_catalog.fits',
            'NGC6266_p50_i5_src_1_2_4_8.fits']
@@ -45,7 +46,6 @@ counts = np.array(result_all['counts'])
 exptime = np.array(result_all['expT'])
 judge=np.array(result_all['judge'])
 CR = counts / exptime
-
 def f(x,a,b):
     logS=a*x+b  #S~V^a
     return logS
@@ -225,7 +225,6 @@ def plot_P_L_profile(save=0, show=1):
     L = np.array(result_all['L'])[idex]
     P_min = 7. / 6.
     P_gap = [7740.0 / 3600., 11448.0 / 3600.]
-    print(len(L))
 
     (ra_LW, dec_LW, seq_LW, period_LW, L_LW, Lmin, Lmax, type_LW) = plot_pXS.load_LW('result_LW')
     LW_index = np.where((period_LW > 3900) & (period_LW < 40000))[0]
@@ -245,6 +244,7 @@ def plot_P_L_profile(save=0, show=1):
     bins_rc = np.logspace(np.log10(0.15), np.log10(130), 11)
     for i in range(len(gcname) - 1):
         gc_srcid = np.where(type == gcname[i])[0]
+        print(gc_srcid)
         dist_rc = np.concatenate((dist_rc, dist[gc_srcid] / pos_all[gcname[i]][3]))
         ax1.scatter(period[gc_srcid] / 3600, L[gc_srcid], marker=label[i], color=color_list[i], label=label_gc[i], s=70)
         ax2.scatter(period[gc_srcid] / 3600, dist[gc_srcid] / pos_all[gcname[i]][3], marker=label[i],
@@ -262,7 +262,7 @@ def plot_P_L_profile(save=0, show=1):
     ax1.plot([P_min, P_min], [0, 1e33], '--', color='grey')
     ax1.plot([P_gap[0], P_gap[0]], [0, 1e33], '-', lw=2., color='orange')
     ax1.plot([P_gap[1], P_gap[1]], [0, 1e33], '-', lw=2., color='orange')
-    ax1.set_ylabel(r'Luminosity ($\rm erg~s^{-1}$)', hawk.font1)
+    ax1.set_ylabel(r'0.5-8 keV X-ray luminosity ($\rm erg~s^{-1}$)', hawk.font1)
     (period_sim, L_sim, Mdot_sim) = CV_model.read_Knigge_model()
     # ax5 = ax1.twinx()
     # ax5.set_ylabel(r'$\rm Log\dot{M_2}$ ($\rm M_\odot~ \rm year^{-1}$)', hawk.font1)
@@ -282,7 +282,7 @@ def plot_P_L_profile(save=0, show=1):
     ax2.plot([1, 26], [4, 4], '-', lw=1., color='c')
     ax2.plot([1, 26], [10, 10], '-', lw=1., color='c')
     ax2.fill_between([1, 26], [4, 4], [10, 10], facecolor='yellow', alpha=0.2)
-    ax2.set_xlabel('Period (h)', hawk.font1)
+    ax2.set_xlabel('Orbital Period (h)', hawk.font1)
     ax2.set_ylabel(r'R/$r_{c}$', hawk.font1)
     ax2.set_xlim(1, 28)
     ax2.set_ylim(1e-1, 150)
@@ -741,7 +741,8 @@ def read_GLres_src(save=0,show=1):
     f1_axes=f1_axes.flatten()
     for k in range(1,len(gcname)):
         ax = f1_axes[k-1]
-        label_gc = ['47 Tuc', 'Terzan 5', 'M 28',r'$\omega~cen$', 'NGC 6397', 'NGC 6752', 'NGC 6266']
+        # label_gc = ['47 Tuc', 'Terzan 5', 'M 28',r'$\omega~cen$', 'NGC 6397', 'NGC 6752', 'NGC 6266']
+        label_gc=['Tuc',r'$\omega~Cen$','M 62','NGC 6397', 'Terzan 5', 'M 28','NGC 6752']
         srcid = seq[np.where(type == gcname[k])[0]]
         path = '/Users/baotong/Desktop/period_' + gcname[k] + '/'
         for j in range(len(srcid)):
@@ -765,9 +766,9 @@ def read_GLres_src(save=0,show=1):
         ax.plot([0.95, 0.95], [0, 100], '--',color='grey')
         ax.text(0.5,60,f'{label_gc[k]}',hawk.font1)
         # ax.legend()
-        if k==1:ax.legend(loc='center', ncol=3, handletextpad=0.2, columnspacing=0.1, facecolor=None,
+        if k==4:ax.legend(loc='center', ncol=3, handletextpad=0.2, columnspacing=0.1, facecolor=None,
                    edgecolor='grey',handlelength=0.5)
-        elif k==2:ax.legend(loc='upper right', ncol=2, handletextpad=0.2, columnspacing=0.1, facecolor=None,
+        elif k==5:ax.legend(loc='upper right', ncol=2, handletextpad=0.2, columnspacing=0.1, facecolor=None,
                    edgecolor='grey',handlelength=0.5)
         else:ax.legend(loc='upper right', ncol=1, handletextpad=0.2, columnspacing=0.1, facecolor=None,
                    edgecolor='grey',handlelength=0.5)
@@ -782,15 +783,16 @@ def read_GLres_src(save=0,show=1):
     if save:plt.savefig('/Users/baotong/Desktop/aas/GCall/figure/'+'hist_sim.pdf',bbox_inches='tight', pad_inches=0.05)
     if show:plt.show()
     else:plt.close()
+
 if __name__ == '__main__':
     # plot_profile()
     # plot_P_L_profile(save=1, show=1)
     # plot_P_L(save=0,show=1)
     # plot_Phist(save=0,show=1)
     # plot_P_L_4reg_scatter(save=0,show=1)
-    # plot_profile(save=0,show=1)
+    plot_P_L_profile(save=1,show=1)
     # plot_Phist(save=1,show=1)
     # plot_src_info(show=1)
     # plot_P_L_threereg()
-    plot_surface_density(save=0,show=1)
+    # plot_surface_density(save=0,show=1)
     # read_GLres_src(save=1,show=1)

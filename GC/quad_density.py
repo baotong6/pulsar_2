@@ -85,11 +85,13 @@ def plot_cum_density(save=0,show=1):
     ax.plot(srcdist_terzan,np.arange(1,len(srcdist_terzan)+1,1),'o-',lw=2, color='green',label='Deteced periodic CVs in Terzan 5')
     ax.plot(srcdist_M28,np.arange(1,len(srcdist_M28)+1,1), 'o-',lw=2,color='black',label='Deteced periodic CVs in M 28')
     # 标注数字
+    terzanidlist=['Seq.2','Seq.3','Seq.7','Seq.8','Seq.1','Seq.4','Seq.5']
+    m28idlist=['Seq.1/4','Seq.3','Seq.7','Seq.2']
     for i, value in enumerate(srcdist_terzan):
-        plt.text(value, 1.3*(i + 1), str(i+1),fontsize=15)
+        plt.text(0.7*value, 1.4*(i + 1), terzanidlist[i],color='green',fontsize=15)
 
     for i, value in enumerate(srcdist_M28):
-        plt.text(value, 1.3*(i + 1), str(i+1),fontsize=15)
+        plt.text(0.7*value, 1.4*(i + 1),m28idlist[i],color='k',fontsize=15)
     # num1 = 0;
     # num2 = 0
     # for i in range(len(bins)-2):
@@ -104,7 +106,7 @@ def plot_cum_density(save=0,show=1):
     # plt.plot([r1_cut,r1_cut],[0,22],'--',color='gray')
     # plt.plot([r2_cut,r2_cut],[0,22],'--',color='gray')
     plt.legend()
-    plt.xlabel('Radius',hawk.font1)
+    plt.xlabel('Radius (arcmin)',hawk.font1)
     plt.ylabel('Number of periodic CVs',hawk.font1)
     plt.tick_params(labelsize=16)
     ax.axhline(y=1, color='gray', linestyle='--')

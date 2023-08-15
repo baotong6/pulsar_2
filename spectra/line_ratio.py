@@ -104,9 +104,8 @@ def get_line(ID,path):
 def read_line_70on67(ID,path):
     fake_name = 'fake_{0}_3line.fit'.format(str(ID))
     fake_file = fits.open(path + fake_name)
-    line_in_67 = fake_file[1].data['norm6']
-    line_in_70 = fake_file[1].data['norm9']
-
+    line_in_67 = fake_file[1].data['norm9']
+    line_in_70 = fake_file[1].data['norm12']
     validindex=np.where((line_in_67>0)&(line_in_70>0))[0]
     print(len(validindex))
     line_70on67 = (7.0 / 6.7) * (line_in_70[validindex] / line_in_67[validindex])
@@ -114,6 +113,15 @@ def read_line_70on67(ID,path):
     line_70on67_sort = np.sort(line_70on67)
     bins=np.logspace(np.log10(1e-5),np.log10(2),100)
     plt.hist(line_70on67_sort,bins=bins,histtype='step')
+    plt.plot(
+        [line_70on67_sort[int((0.16) * len(line_70on67_sort))], line_70on67_sort[int((0.16) * len(line_70on67_sort))]],
+        [0, 200], '--')
+    plt.plot(
+        [line_70on67_sort[int((0.5) * len(line_70on67_sort))], line_70on67_sort[int((0.5) * len(line_70on67_sort))]],
+        [0, 200], '--')
+    plt.plot(
+        [line_70on67_sort[int((0.84) * len(line_70on67_sort))], line_70on67_sort[int((0.84) * len(line_70on67_sort))]],
+        [0, 200], '--')
     plt.show()
     line_70on67_mod=line_70on67_sort[np.where((line_70on67_sort>bins[0])&(line_70on67_sort<bins[-1]))[0]]
     print(len(line_70on67_mod))
@@ -124,8 +132,8 @@ def read_line_70on67(ID,path):
     return [low_70on67,in70on67,high_70on67]
 
 if __name__=='__main__':
-    ID='306'
-    path='/Users/baotong/Desktop/period_NGC6397/spectra_startover/'
+    ID='lsrc_in'
+    path='/Users/baotong/Desktop/period_terzan5/spectra_startover/'
     result=read_line_70on67(ID,path)
     print('ID={0}'.format(ID))
     print('in70on67={0}'.format(result[1]))

@@ -82,7 +82,7 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
 def main_process(path,dataname,period=None):
     ecf=90
     bin_len = 12.8
-    net_p=0.94
+    net_p=0.95
     (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[])
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/GCall/figure/fold/'
@@ -94,7 +94,7 @@ def main_process(path,dataname,period=None):
     hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.,show=True)
     # hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=15,shift=0.,
     #                 label=dataname,text='Seq.{}'.format(dataname),save=0,show=1)
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=40,shift=0.3,
+    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=20,shift=0.3,
                     label=dataname,textdef='#{0} (M28), P={1:.2f}s'.format(dataname,period,len(time)),save=0,show=1)
     # plt.hist(time,bins=300,histtype='step')
     # plt.show()
@@ -109,9 +109,9 @@ def main_process(path,dataname,period=None):
     #                        shift=0.7,dataname=dataname,save=0,show=1)
 if __name__=='__main__':
     path_M31='/Users/baotong/Desktop/period_M31XRB/M31ACIS_txt/txt_all_obs_p90/';useid=[]
-    path_GC = '/Users/baotong/Desktop/period_terzan5/txt_all_obs_p90/';useid=[]
+    path_GC = '/Users/baotong/Desktop/period_M28/txt_all_obs_p90/';useid=[]
     path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
     path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
     # path_M31='/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/'
-    dataname='125'
-    main_process(path=path_M31,dataname=dataname,period=69414.0 )
+    dataname='450'
+    main_process(path=path_GC,dataname=dataname,period=5878.89477 )
