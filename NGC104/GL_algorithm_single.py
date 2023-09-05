@@ -247,10 +247,10 @@ def get_T_in_mbins(epoch_info,w,m,fi):
 
 # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
 path_Tuc='/Users/baotong/Desktop/period_M28/txt_all_obs_p90/'
-path_M31 = '/Users/baotong/Desktop/M31XRB/M31ACIS_txt/txt_all_obs_p90/'
+path_M31 = '/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/'
 path_NSC = '/Users/baotong/Desktop/period/txt_all_obs_IG/'
 # path_Tuc = f'/Users/baotong/eSASS/data/raw_data/47_Tuc/txt/txt_merge_psf75_0.2_5/'
-path = path_Tuc
+path = path_M31
 #path = '/Users/baotong/xmm/M28_LMXB/0701981501/txt/'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
 def filter_obs(src_evt,useid):
@@ -283,7 +283,7 @@ def write_result(dataname):
 
     (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
                                             flux_filter=5,expT_filter=4000,
-                                            if_flux_high=0, if_expT_high=1,obsID=[])
+                                            if_flux_high=0, if_expT_high=1,obsID=[12110])
     # [953,955,2735,2736,2737,2738]
     # [16527, 15747,16529,17420,15748,16528]
     epoch_info = epoch_info_use  ##这里随意改
@@ -295,7 +295,7 @@ def write_result(dataname):
     energy=src_evt[:,1]
     time = hawk.filter_energy(time, energy, [20, 8000])
     counts=len(time)
-    w_range=2*np.pi*np.arange(1./6000,1./5000,1.e-8)
+    w_range=2*np.pi*np.arange(1./80,1./50,1.e-6)
     starttime = datetime.datetime.now()
     GL_R=compute_GL(time,epoch_info=epoch_info,w_range=w_range,m_max=20,parallel=True)
     endtime = datetime.datetime.now()
@@ -346,7 +346,7 @@ def get_result_fromid(id_range):
     #            fmt='%10d %10.2f %10.5f %10.5f %10.5f %10d %10.5f %10.5f %10d')
 
 if __name__ == '__main__':
-    get_result_fromid(['450'])
+    get_result_fromid(['110'])
     # a=np.arange(1,184,1)
     # a=[14,16,22,1,13,20,2,12,51,29,67,17,47,50,70,73,30,64,71,68]
     # for i in a:

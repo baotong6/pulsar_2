@@ -10,7 +10,7 @@ from astropy.stats import poisson_conf_interval
 from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit
 import pandas as pd
-from astropy.coordinates import SkyCoord
+from matplotlib import cm
 from astropy import units as u
 from scipy import optimize as op
 import os
@@ -18,7 +18,8 @@ import hawkeye as hawk
 import NGC104.plot_pXS as plot_pXS
 import GC.localCVs as localCVs
 import NGC104.CV_model as CV_model
-
+import GC.SDSSCV as SDSS
+import GC.MESA_sim as MESA
 pos_all = {'Tuc': [6.0236250, -72.0812833, 3.17 * 60, 3.17 / 8.8 * 60],
            'terzan5': [267.0202083, -24.7790556, 0.72 * 60, 0.72 / 3.4 * 60],
            'M28': [276.1363750, -24.8702972, 1.97 * 60, 1.97 / 8.2 * 60],
@@ -45,10 +46,13 @@ dist = np.array(result_all['proj_dist'])
 counts = np.array(result_all['counts'])
 exptime = np.array(result_all['expT'])
 judge=np.array(result_all['judge'])
+L = np.array(result_all['L'])
 CR = counts / exptime
+
 def f(x,a,b):
     logS=a*x+b  #S~V^a
     return logS
+
 def spectrafit(x,y,error):
     popt, pcov = op.curve_fit(f, np.log(x), np.log(y),absolute_sigma=True,sigma=np.log(error))
     # popt, pcov = op.curve_fit(f, np.log(x), np.log(y))
@@ -103,7 +107,6 @@ def plot_profile():
     # plt.show()
     return None
 
-
 def plot_Phist(save=0, show=1):
     result_all = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'all')
     result_allbutTuc = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'allbutTuc')
@@ -156,27 +159,33 @@ def plot_Phist(save=0, show=1):
     (ra, dec, seq, period_LW, L, Lmin, Lmax, type) = plot_pXS.load_LW('result_LW')
     period_LW = period_LW[np.where((period_LW > 3900) & (period_LW < 40000))]
     period_LW /= 3600.
+    period_SDSS = SDSS.readPSDSS()
     # fig, axes = plt.subplots(2, 1, figsize=(15, 10), sharex='all')
     fig, (ax1, ax2) = plt.subplots(ncols=1, nrows=2, sharex='all', gridspec_kw={'height_ratios': [2, 1]},
                                    figsize=(15, 10))
     # ax1=fig.add_subplot(211)
     ax1.plot()
-    ax1.hist(orb_all, bins=bins, histtype='step', lw=2, color='red', linestyle='--')
+    # ax1.hist(orb_all, bins=bins, histtype='step', lw=2, color='red', linestyle='--')
     ax1.hist(period_allbutTuc, bins=bins_p, histtype='step', lw=2, linestyle='-', facecolor='grey',
-             hatch='/', edgecolor='k', fill=True)
-    ax1.hist(period_GC, bins=bins_p, histtype='step', lw=4, color='c', linestyle='-')
-    ax1.hist(period_LW, bins=bins_p, histtype='step', lw=3, color='blue', linestyle='-')
+             hatch='/', edgecolor='k', fill=True,label='CVs in GCs (excluding 47 Tuc)')
+    ax1.hist(period_GC, bins=bins_p, histtype='step', lw=4, color='c', linestyle='-',label='CVs in GCs')
+    ax1.hist(period_LW, bins=bins_p, histtype='step', lw=3, color='blue', linestyle='-',label='CVs in Galactic Bulge')
+    ax1.hist(period_SDSS, bins=bins, histtype='step', lw=2, color='red', linestyle='--',
+             label='CVs in Solar Neighborhood')
+    print('SDSS CVs',len(period_SDSS))
+    print(len(np.where(period_SDSS>11448.0 / 3600)[0]))
     # ax1.hist(spin_IP, bins = bins_spin, histtype = 'step',lw=1.5, color = 'purple',linestyle='-')
-    ax1.legend(['CVs in Solar Neighborhood', 'CVs in GCs (excluding 47 Tuc)', 'CVs in GCs', 'CVs in Galactic Bulge'])
+    # ax1.legend(['CVs in Solar Neighborhood', 'CVs in GCs (excluding 47 Tuc)', 'CVs in GCs', 'CVs in Galactic Bulge'])
+    ax1.legend()
     P_min = 1.373333333
     P_gap = [7740.0 / 3600., 11448.0 / 3600.]
-    ax1.set_ylim(8e-1, 360)
+    ax1.set_ylim(8e-1, 130)
     ax1.set_xlim(0.6, 35)
-    ax1.plot([P_min, P_min], [0, 220], '--', color='grey')
-    ax1.plot([P_gap[0], P_gap[0]], [0, 220], '-', lw=2., color='orange')
-    ax1.plot([P_gap[1], P_gap[1]], [0, 220], '-', lw=2., color='orange')
-    ax1.text(P_gap[0] + 0.3, 250, 'gap', fontsize=14)
-    ax1.text(P_min - 0.2, 250, 'minimum', fontsize=14)
+    ax1.plot([P_min, P_min], [0, 100], '--', color='grey')
+    ax1.plot([P_gap[0], P_gap[0]], [0, 100], '-', lw=2., color='orange')
+    ax1.plot([P_gap[1], P_gap[1]], [0, 100], '-', lw=2., color='orange')
+    ax1.text(P_gap[0] + 0.3, 105, 'gap', fontsize=14)
+    ax1.text(P_min - 0.2, 105, 'minimum', fontsize=14)
     # ax1.set_xlabel('Period (hours)',font1)
     ax1.set_ylabel('Number of sources', plot_pXS.font1)
     ax1.tick_params(labelsize=16)
@@ -204,10 +213,9 @@ def plot_Phist(save=0, show=1):
     # ax2.set_yscale('log')
     path_out = '/Users/baotong/Desktop/aas/GCall/figure/'
     if save:
-        plt.savefig(path_out + 'GC_NP.pdf', bbox_inches='tight', pad_inches=0.05)
+        plt.savefig(path_out + 'GC_NP_v2.pdf', bbox_inches='tight', pad_inches=0.05)
     if show:
         plt.show()
-
 
 def plot_P_L_profile(save=0, show=1):
     label = ['.', '^', 'v', 'o', 'D', '*', 's']
@@ -226,30 +234,65 @@ def plot_P_L_profile(save=0, show=1):
     P_min = 7. / 6.
     P_gap = [7740.0 / 3600., 11448.0 / 3600.]
 
+    GDNe_pars = np.array(list(localCVs.GDNe.values()))
+    period_GDNe = GDNe_pars[:, 0];
+    L_GDNe = GDNe_pars[:, 1]
+
     (ra_LW, dec_LW, seq_LW, period_LW, L_LW, Lmin, Lmax, type_LW) = plot_pXS.load_LW('result_LW')
     LW_index = np.where((period_LW > 3900) & (period_LW < 40000))[0]
     period_LW = period_LW[LW_index]
     period_LW /= 3600.
     L_LW = L_LW[LW_index]
     fig, f1_axes = plt.subplots(ncols=2, nrows=2, sharey='row', sharex='col',
-                                gridspec_kw={'height_ratios': [1, 1], 'width_ratios': [3, 1]},
+                                gridspec_kw={'height_ratios': [2, 1], 'width_ratios': [3, 1]},
                                 figsize=(12, 12))
-    ax1 = f1_axes[0, 0];
-    ax2 = f1_axes[1, 0];
-    ax3 = f1_axes[0, 1];
-    ax4 = f1_axes[1, 1]
+    ax1 = f1_axes[0, 0];ax2 = f1_axes[1, 0];ax3 = f1_axes[0, 1];ax4 = f1_axes[1, 1]
     label_gc = ['47 Tuc', 'Terzan 5', r'$\omega~cen$', 'M 28', 'NGC 6397', 'NGC 6752', 'NGC 6266', 'M 30']
     dist_rc = []
     bins_lx = np.logspace(np.log10(1e31), np.log10(1e33), 11)
     bins_rc = np.logspace(np.log10(0.15), np.log10(130), 11)
+    ##=== MESA CV ===##
+    folder_path = '/Users/baotong/Desktop/period_terzan5/Tracks/'
+    cmap1 = cm.get_cmap("Oranges")
+    cmap2 = cm.get_cmap("Greens")
+    cmap3 = cm.get_cmap("Purples")
+    def read_dat_files(folder_path):
+        # 获取指定文件夹中所有的dat文件
+        dat_files = [file for file in os.listdir(folder_path) if file.endswith('.dat')]
+        file_paths = [os.path.join(folder_path, filename) for filename in os.listdir(folder_path) if
+                      filename.endswith('.dat')]
+        sorted_file_names = sorted([os.path.basename(file_path) for file_path in file_paths])
+        print(sorted_file_names)
+        for dat_file in sorted_file_names:
+            namef = MESA.extract_values(dat_file)
+            labelname = r'$M_{\rm WD}=$' + str(namef['MASS2']) + ', Z=' + str(namef['Z'])
+            file_path = os.path.join(folder_path, dat_file)
+            (Porb, Xlum1, Xlum3, Mdot,MBAML, text)=MESA.process_dat_file(file_path, text=labelname)
+            (Pplot1, Xlum1plot) = MESA.filtered_line(Porb, Xlum1,MBAML)
+            print(Xlum1plot)
+            (Pplot3, Xlum3plot) = MESA.filtered_line(Porb, Xlum3,MBAML)
+            ax1.scatter(Pplot1*24,0.5*Xlum1plot,s=1,alpha=0.2,color='red')
+            # if namef['Z'] == 0.01:
+            #     if namef['MASS2']==0.6 or namef['MASS2']==1.0:
+            #         ax1.plot(Porb*24, 0.5*Xlum1,'-',alpha=0.6,lw=1.5,color=cmap1(-namef['MASS2']+1.6),label=text)
+            #         ax1.plot(Porb*24, 0.5*Xlum3, '--', alpha=0.5, lw=2, color=cmap1(-namef['MASS2'] + 1.6))
+            # if namef['Z'] == 0.02:
+            #     if namef['MASS2'] == 0.6 or namef['MASS2'] == 1.0:
+            #         ax1.plot(Porb*24,0.5*Xlum1,'-',alpha=0.6,lw=1.5,color=cmap2(-namef['MASS2']+1.6),label=text)
+            #         ax1.plot(Porb * 24, 0.5*Xlum3, '-', alpha=0.5, lw=2, color=cmap2(-namef['MASS2'] + 1.6))
+            # if namef['Z'] == 0.02:
+            #     ax1.plot(Porb*24,Xlum2,'-',alpha=0.5,lw=2,color=cmap3(namef['MASS2']-0.2),label=text)
+                # ax1.plot(Porb * 24, 0.1*Xlum4, '--', alpha=0.5, lw=1, color=cmap3(namef['MASS2'] - 0.2), label=text)
+    read_dat_files(folder_path)
+
     for i in range(len(gcname) - 1):
         gc_srcid = np.where(type == gcname[i])[0]
         print(gc_srcid)
         dist_rc = np.concatenate((dist_rc, dist[gc_srcid] / pos_all[gcname[i]][3]))
-        ax1.scatter(period[gc_srcid] / 3600, L[gc_srcid], marker=label[i], color=color_list[i], label=label_gc[i], s=70)
+        ax1.scatter(period[gc_srcid] / 3600, L[gc_srcid], marker=label[i], color=color_list[i], s=100)
         ax2.scatter(period[gc_srcid] / 3600, dist[gc_srcid] / pos_all[gcname[i]][3], marker=label[i],
                     color=color_list[i], label=label_gc[i], s=70)
-    ax1.scatter(period_LW, 1e31 * L_LW, marker='x', color='grey', label='LW', s=60)
+    ax1.scatter(period_LW, 1e31 * L_LW, marker='x', color='grey', label='LW', s=100)
     counts_lx, bins_lx = np.histogram(L, bins_lx)
     lx_drc = ax3.hist(bins_lx[:-1], bins=bins_lx, weights=counts_lx / np.sum(counts_lx), histtype='step',
                       orientation='horizontal', lw=1.5, color='k',
@@ -259,22 +302,24 @@ def plot_P_L_profile(save=0, show=1):
                         orientation='horizontal',
                         lw=1.5, color='k', linestyle='--')
 
-    ax1.plot([P_min, P_min], [0, 1e33], '--', color='grey')
-    ax1.plot([P_gap[0], P_gap[0]], [0, 1e33], '-', lw=2., color='orange')
-    ax1.plot([P_gap[1], P_gap[1]], [0, 1e33], '-', lw=2., color='orange')
+    # ax1.plot([P_min, P_min], [0, 1e33], '--', color='grey')
+    # ax1.plot([P_gap[0], P_gap[0]], [0, 1e33], '-', lw=2., color='orange')
+    # ax1.plot([P_gap[1], P_gap[1]], [0, 1e33], '-', lw=2., color='orange')
     ax1.set_ylabel(r'0.5-8 keV X-ray luminosity ($\rm erg~s^{-1}$)', hawk.font1)
-    (period_sim, L_sim, Mdot_sim) = CV_model.read_Knigge_model()
+    # (period_sim, L_sim, Mdot_sim) = CV_model.read_Knigge_model()
+    # ax1.scatter(period_sim, L_sim, s=10, marker='.', color='red', label='Model')
     # ax5 = ax1.twinx()
     # ax5.set_ylabel(r'$\rm Log\dot{M_2}$ ($\rm M_\odot~ \rm year^{-1}$)', hawk.font1)
     # ax5.tick_params(labelsize=18)
-    ax1.scatter(period_sim, L_sim, s=10, marker='.', color='red', label='Model')
-
+    ax1.scatter(period_GDNe, 10**L_GDNe*1.3, s=60, marker='D', edgecolor='red',facecolor='none', label='DNe')
     # ax1.set_xlabel('Period (h)',hawk.font1)
     ax1.loglog()
     ax2.loglog()
     ax3.set_yscale('log')
     ax4.set_yscale('log')
     ax1.set_xlim(1, 28)
+    ax1.set_ylim(1e29, 1e34)
+    ax3.set_ylim(1e29, 1e34)
     ax1.tick_params(labelsize=18)
     ax2.plot([P_min, P_min], [0, 150], '--', color='grey')
     ax2.plot([P_gap[0], P_gap[0]], [0, 150], '-', lw=2., color='orange')
@@ -282,25 +327,25 @@ def plot_P_L_profile(save=0, show=1):
     ax2.plot([1, 26], [4, 4], '-', lw=1., color='c')
     ax2.plot([1, 26], [10, 10], '-', lw=1., color='c')
     ax2.fill_between([1, 26], [4, 4], [10, 10], facecolor='yellow', alpha=0.2)
-    ax2.set_xlabel('Orbital Period (h)', hawk.font1)
+    ax3.set_xlabel('Orbital Period (h)', hawk.font1)
     ax2.set_ylabel(r'R/$r_{c}$', hawk.font1)
-    ax2.set_xlim(1, 28)
-    ax2.set_ylim(1e-1, 150)
+    ax2.set_xlim(1, 28);ax2.set_ylim(1e-1, 300)
+    ax3.set_xlim(0, 0.3);ax4.set_xlim(0, 0.3)
     ax2.tick_params(labelsize=18)
     ax4.tick_params(labelsize=18)
     ax4.xaxis.set_major_formatter(ticker.PercentFormatter(xmax=1, decimals=0))
-    ax1.legend(loc='upper right', ncol=1, handletextpad=0.001, columnspacing=0.001, facecolor=None, edgecolor='grey')
+    ax1.legend(loc='lower right', ncol=2, handletextpad=0.001, columnspacing=0.001, facecolor='none', edgecolor='grey',fontsize=10)
+    ax2.legend(loc='upper center', ncol=7, handletextpad=0.001, columnspacing=0.0001, facecolor='none', edgecolor='grey',fontsize=12)
     # ax1.legend(loc='right',ncol=1,facecolor=None,edgecolor='grey')
     plt.subplots_adjust(wspace=0, hspace=0.0)
 
     path_out = '/Users/baotong/Desktop/aas/GCall/figure/'
     if save:
-        plt.savefig(path_out + 'GC_CV_profile.pdf', bbox_inches='tight', pad_inches=0.05)
+        plt.savefig(path_out + 'GC_CV_profile_DN.pdf', bbox_inches='tight', pad_inches=0.05)
     if show:
         plt.show()
     plt.figure(2)
     return period
-
 
 def plot_P_L(save=0, show=1):
     result_all = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'all')
@@ -339,6 +384,10 @@ def plot_P_L(save=0, show=1):
     non_mCVpars = np.array(list(localCVs.non_mCVs.values()))
     period_non_mCV = non_mCVpars[:, 0];
     L_non_mCV = non_mCVpars[:, 1]
+    GDNe_pars = np.array(list(localCVs.GDNe.values()))
+    period_GDNe = GDNe_pars[:, 0];
+    L_GDNe = GDNe_pars[:, 1]
+
     ax1.scatter(period_mCV, 10 ** L_mCV, marker='<', color='c', label='local mCVs',
                 s=60)
     ax1.scatter(period_non_mCV, 10 ** L_non_mCV, marker='>', color='c', label='local non-mCVs',
@@ -368,7 +417,6 @@ def plot_P_L(save=0, show=1):
     if show:
         plt.show()
     return period
-
 
 def plot_P_L_type(save=0, show=1):
     label = ['x', '^', 'v']
@@ -420,7 +468,6 @@ def plot_P_L_type(save=0, show=1):
     if show:
         plt.show()
     return period
-
 
 def plot_P_L_threereg(save=0, show=1):
     result_GC = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'all')
@@ -524,7 +571,6 @@ def plot_P_L_threereg(save=0, show=1):
     ax2.set_xlabel('Period (hour)', plot_pXS.font1)
     plt.show()
 
-
 def plot_spec():
     label = ['x', '^', 'v', 'o', 'D', '*', 's']
     color_list = ['r', 'g', 'b', 'k', 'orange', 'purple', 'magenta']
@@ -543,7 +589,6 @@ def plot_spec():
     plt.scatter(kT, L)
     plt.loglog()
     plt.show()
-
 
 def plot_src_info(save=0, show=1):
     label = ['x', '^', 'v', 'o', 'D', '*', 's', '.']
@@ -565,7 +610,6 @@ def plot_src_info(save=0, show=1):
         # plt.show()
     plt.legend()
     plt.show()
-
 
 def plot_P_L_4reg_scatter(save=0, show=1):
     result_GC = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'all')
@@ -784,15 +828,114 @@ def read_GLres_src(save=0,show=1):
     if show:plt.show()
     else:plt.close()
 
+def plot_P_L_scatter(save=0,show=1):
+    label = ['.', '^', 'v', 'o', 'D', '*', 's']
+    color_list = ['grey', 'g', 'b', 'k', 'orange', 'purple', 'magenta']
+    result_all = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'all')
+    idex = np.where(result_all['judge'] == 'CV')[0]
+    ra = np.array(result_all['ra'])[idex]
+    dec = np.array(result_all['dec'])[idex]
+    seq = np.array(result_all['seq'])[idex]
+    period = np.array(result_all['period_all'])[idex]
+    type = np.array(result_all['GC'])[idex]
+    dist = np.array(result_all['proj_dist'])[idex]
+    counts = np.array(result_all['counts'])[idex]
+    exptime = np.array(result_all['expT'])[idex]
+    L = np.array(result_all['L'])[idex]
+    fig, f1_axes = plt.subplots(ncols=2, nrows=2, sharey='row', sharex='col',
+                                gridspec_kw={'height_ratios': [2,3], 'width_ratios': [4, 1]},
+                                figsize=(12, 12))
+    ax1 = f1_axes[0, 0];ax2 = f1_axes[1, 0];ax3 = f1_axes[0, 1];ax4 = f1_axes[1, 1]
+    label_gc = ['47 Tuc', 'Terzan 5', r'$\omega~cen$', 'M 28', 'NGC 6397', 'NGC 6752', 'NGC 6266', 'M 30']
+    dist_rc = []
+    for i in range(len(gcname) - 1):
+        gc_srcid = np.where(type == gcname[i])[0]
+        dist_rc = np.concatenate((dist_rc, dist[gc_srcid] / pos_all[gcname[i]][3]))
+    bins_lx = np.logspace(np.log10(1e31), np.log10(1e33), 11)
+    bins_rc = np.logspace(np.log10(0.15), np.log10(130), 11)
+
+    period_GC=period
+    L_GC=L
+    IPlowpars = np.array(list(localCVs.IPlow.values()))
+    IPhighpars = np.array(list(localCVs.IPhigh.values()))
+    Polarhighpars = np.array(list(localCVs.Polarhigh.values()))
+    Polarlowpars = np.array(list(localCVs.Polarlow.values()))
+    periodbouncerpars = np.array(list(localCVs.periodbouncer.values()))
+    nonmCVs_2015pars = np.array(list(localCVs.nonmCVs_2015.values()))
+
+    (ra_LW, dec_LW, seq_LW, period_LW, L_LW, Lmin, Lmax, type_LW) = plot_pXS.load_LW('result_LW')
+
+    LW_index = np.where((period_LW > 3900) & (period_LW < 40000))[0]
+    period_LW = period_LW[LW_index]
+    period_LW /= 3600.
+    L_LW = L_LW[LW_index]
+    L_LW *= 1.11423 * 1e31
+    P_min = 7. / 6.
+    P_gap = [7740.0 / 3600., 11448.0 / 3600.]
+    ax2.plot([P_min, P_min], [0, 1e35], '--', color='grey')
+    ax2.plot([P_gap[0], P_gap[0]], [0, 1e35], '-', lw=2., color='orange')
+    ax2.plot([P_gap[1], P_gap[1]], [0, 1e35], '-', lw=2., color='orange')
+    ax2.scatter(period_GC/3600,L_GC,s=200,marker='+',color='red',label='GC')
+    ax2.scatter(period_LW, L_LW,s=200,marker='+',color='cyan',label='LW')
+    ax2.scatter(IPlowpars[:, 0], 10 ** IPlowpars[:, 1], s=100,marker='v',color='blue',label='IPs (low state)')
+    ax2.scatter(IPhighpars[:, 0], 10 ** IPhighpars[:, 1], s=100,marker='v',facecolor='none',edgecolor='blue',label='IPs (high state)')
+    ax2.scatter(Polarlowpars[:, 0], 10 ** Polarlowpars[:, 1], s=90,marker='s',color='green',label='polars (low/intermediate state)')
+    ax2.scatter(Polarhighpars[:, 0], 10 ** Polarhighpars[:, 1], s=100,marker='s',facecolor='none',edgecolor='green',
+                label='polars (high state)')
+    ax2.scatter(nonmCVs_2015pars[:, 0], 10 ** nonmCVs_2015pars[:, 1], s=100,marker='x',color='grey',label='non-mCVs')
+    ax2.scatter(periodbouncerpars[:, 0], 10 ** periodbouncerpars[:, 1], s=200,marker='o',facecolor='none',edgecolor='green',label='period bouncers')
+    ax2.loglog()
+    ax2.set_xlim(0.8,40)
+    ax2.set_ylabel(r'0.5-8 keV X-ray luminosity ($\rm erg~s^{-1}$)', hawk.font1)
+    for i in range(len(gcname) - 1):
+        gc_srcid = np.where(type == gcname[i])[0]
+        ax1.scatter(period[gc_srcid] / 3600, dist[gc_srcid] / pos_all[gcname[i]][3], marker=label[i],
+                    color=color_list[i], label=label_gc[i], s=70)
+    counts_lx, bins_lx = np.histogram(L, bins_lx)
+    lx_drc = ax4.hist(bins_lx[:-1], bins=bins_lx, weights=counts_lx / np.sum(counts_lx), histtype='step',
+                      orientation='horizontal', lw=1.5, color='k',
+                      linestyle='--')
+    counts_dist, bins_rc = np.histogram(dist_rc, bins_rc)
+    print(counts_dist,bins_rc)
+    dist_drc = ax3.hist(bins_rc[:-1], bins=bins_rc, weights=counts_dist / np.sum(counts_dist), histtype='step',
+                        orientation='horizontal',
+                        lw=1.5, color='k', linestyle='--')
+    # ax1.set_ylim(1e29, 1e34)
+    # ax3.set_ylim(1e29, 1e34)
+    ax1.loglog()
+    ax3.set_yscale('log')
+    ax4.set_yscale('log')
+    ax2.tick_params(labelsize=18)
+    ax1.plot([P_min, P_min], [0, 150], '--', color='grey')
+    ax1.plot([P_gap[0], P_gap[0]], [0, 150], '-', lw=2., color='orange')
+    ax1.plot([P_gap[1], P_gap[1]], [0, 150], '-', lw=2., color='orange')
+    ax1.plot([1, 26], [4, 4], '-', lw=1., color='c')
+    ax1.plot([1, 26], [10, 10], '-', lw=1., color='c')
+    ax1.fill_between([1, 26], [4, 4], [10, 10], facecolor='yellow', alpha=0.2)
+    ax2.set_xlabel('Orbital Period (h)', hawk.font1)
+    ax1.set_ylabel(r'R/$r_{c}$', hawk.font1)
+    ax2.set_xlim(1, 28);ax1.set_ylim(1e-1, 300)
+    ax4.set_xlim(0, 0.35);ax4.set_xlim(0, 0.35)
+    ax1.tick_params(labelsize=18)
+    ax4.tick_params(labelsize=18)
+    ax2.legend(loc='lower right', ncol=2, handletextpad=0.001, columnspacing=0.001, facecolor='none', edgecolor='grey',
+               fontsize=11)
+    ax1.legend(loc='upper center', ncol=7, handletextpad=0.001, columnspacing=0.0001, facecolor='none',
+               edgecolor='grey', fontsize=11)
+    ax4.xaxis.set_major_formatter(ticker.PercentFormatter(xmax=1, decimals=0))
+    plt.subplots_adjust(wspace=0, hspace=0.0)
+    if save:plt.savefig('/Users/baotong/Desktop/aas/GCall/figure/'+'CVall_scatter.pdf',bbox_inches='tight', pad_inches=0.05)
+    if show:plt.show()
+    else:plt.close()
 if __name__ == '__main__':
     # plot_profile()
     # plot_P_L_profile(save=1, show=1)
     # plot_P_L(save=0,show=1)
-    # plot_Phist(save=0,show=1)
     # plot_P_L_4reg_scatter(save=0,show=1)
-    plot_P_L_profile(save=1,show=1)
+    # plot_P_L_profile(save=0,show=1)
     # plot_Phist(save=1,show=1)
     # plot_src_info(show=1)
     # plot_P_L_threereg()
     # plot_surface_density(save=0,show=1)
     # read_GLres_src(save=1,show=1)
+    plot_P_L_scatter(save=1, show=1)

@@ -81,12 +81,12 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
 
 def main_process(path,dataname,period=None):
     ecf=90
-    bin_len = 12.8
+    bin_len = 3
     net_p=0.95
-    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[])
+    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[12110])
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/GCall/figure/fold/'
-    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[2000,8000])
+    time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[20,8000])
     print('counts=',len(time))
     ## if filter time ##
     # time=hawk.filter_time_t1t2(time,t1=50000,t2=130000)
@@ -101,17 +101,17 @@ def main_process(path,dataname,period=None):
     lc=hawk.get_hist(time,len_bin=bin_len,tstart=epoch_info_use[:,0][0],tstop=epoch_info_use[:,1][-1])
     T_tot=epoch_info_use[:,1][-1]-epoch_info_use[:,0][0]
     freq = np.arange(1 / T_tot, 0.5/ bin_len, 1 / (10* T_tot))
-    freq = freq[np.where(freq > 1 / 10000.)]
+    freq = freq[np.where(freq > 1 / 200.)]
     # (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq,outpath=None,outname=None,save=False,show=True)
     # (freq_grid, pgram)=gptLS.lomb_scargle(lc.time,lc.counts,freq=freq)
     # print('Period=',format(out_period))
     # hawk.plot_singleobs_lc(lc,period=period,ifsin=0,figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',
     #                        shift=0.7,dataname=dataname,save=0,show=1)
 if __name__=='__main__':
-    path_M31='/Users/baotong/Desktop/period_M31XRB/M31ACIS_txt/txt_all_obs_p90/';useid=[]
+    path_M31='/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/';useid=[12110,12111,12112,12113,12114]
     path_GC = '/Users/baotong/Desktop/period_M28/txt_all_obs_p90/';useid=[]
     path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
     path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
     # path_M31='/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/'
-    dataname='450'
-    main_process(path=path_GC,dataname=dataname,period=5878.89477 )
+    dataname='110'
+    main_process(path=path_M31,dataname=dataname,period=66.57789613849023)

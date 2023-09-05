@@ -28,7 +28,7 @@ def read_data(dataname,path):
     bin_len = 12.8
     net_p=0.94
     useidlw=[9502, 9500, 9501,9854,9503,9892,9893, 9504]
-    (src_evt_use,epoch_info_use)=tdata.load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[3798,17779,18881])
+    (src_evt_use,epoch_info_use)=tdata.load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[12110])
     if src_evt_use.ndim<2:time=[]
     else:time=src_evt_use[:,0]
 
@@ -47,14 +47,14 @@ def get_Z2(dataname,pathin=None,ep=1):
     time=read_data(dataname=dataname,path=pathin)
     if len(time)<2:return 0
     events.time=time
-    df_min=1e-7
-    frequencies=np.arange(2e-5,1e-3,df_min)
+    df_min=1e-6
+    frequencies=np.arange(1/80,1/60,df_min)
     nbin=20
     ntrial = (frequencies[-1] - frequencies[0]) / df_min
     freq, zstat = z_n_search(events.time, frequencies, nbin=nbin, nharm=nharm)
-    z_detlev = z2_n_detection_level(n=1, epsilon=0.001, ntrial=len(freq)*1000)
-    z_detlev2 = z2_n_detection_level(n=1, epsilon=0.01, ntrial=len(freq)*1000)
-    z_detlev3 = z2_n_detection_level(n=1, epsilon=0.1, ntrial=len(freq)*1000)
+    z_detlev = z2_n_detection_level(n=1, epsilon=0.001, ntrial=len(freq)*1)
+    z_detlev2 = z2_n_detection_level(n=1, epsilon=0.01, ntrial=len(freq)*1)
+    z_detlev3 = z2_n_detection_level(n=1, epsilon=0.1, ntrial=len(freq)*1)
     # ---- PLOTTING --------
     plt.figure()
     plt.plot(freq, (zstat - nharm), label='$Z_2$ statistics')
@@ -96,4 +96,4 @@ if __name__=='__main__':
     #             warnlist.append(a)
     #
     #     np.savetxt(f'/Users/baotong/Desktop/CDFS/figure_Z2/ep{ep}/warnlist90.txt',warnlist)
-    get_Z2(dataname='215',pathin='/Users/baotong/Desktop/period_terzan5/txt_all_obs_p90/')
+    get_Z2(dataname='110',pathin='/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/')
