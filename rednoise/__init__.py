@@ -9,3 +9,4 @@ from rednoise.useful_functions import *
 from rednoise.singleobs_psd import *
 from rednoise.fit_psd import *
 from rednoise.RNplusSIN import *
+from rednoise.Vaughan import *

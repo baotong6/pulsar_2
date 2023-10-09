@@ -256,6 +256,7 @@ def plot_P_L_profile(save=0, show=1):
     cmap1 = cm.get_cmap("Oranges")
     cmap2 = cm.get_cmap("Greens")
     cmap3 = cm.get_cmap("Purples")
+    cmap4 = cm.get_cmap('RdBu')
     def read_dat_files(folder_path):
         # 获取指定文件夹中所有的dat文件
         dat_files = [file for file in os.listdir(folder_path) if file.endswith('.dat')]
@@ -271,18 +272,19 @@ def plot_P_L_profile(save=0, show=1):
             (Pplot1, Xlum1plot) = MESA.filtered_line(Porb, Xlum1,MBAML)
             print(Xlum1plot)
             (Pplot3, Xlum3plot) = MESA.filtered_line(Porb, Xlum3,MBAML)
-            ax1.scatter(Pplot1*24,0.5*Xlum1plot,s=1,alpha=0.2,color='red')
+            ax1.plot(Porb * 24, 0.5 * Xlum1, '-', alpha=0.6, lw=1.5, color=cmap4(-namef['MASS2'] + 1.6), label=text)
+            # ax1.scatter(Pplot1*24,0.5*Xlum1plot,s=1,alpha=0.2,color='red')
             # if namef['Z'] == 0.01:
-            #     if namef['MASS2']==0.6 or namef['MASS2']==1.0:
-            #         ax1.plot(Porb*24, 0.5*Xlum1,'-',alpha=0.6,lw=1.5,color=cmap1(-namef['MASS2']+1.6),label=text)
-            #         ax1.plot(Porb*24, 0.5*Xlum3, '--', alpha=0.5, lw=2, color=cmap1(-namef['MASS2'] + 1.6))
+                # if namef['MASS2']==0.6 or namef['MASS2']==1.0:
+                #     ax1.plot(Porb*24, 0.5*Xlum1,'-',alpha=0.6,lw=1.5,color=cmap1(-namef['MASS2']+1.6),label=text)
+                    # ax1.plot(Porb*24, 0.5*Xlum3, '--', alpha=0.5, lw=2, color=cmap1(-namef['MASS2'] + 1.6))
             # if namef['Z'] == 0.02:
-            #     if namef['MASS2'] == 0.6 or namef['MASS2'] == 1.0:
-            #         ax1.plot(Porb*24,0.5*Xlum1,'-',alpha=0.6,lw=1.5,color=cmap2(-namef['MASS2']+1.6),label=text)
-            #         ax1.plot(Porb * 24, 0.5*Xlum3, '-', alpha=0.5, lw=2, color=cmap2(-namef['MASS2'] + 1.6))
+                # if namef['MASS2'] == 0.6 or namef['MASS2'] == 1.0:
+                #     ax1.plot(Porb*24,0.5*Xlum1,'-',alpha=0.6,lw=1.5,color=cmap2(-namef['MASS2']+1.6),label=text)
+                    # ax1.plot(Porb * 24, 0.5*Xlum3, '-', alpha=0.5, lw=2, color=cmap2(-namef['MASS2'] + 1.6))
             # if namef['Z'] == 0.02:
-            #     ax1.plot(Porb*24,Xlum2,'-',alpha=0.5,lw=2,color=cmap3(namef['MASS2']-0.2),label=text)
-                # ax1.plot(Porb * 24, 0.1*Xlum4, '--', alpha=0.5, lw=1, color=cmap3(namef['MASS2'] - 0.2), label=text)
+            #     ax1.plot(Porb*24,Xlum1,'-',alpha=0.5,lw=2,color=cmap3(namef['MASS2']-0.2),label=text)
+                # ax1.plot(Porb * 24, 0.1*Xlum3, '--', alpha=0.5, lw=1, color=cmap3(namef['MASS2'] - 0.2), label=text)
     read_dat_files(folder_path)
 
     for i in range(len(gcname) - 1):
@@ -327,7 +329,7 @@ def plot_P_L_profile(save=0, show=1):
     ax2.plot([1, 26], [4, 4], '-', lw=1., color='c')
     ax2.plot([1, 26], [10, 10], '-', lw=1., color='c')
     ax2.fill_between([1, 26], [4, 4], [10, 10], facecolor='yellow', alpha=0.2)
-    ax3.set_xlabel('Orbital Period (h)', hawk.font1)
+    ax2.set_xlabel('Orbital Period (h)', hawk.font1)
     ax2.set_ylabel(r'R/$r_{c}$', hawk.font1)
     ax2.set_xlim(1, 28);ax2.set_ylim(1e-1, 300)
     ax3.set_xlim(0, 0.3);ax4.set_xlim(0, 0.3)
@@ -482,15 +484,16 @@ def plot_P_L_threereg(save=0, show=1):
     L_LW = L_LW * 1.11423 * 1e31
     path_table = '/Users/baotong/Desktop/period/table/'
     result_NSC = pd.read_excel(path_table + 'final_all_del.csv', 'result_NSC_IG')
-    line = result_NSC['line']
-
+    label = result_NSC['label']
+    print(label)
     ID_NSC = result_NSC['seq']
     period_NSC = result_NSC['P']
     L_NSC = result_NSC['L']
     L_NSC = L_NSC * 1.3 * 1e31
-    ID_NSC = ID_NSC[np.where(line == 3)[0]]
-    period_NSC = period_NSC[np.where(line == 3)[0]]
-    L_NSC = L_NSC[np.where(line == 3)[0]]
+    ID_NSC = ID_NSC[np.where(label == 1)[0]]
+    period_NSC = period_NSC[np.where(label == 1)[0]]
+    L_NSC = L_NSC[np.where(label == 1)[0]]
+    print(len(period_NSC))
     ##-----P_L-----##
     # P_gap = [7740.0 / 3600., 11048.0 / 3600.]
     # P_min = [4902.0 / 3600., 4986.0/3600]
@@ -536,13 +539,13 @@ def plot_P_L_threereg(save=0, show=1):
 
     fig, (ax1, ax2) = plt.subplots(ncols=1, nrows=2, sharex='all', gridspec_kw={'height_ratios': [2, 1]},
                                    figsize=(9, 6))
-    ax1.hist(orb_all, bins=bins, histtype='step', lw=2, color='red', linestyle='--')
-    ax1.hist(period_NSC / 3600, bins=bins_NSC, histtype='step', lw=4, color='blue', linestyle='-')
+    ax1.hist(orb_all, bins=bins, histtype='step', lw=2, color='red', linestyle='--',label='CVs in Solar Neighborhood')
     ax1.hist(period_GC / 3600, bins=bins_p, histtype='step', lw=2, linestyle='-', facecolor='grey',
-             hatch='/', edgecolor='k', fill=False)
-    ax1.hist(period_LW / 3600, bins=bins_p, histtype='step', lw=3, color='c', linestyle='-')
+             hatch='/', edgecolor='k', fill=False,label='CVs in GCs')
+    ax1.hist(period_LW / 3600, bins=bins_p, histtype='step', lw=3, color='c', linestyle='-',label='CVs in Galactic Bulge')
+    ax1.hist(period_NSC / 3600, bins=bins_NSC, histtype='step', lw=4, color='blue', linestyle='-',label='Periodic X-ray sources in NSC')
 
-    ax1.legend(['CVs in Solar Neighborhood', 'CVs in NSC', 'CVs in GCs', 'CVs in LW'])
+    ax1.legend()
     P_min = 1.373333333
     P_gap = [7740.0 / 3600., 11448.0 / 3600.]
     ax1.set_ylim(8e-1, 360)
@@ -569,6 +572,7 @@ def plot_P_L_threereg(save=0, show=1):
     ax2.tick_params(labelsize=16)
     ax2.set_ylabel('CDF', plot_pXS.font1)
     ax2.set_xlabel('Period (hour)', plot_pXS.font1)
+    plt.subplots_adjust(wspace=0, hspace=0.0)
     plt.show()
 
 def plot_spec():
@@ -900,9 +904,48 @@ def plot_P_L_scatter(save=0,show=1):
     dist_drc = ax3.hist(bins_rc[:-1], bins=bins_rc, weights=counts_dist / np.sum(counts_dist), histtype='step',
                         orientation='horizontal',
                         lw=1.5, color='k', linestyle='--')
+    ##=== MESA CV ===##
+    folder_path = '/Users/baotong/Desktop/period_terzan5/Tracks/'
+    cmap1 = cm.get_cmap("Oranges")
+    cmap2 = cm.get_cmap("Greens")
+    cmap3 = cm.get_cmap("Purples")
+    cmap4 = cm.get_cmap('RdBu')
+
+    def read_dat_files(folder_path):
+        # 获取指定文件夹中所有的dat文件
+        dat_files = [file for file in os.listdir(folder_path) if file.endswith('.dat')]
+        file_paths = [os.path.join(folder_path, filename) for filename in os.listdir(folder_path) if
+                      filename.endswith('.dat')]
+        sorted_file_names = sorted([os.path.basename(file_path) for file_path in file_paths])
+        print(sorted_file_names)
+        for dat_file in sorted_file_names:
+            namef = MESA.extract_values(dat_file)
+            labelname = r'$M_{\rm WD}=$' + str(namef['MASS2']) + ', Z=' + str(namef['Z'])
+            file_path = os.path.join(folder_path, dat_file)
+            (Porb, Xlum1, Xlum3, Mdot, MBAML, text) = MESA.process_dat_file(file_path, text=labelname)
+            (Pplot1, Xlum1plot) = MESA.filtered_line(Porb, Xlum1, MBAML)
+            print(Xlum1plot)
+            (Pplot3, Xlum3plot) = MESA.filtered_line(Porb, Xlum3, MBAML)
+            ax2.plot(Porb * 24, 0.5 * Xlum1, '-', alpha=0.6, lw=1.5, color=cmap4(-namef['MASS2'] + 1.6), label=text)
+            # ax1.scatter(Pplot1*24,0.5*Xlum1plot,s=1,alpha=0.2,color='red')
+            # if namef['Z'] == 0.01:
+            # if namef['MASS2']==0.6 or namef['MASS2']==1.0:
+            #     ax1.plot(Porb*24, 0.5*Xlum1,'-',alpha=0.6,lw=1.5,color=cmap1(-namef['MASS2']+1.6),label=text)
+            # ax1.plot(Porb*24, 0.5*Xlum3, '--', alpha=0.5, lw=2, color=cmap1(-namef['MASS2'] + 1.6))
+            # if namef['Z'] == 0.02:
+            # if namef['MASS2'] == 0.6 or namef['MASS2'] == 1.0:
+            #     ax1.plot(Porb*24,0.5*Xlum1,'-',alpha=0.6,lw=1.5,color=cmap2(-namef['MASS2']+1.6),label=text)
+            # ax1.plot(Porb * 24, 0.5*Xlum3, '-', alpha=0.5, lw=2, color=cmap2(-namef['MASS2'] + 1.6))
+            # if namef['Z'] == 0.02:
+            #     ax1.plot(Porb*24,Xlum1,'-',alpha=0.5,lw=2,color=cmap3(namef['MASS2']-0.2),label=text)
+            # ax1.plot(Porb * 24, 0.1*Xlum3, '--', alpha=0.5, lw=1, color=cmap3(namef['MASS2'] - 0.2), label=text)
+
+    read_dat_files(folder_path)
+
     # ax1.set_ylim(1e29, 1e34)
     # ax3.set_ylim(1e29, 1e34)
     ax1.loglog()
+    ax2.set_ylim(1e29,1e34)
     ax3.set_yscale('log')
     ax4.set_yscale('log')
     ax2.tick_params(labelsize=18)
@@ -931,6 +974,7 @@ if __name__ == '__main__':
     # plot_profile()
     # plot_P_L_profile(save=1, show=1)
     # plot_P_L(save=0,show=1)
+    plot_P_L_threereg(save=0,show=1)
     # plot_P_L_4reg_scatter(save=0,show=1)
     # plot_P_L_profile(save=0,show=1)
     # plot_Phist(save=1,show=1)
@@ -938,4 +982,4 @@ if __name__ == '__main__':
     # plot_P_L_threereg()
     # plot_surface_density(save=0,show=1)
     # read_GLres_src(save=1,show=1)
-    plot_P_L_scatter(save=1, show=1)
+    # plot_P_L_scatter(save=0, show=1)

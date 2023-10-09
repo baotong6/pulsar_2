@@ -1,9 +1,15 @@
+'''
+Author: baotong && baotong@smail.nju.edu.cn
+Date: 2023-08-18 14:34:35
+LastEditors: baotong && baotong@smail.nju.edu.cn
+LastEditTime: 2023-10-09 18:06:00
+FilePath: /pulsar/GC/MESA_sim.py
+Description: 
+
+Copyright (c) 2023 by baotong, All Rights Reserved. 
+'''
 #!/bin/bash
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 18 14:58:00 2023
-@author: baotong
-"""
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

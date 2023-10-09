@@ -45,8 +45,8 @@ def load_data(dataname,ecf=90,ifpath=None,ifobsID=[]):
         CR/=ecf/100.
         useobsID=epoch_info[:,2][0:50].astype('int')
         (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                                flux_filter=1e-5,expT_filter=4000,
-                                                if_flux_high=1, if_expT_high=1,obsID=ifobsID)
+                                                flux_filter=10,expT_filter=4000,
+                                                if_flux_high=0, if_expT_high=1,obsID=ifobsID)
         print(useid)
         src_evt_use =hawk.filter_obs(src_evt, useid)
         return (src_evt_use,epoch_info_use)
@@ -81,9 +81,9 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
 
 def main_process(path,dataname,period=None):
     ecf=90
-    bin_len = 3
+    bin_len = 300
     net_p=0.95
-    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[12110])
+    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[])
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/GCall/figure/fold/'
     time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[20,8000])
@@ -108,10 +108,11 @@ def main_process(path,dataname,period=None):
     # hawk.plot_singleobs_lc(lc,period=period,ifsin=0,figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',
     #                        shift=0.7,dataname=dataname,save=0,show=1)
 if __name__=='__main__':
-    path_M31='/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/';useid=[12110,12111,12112,12113,12114]
+    path_M31='/Users/baotong/Desktop/period_M31XRB/M31ACIS_txt/txt_all_obs_p90/';useid=[12110,12111,12112,12113,12114]
     path_GC = '/Users/baotong/Desktop/period_M28/txt_all_obs_p90/';useid=[]
     path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
     path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
+    path_NSC='/Users/baotong/Desktop/period/txt_all_obs_IG/'
     # path_M31='/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/'
     dataname='110'
-    main_process(path=path_M31,dataname=dataname,period=66.57789613849023)
+    main_process(path=path_M31,dataname=dataname,period=11103.70864)

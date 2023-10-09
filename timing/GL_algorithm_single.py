@@ -31,6 +31,7 @@ w_conf   - 95% confidence interval of w_peak
 import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing as mp
+from multiprocessing import Pool
 import functools
 import datetime
 
@@ -126,10 +127,10 @@ def compute_Om1(w, Tlist, m, factor, fbin, ni,epoch_info):
 def compute_Om1wPar(Tlist, m_max, w, fa, fbin, ni,epoch_info):  # compute odds-ratios for bins and frequencies
     # parallel version
     Om1w = np.zeros((m_max, np.size(w)), 'float')  # odds ratio matrix
-    pool = mp.Pool()  # use all workers
-
+    # pool = Pool()  # use all workers
+    pool1=Pool()
     for m in range(0, m_max):
-        Om1w[m, :] = pool.map(functools.partial(compute_Om1, Tlist=Tlist, m=(m + 1), factor=fa[m], fbin=fbin, ni=ni,epoch_info=epoch_info), w)
+        Om1w[m, :] = pool1.map(functools.partial(compute_Om1, Tlist=Tlist, m=(m + 1), factor=fa[m], fbin=fbin, ni=ni,epoch_info=epoch_info), w)
     return Om1w
 
 

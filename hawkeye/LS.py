@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.timeseries import LombScargle
+from astropy.io import fits
 import stingray as sr
 from stingray.events import EventList
 from stingray.lightcurve import Lightcurve
@@ -28,6 +29,9 @@ def get_LS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
     max_NormLSP=np.max(power)
     period_peak=1./freq[np.where(power==np.max(power))][0]
     FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='baluev')
+    Np=1000
+    FAP_N=1-(1-FP)**Np
+    print(FAP_N)
     FP_99 = LS.false_alarm_level(0.0027,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     FP_95 = LS.false_alarm_level(0.05, minimum_frequency=freq[0],
                                  maximum_frequency=freq[-1], method='baluev')
@@ -116,11 +120,31 @@ def get_gptLS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
     if show:plt.show()
     else:plt.close()
     return [power,out_period,max_NormLSP]
+
+def FAPn():
+    F=0.0001;Np=np.arange(100,1000,1)
+    FAPn=1-(1-F)**Np
+    # plt.plot(Np,FAPn,color='red',linestyle='--')
+    # plt.show()
+    # print(FAPn)
 if __name__=='__main__':
-    path = '/Users/baotong/Downloads/hzq2/'
-    time=np.load(path+'time_h.npy')
-    flux=np.load(path+'flux_h.npy')
-    freq=np.linspace(12,1e4,10000)
-    lc=Lightcurve(time,flux)
-    psd=rednoise.func.plot_psd(lc)
-    get_LS(time,flux,freq)
+    # path = '/Users/baotong/Downloads/hzq2/'
+    # time=np.load(path+'time_h.npy')
+    # flux=np.load(path+'flux_h.npy')
+    # freq=np.linspace(12,1e4,10000)
+    # lc=Lightcurve(time,flux)
+    # psd=rednoise.func.plot_psd(lc)
+    # get_LS(time,flux,freq)
+    path='/Users/baotong/Desktop/XMMcentral/all_lc/'
+    file_name='0886081301_268.80_26.05_2976_pnsrc_2_10keV.lc'
+    a = fits.open(path + file_name)
+    rate = a[1].data['RATE']
+    time = a[1].data['TIME']
+    T = time[-1] - time[0]
+    lc = Lightcurve(time=time, counts=rate * (time[1] - time[0]))
+    freq = np.arange(1 / T, 1 / 1, 1e-5)
+    # hawk.get_LS(lc.time,lc.counts,freq,show=1)
+    CR = np.mean(lc.counts) / lc.dt
+    epoch = np.array([time[0], time[-1], '11111', T])
+    get_LS(time, rate, freq=np.arange(1 / T, 1 / 1, 1e-6), outpath=None, outname=None, save=0, show=1)
+    # FAPn()

@@ -5,7 +5,6 @@ Created on Sun Sep 19 18:13:40 2022
 @author: wafels
 modified by Tong
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.stats import poisson_conf_interval
@@ -20,6 +19,7 @@ from stingray import Lightcurve, Crossspectrum, sampledata,Powerspectrum,Average
 from stingray.simulator import simulator, models
 import rednoise
 import emcee
+from astropy.io import fits
 import corner
 from rednoise import useful_functions as func
 
@@ -40,6 +40,7 @@ def func_forCV(x,p):
     """
     # p[1]=1e-3
     return p[0]*x**(-1)*(1+(x/3e-2)**4)**(-1/4.)+p[1]
+
 def powerlaw(x,p):
     """One dimensional smoothly broken power law model.
     Parameters
@@ -52,6 +53,7 @@ def powerlaw(x,p):
         Poisson noise
     """
     # p[1]=1e-3
+
     return p[0]*x**(-1)+p[1]
 
 def vaughan_2010_T_ISS(iobs, S):
@@ -83,7 +85,6 @@ def compute_sigma_level(trace1, trace2, nbins = 20):
 
     return xbins, ybins, L_cumsum[i_unsort].reshape(shape)
 
-
 def plot_MCMC_trace(ax, xdata, ydata, trace, scatter = False, **kwargs):
     """Plot traces and contours"""
     xbins, ybins, sigma = compute_sigma_level(trace[0], trace[1])
@@ -108,8 +109,8 @@ def plot_MCMC_model(ax, xdata, ydata, trace,CR=None,show=0):
 
     p0, p1= trace[:2]
     xfit = xdata
-    yfit = p0[:,None]*xdata**(-1)*(1+(xdata/1e-2)**4)**(-1/4.)+p1[:,None]
-    # yfit = p0[:, None] * xdata ** (-p1[:,None]) +2/CR
+    # yfit = p0[:,None]*xdata**(-1)*(1+(xdata/1e-2)**4)**(-1/4.)+p1[:,None]
+    yfit = p0[:, None] * xdata ** (-p1[:,None]) +2/CR
     mu = yfit.mean(0)
     sig = 1 * yfit.std(0)
 
@@ -126,6 +127,7 @@ def plot_MCMC_model(ax, xdata, ydata, trace,CR=None,show=0):
     # plt.savefig(figurepath + '{0}.pdf'.format('312_2738_psd'), bbox_inches='tight', pad_inches=0.0)
     if show:plt.show()
     else:plt.close()
+
 def plot_MCMC_results(xdata, ydata, trace, colors = 'k',CR=None,show=0):
     """Plot both the trace and the model together"""
     # fig, ax = plt.subplots(1, 2, figsize = (10, 5))
@@ -155,6 +157,10 @@ def log_prior(p):
 def log_likelihood(func,p,x, y,yerr=None):
     sigma = yerr
     y_model = func(x,p)
+    print(p)
+    if np.min(y_model)<0:
+        print('p=',p[np.argmin(y_model)])
+        print('x=',x[np.argmin(y_model)])
     # sigma = yerr ** 2 + y_model** 2 * np.exp(2 * log_f)
     S=vaughan_2010_T_ISS(iobs=y,S=y_model)
     return S
@@ -171,14 +177,15 @@ def mcmcfit(xdata,ydata,model,yerr=None,CR=None,show=0):
     # 跟踪结果的数量为 nwalkers * nsteps
     ndim = 2  # number of parameters in the model
     nwalkers = 100  # number of MCMC walkers
-    nburn = 200  # "burn-in" period to let chains stabilize
-    nsteps = 1000  # number of MCMC steps to take
+    nburn = 100  # "burn-in" period to let chains stabilize
+    nsteps = 50  # number of MCMC steps to take
     # set theta near the maximum likelihood, with
     np.random.seed(0)
     # starting_guesses = np.random.random((nwalkers, ndim))
     starting_guesses=np.zeros((nwalkers,ndim))
-    starting_guesses[:,0]=np.zeros(nwalkers)+1e-4*np.random.random(nwalkers)
+    starting_guesses[:,0]=np.zeros(nwalkers)+1e-2+np.random.random(nwalkers)
     starting_guesses[:,1]=2/CR+np.random.random(nwalkers)
+    # print(starting_guesses)
     # starting_guesses[:,1]=np.random.random(nwalkers)
     # print(starting_guesses)
     # Here's the function call where all the work happens:
@@ -238,9 +245,14 @@ def gogogo():
     return result_mu
 
 def apply_Vaughan(lc,epoch_info,model,maskfreq=0,show=0):
-    expT = np.sum(epoch_info[:, 3])
+    if epoch_info.ndim==1:
+        epoch_info=np.array([epoch_info])
+        expT=float(epoch_info[:,3])
+        print('expT=',expT)
+    else:expT = np.sum(epoch_info[:, 3])
     CR = np.mean(lc.counts) / lc.dt
-    psd = rednoise.plot_psd(lc, norm='frac', show=0, ifexpTfilter=expT)
+    print(CR)
+    psd = rednoise.plot_psd(lc, norm='frac', show=1, ifexpTfilter=expT)
     xdata=np.array(psd.freq);ydata=np.array(psd.power)
     if maskfreq:
         mask_index = np.argmin(np.abs(xdata - maskfreq))
@@ -250,6 +262,7 @@ def apply_Vaughan(lc,epoch_info,model,maskfreq=0,show=0):
         result_mu=mcmcfit(x_mask,y_mask,model,CR=CR,show=show)
     else:
         result_mu=mcmcfit(xdata,ydata,model,CR=CR,show=show)
+        print('sadasd')
     sigma_range=poisson_conf_interval(lc.counts)
     sigma=(sigma_range[1:,]-sigma_range[0,:])/2
     mse=np.mean(sigma**2)
@@ -260,9 +273,17 @@ def apply_Vaughan(lc,epoch_info,model,maskfreq=0,show=0):
 
 if __name__=='__main__':
     id = 148
-    (src_evt_use, epoch_info_use) = rednoise.singleobs_psd.load_data(id,path_provide='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_p90/', ifobsid=[7460])
-    expT = np.sum(epoch_info_use[:, 3])
-    lc = rednoise.get_hist(t=src_evt_use[:, 0], len_bin=500, tstart=epoch_info_use[:, 0][0],
-                           tstop=epoch_info_use[:, 1][-1])
-    print('2/CR=',2/np.sum(lc.counts)*expT)
-    apply_Vaughan(lc, epoch_info=epoch_info_use, model=powerlaw, maskfreq=1/5434.78)
+    # (src_evt_use, epoch_info_use) = rednoise.singleobs_psd.load_data(id,path_provide='/Users/baotong/Desktop/period_NGC6397/txt_all_obs_p90/', ifobsid=[7460])
+    # expT = np.sum(epoch_info_use[:, 3])
+    # lc = rednoise.get_hist(t=src_evt_use[:, 0], len_bin=500, tstart=epoch_info_use[:, 0][0],
+    #                        tstop=epoch_info_use[:, 1][-1])
+    # print('2/CR=',2/np.sum(lc.counts)*expT)
+    # apply_Vaughan(lc, epoch_info=epoch_info_use, model=powerlaw, maskfreq=None)
+    path = '/Users/baotong/Desktop/XMMcentral/all_lc/'
+    a = fits.open(path + '0801681301_267.32_28.56_4690_pnsrc_2_10keV.lc')
+    rate = a[1].data['RATE']
+    time = a[1].data['TIME']
+    T = time[-1] - time[0]
+    lc = Lightcurve(time=time, counts=rate * (time[1] - time[0]))
+    epoch = np.array([time[0], time[-1],11111, T])
+    apply_Vaughan(lc, epoch_info=epoch, model=powerlaw, maskfreq=None)
