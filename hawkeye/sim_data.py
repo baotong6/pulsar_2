@@ -1,3 +1,13 @@
+'''
+Author: baotong && baotong@smail.nju.edu.cn
+Date: 2022-03-23 17:00:14
+LastEditors: baotong && baotong@smail.nju.edu.cn
+LastEditTime: 2023-12-25 16:35:51
+FilePath: /pulsar/hawkeye/sim_data.py
+Description: 
+
+Copyright (c) 2023 by baotong, All Rights Reserved. 
+'''
 #!/bin/bash
 # -*- coding: utf-8 -*-
 import numpy as np
@@ -92,4 +102,5 @@ def get_epoch_time_series(cts_rate,period,amp, model,epoch_info):
     t = np.array(t);obsidout=np.array(obsidout)
     t = t + np.random.rand(len(t)) * 3.2 - 1.6
     return t,obsidout
+
 

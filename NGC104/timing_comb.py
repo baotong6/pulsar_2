@@ -42,12 +42,13 @@ def load_data(dataname,ecf=90,ifpath=None,ifobsID=[]):
         return (np.array([]),np.array([]))
     else:
         CR=hawk.plot_longT_V(src_evt=src_evt, bkg_file=None,epoch_info=epoch_info)
-        CR/=ecf/100.
-        useobsID=epoch_info[:,2][0:50].astype('int')
+        # CR/=ecf/100.
+        # useobsID=epoch_info[:,2][0:50].astype('int')
         (useid, epoch_info_use)=hawk.choose_obs(epoch_info,flux_info=CR,
-                                                flux_filter=10,expT_filter=4000,
+                                                flux_filter=280.,expT_filter=20000,
                                                 if_flux_high=0, if_expT_high=1,obsID=ifobsID)
-        print(useid)
+        print(epoch_info_use[:,3])
+        if len(useid)==0 or len(epoch_info_use)==0: return ([],[])
         src_evt_use =hawk.filter_obs(src_evt, useid)
         return (src_evt_use,epoch_info_use)
 
@@ -79,11 +80,12 @@ def get_lc_frombkgimg(srcID,src_evt_use,epoch_info_use,ecf,bin_len):
 
     return lc_all
 
-def main_process(path,dataname,period=None):
+def main_process(path,dataname,period=None,ifobsID=None):
     ecf=90
-    bin_len = 300
+    bin_len = 10
     net_p=0.95
-    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=[])
+    (src_evt_use,epoch_info_use)=load_data(dataname=dataname,ecf=90,ifpath=path,ifobsID=ifobsID)
+    if src_evt_use==[] or epoch_info_use==[]:return None
     # lc=get_lc_frombkgimg(int(dataname),src_evt_use,epoch_info_use,ecf=90,bin_len=bin_len)
     figurepath = '/Users/baotong/Desktop/aas/GCall/figure/fold/'
     time=hawk.filter_energy(src_evt_use[:,0],src_evt_use[:,1],[20,8000])
@@ -91,28 +93,42 @@ def main_process(path,dataname,period=None):
     ## if filter time ##
     # time=hawk.filter_time_t1t2(time,t1=50000,t2=130000)
     # hawk.plot_Z2(time,freq=np.linspace(1/1e-4,1/500,10000))
-    hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,iffold=True,p_test=period,shift=0.,show=True)
+    # hawk.plot_longT_V(src_evt=src_evt_use, bkg_file=None,epoch_info=epoch_info_use,
+    #                   iffold=True,p_test=period,shift=0.,show=1)
     # hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=15,shift=0.,
     #                 label=dataname,text='Seq.{}'.format(dataname),save=0,show=1)
-    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,outpath=figurepath,bin=20,shift=0.3,
-                    label=dataname,textdef='#{0} (M28), P={1:.2f}s'.format(dataname,period,len(time)),save=0,show=1)
+    hawk.phase_fold(time=time,epoch_info=epoch_info_use,net_percent=net_p,p_test=period,
+                    outpath=figurepath,bin=30,shift=0.3,
+                    label=dataname,textdef='#{0} (M28), P={1:.2f}s'.format(dataname,period,len(time)),
+                    save=0,show=1)
     # plt.hist(time,bins=300,histtype='step')
     # plt.show()
     lc=hawk.get_hist(time,len_bin=bin_len,tstart=epoch_info_use[:,0][0],tstop=epoch_info_use[:,1][-1])
+    # print(lc.time,lc.counts)
     T_tot=epoch_info_use[:,1][-1]-epoch_info_use[:,0][0]
     freq = np.arange(1 / T_tot, 0.5/ bin_len, 1 / (10* T_tot))
-    freq = freq[np.where(freq > 1 / 200.)]
-    # (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq,outpath=None,outname=None,save=False,show=True)
+    freq = freq[np.where(freq > 1 / 2000.)]
+    # outname=f'{dataname}_{ifobsID[0]}'
+    # (FP, out_period, max_NormLSP)=hawk.get_LS(lc.time,lc.counts,freq,
+    #                                           outpath='/Users/baotong/Desktop/period_M31XRB/fig_LS_HRC/',
+    #                                           outname=f'{dataname}',save=0,show=1)
+
+    # print(out_period)
     # (freq_grid, pgram)=gptLS.lomb_scargle(lc.time,lc.counts,freq=freq)
-    # print('Period=',format(out_period))
-    # hawk.plot_singleobs_lc(lc,period=period,ifsin=0,figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',
+    # hawk.plot_singleobs_lc(lc,period=period,ifsin=0,
+    #                        figurepath='/Users/baotong/Desktop/aas/pXS_Tuc/figure/',
     #                        shift=0.7,dataname=dataname,save=0,show=1)
 if __name__=='__main__':
-    path_M31='/Users/baotong/Desktop/period_M31XRB/M31ACIS_txt/txt_all_obs_p90/';useid=[12110,12111,12112,12113,12114]
+    # path_M31='/Users/baotong/Desktop/period_M31XRB/txt_all_obs_p90_HRC/'
+    useid=[]
     path_GC = '/Users/baotong/Desktop/period_M28/txt_all_obs_p90/';useid=[]
     path_LW='/Users/baotong/Desktop/period_LW/txt_all_obs/'
     path_CDFS='/Users/baotong/Desktop/CDFS/txt_all_obs_0.5_8_ep4/'
     path_NSC='/Users/baotong/Desktop/period/txt_all_obs_IG/'
-    # path_M31='/Users/baotong/Desktop/period_M31XRB/M31HRC_txt/txt_all_obs_p90/'
-    dataname='110'
-    main_process(path=path_M31,dataname=dataname,period=11103.70864)
+    path_M31='/Users/baotong/Desktop/period_M31XRB/M31ACIS_txt/txt_all_obs_p90/'
+    # path_M31='/Users/baotong/nustar/simulation/'
+    dataname=21
+    main_process(path=path_M31,dataname=dataname,period=22834.083,ifobsID=[])
+    # for dataname in np.arange(214,215,1):
+    #     for id in [1912,5925, 6177, 5926, 6202, 5927, 5928, 7283, 7284, 7285, 7286, 8526, 8527, 8528, 8529, 8530, 9825, 9826, 9827, 9828, 9829,10838,10683,10684,10882,10883,10884,10885,10886,11808,11809,12110,12111,12112,12113,12114,13178,13179,13180,13227,13228,13229,13230,13231,13278,13279,13280,13281]:
+    #         main_process(path=path_M31,dataname=dataname,period=4521.41,ifobsID=[id])

@@ -1,3 +1,13 @@
+'''
+Author: baotong && baotong@smail.nju.edu.cn
+Date: 2023-05-15 16:16:35
+LastEditors: baotong && baotong@smail.nju.edu.cn
+LastEditTime: 2024-03-28 10:14:01
+FilePath: /pulsar/GC/HR_67.py
+Description: 
+
+Copyright (c) 2024 by baotong, All Rights Reserved. 
+'''
 #!/bin/bash
 # -*- coding: utf-8 -*-
 import numpy as np
@@ -150,7 +160,7 @@ def plot_HR67_hist(save=0,show=1):
         print(len(goodindex))
 
         # 绘制拟合曲线和原始直方图
-        plt.figure(1,(9,6))
+        plt.figure(1,(7,6))
         temphist=plt.hist(HR[goodindex],bins=25,histtype='step',label=gc,linewidth=3)
         histvalue=temphist[0]
         bin_centers=(temphist[1][:-1]+temphist[1][1:])/2
@@ -226,7 +236,7 @@ def plot_HR67_profile(save=0,show=1):
         print('perr1=', perr1)
         print('popt2=', popt2)
         print('perr2=', perr2)
-        plt.figure(1,(9,6))
+        plt.figure(1,(6,6))
         plt.errorbar(x, y*10, xerr=xerr, yerr=y_err*10, fmt='ks', capsize=2, elinewidth=2, ecolor='k', color='k',
                      markersize=8, label=r'$\rm Metal-rich~CVs \times 10$')
 
@@ -243,6 +253,6 @@ def plot_HR67_profile(save=0,show=1):
         plt.show()
 if __name__=='__main__':
     # plot_HR67_SH()
-    # plot_HR67_dist()
-    plot_HR67_hist()
+    plot_HR67_dist()
+    # plot_HR67_hist()
     # plot_HR67_profile()

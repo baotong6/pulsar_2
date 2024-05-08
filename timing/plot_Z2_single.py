@@ -20,16 +20,17 @@ import random
 #path='/Volumes/halo/chandra_obs_hr_m04_for_baotong/'
 #path='/Users/baotong/xmm/0109110101/'
 #path='/Users/baotong/Desktop/period/'
-path='/Users/baotong/Desktop/period_M28/txt_all_obs_0.5_8_ep4/'
+path='/Users/baotong/Desktop/FRBtime/'
 #dataname="Muno4.txt"
 #dataname="Muno6.txt"
-p99_Z2 = 67.74654931
-p90_Z2 = 61.35167033
+p99_Z2 = 30
+p90_Z2 = 26
 
-dataname='872_flare'
+dataname='FRB240114A_0306'
 # evt_list_name=['WR1']
 def get_Z2(dataname,freq):
-    time=   np.loadtxt(path + dataname + '.txt')[:,0]
+    time=  np.loadtxt(path + dataname + '.txt')
+    time*=86400
     N=len(time)
     def turns(t,f):
         ti=t-t[0]
@@ -51,9 +52,10 @@ def get_Z2(dataname,freq):
         Z2.append((2.0 / N)*(sum(np.cos(turns(time,fi)))**2+sum(np.sin(turns(time,fi))**2)))
     cts=len(time)
     return [Z2,cts]
-T_tot=1e5
-freq=np.arange(1/T_tot,0.5/100,1/(5*T_tot))
-freq=freq[np.where(freq>1/10000)]
+T_tot=1800
+freq=np.arange(1/1,1/0.01,1/(1*500))
+# freq=freq[np.where(freq>1/10000)]
+print(len(freq))
 [Z2,cts]=get_Z2(dataname,freq)
 Z2=np.array(Z2)
 plt.figure(1,(7,7))
@@ -61,6 +63,7 @@ plt.title(dataname+',cts={0}'.format(cts))
 plt.semilogx(freq,[p99_Z2 for i in range(len(Z2))],'--',color='black')
 plt.semilogx(freq,[p90_Z2 for i in range(len(Z2))],'--',color='red')
 plt.step(freq,Z2,color='black')
+print('period=',1/freq[np.argmax(Z2)])
 plt.text(0.0005,p99_Z2+1,"99%")
 plt.text(0.0005,p90_Z2+1,"90%")
 plt.show()

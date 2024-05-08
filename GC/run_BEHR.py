@@ -49,25 +49,6 @@ def input_parsfromtxt(path,srcid,ebands,ebandh):
         hardbkg=len(np.where((bkgevt[:,1]<ebandh[1])&(bkgevt[:,1]>ebandh[0]))[0])
 
     return (softsrc,softbkg,hardsrc,hardbkg)
-
-def input_parsfromtxt_lc(path,srcid,ebands,ebandh):
-    srcevt=np.loadtxt(path+f'{srcid}.txt')
-    bkgevt=np.loadtxt(path+f'{srcid}_bkg.txt')
-    if srcevt.ndim== 1:srcevt = np.array([srcevt])
-
-    softsrc=len(np.where((srcevt[:,1]<ebands[1])&(srcevt[:,1]>ebands[0]))[0])
-    hardsrc=len(np.where((srcevt[:,1]<ebandh[1])&(srcevt[:,1]>ebandh[0]))[0])
-    if len(bkgevt)==0 or bkgevt.ndim==1:
-        softbkg=0;hardbkg=0
-    # elif bkgevt.ndim==1:
-    #     bkgevt = np.array([bkgevt])
-    else:
-        softbkg=len(np.where((bkgevt[:,1]<ebands[1])&(bkgevt[:,1]>ebands[0]))[0])
-        hardbkg=len(np.where((bkgevt[:,1]<ebandh[1])&(bkgevt[:,1]>ebandh[0]))[0])
-
-    return (softsrc,softbkg,hardsrc,hardbkg)
-
-
 def input_pars(path,specpath,srcid):
     specname=f'{srcid}_stack_src.pi'
     bkgspecname=f'{srcid}_stack_bkg.pi'

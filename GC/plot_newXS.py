@@ -28,9 +28,7 @@ pos_all = {'Tuc': [6.0236250, -72.0812833, 3.17 * 60, 3.17 / 8.8 * 60],
            'NGC6752': [287.71713, -59.98455, 1.91 * 60, 1.91 / 11.24 * 60],
            'NGC6266': [255.303333, -30.113722, 0.92 * 60, 0.92 / 4.2 * 60],
            'M30': [325.092167, -23.179861, 1.03 * 60, 1.03 / 17.2 * 60]}
-
 gcname = ['Tuc', 'terzan5', 'omg','M28', 'NGC6397', 'NGC6752', 'NGC6266','M30']
-# gcname = ['Tuc','omg', 'NGC6266', 'NGC6397', 'terzan5', 'M28', 'NGC6752']
 catname = ['xray_properties-592.fits', 'cheng2019_terzan.fit', 'cheng2020_M28.fit',
            'cheng2020_omg.fit', 'ngc6397_catalog.fits', 'ngc6752_catalog.fits',
            'NGC6266_p50_i5_src_1_2_4_8.fits']
@@ -108,6 +106,19 @@ def plot_profile():
     return None
 
 def plot_Phist(save=0, show=1):
+    path_table = '/Users/baotong/Desktop/period/table/'
+    result_NSC = pd.read_excel(path_table + 'final_all_del.csv', 'result_NSC_IG')
+    line = result_NSC['line']
+    ID_NSC = result_NSC['seq']
+    period_NSC = result_NSC['P']
+    L_NSC = result_NSC['L']
+    L_NSC = L_NSC * 1.3 * 1e31
+    ID_NSC = ID_NSC[np.where(line == 3)[0]]
+    period_NSC/=3600.
+    period_NSC_CV = period_NSC[np.where(line == 3)[0]]
+    period_NSC_nCV = period_NSC[np.where(line == 0)[0]]
+    L_NSC = L_NSC[np.where(line == 3)[0]]
+
     result_all = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'all')
     result_allbutTuc = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'allbutTuc')
     idex = np.where(result_all['judge'] == 'CV')[0]
@@ -134,6 +145,9 @@ def plot_Phist(save=0, show=1):
     bins_spin = np.logspace(np.log10(3 / 36.), np.log10(2), 31)
     bins_p = np.logspace(np.log10(0.8), np.log10(16), 13)
     bins_p = np.concatenate((bins_p, [20., 25., 30.]))
+    bins_NSC1=np.logspace(np.log10(0.9), np.log10(16), 15)
+    bins_NSC2=np.logspace(np.log10(1), np.log10(12), 12)
+
     path_fits = '/Users/baotong/Desktop/period_LW/'
     RK = fits.open(path_fits + 'RK14.fit')
     orb = RK[1].data['Orb_Per']
@@ -165,13 +179,15 @@ def plot_Phist(save=0, show=1):
                                    figsize=(15, 10))
     # ax1=fig.add_subplot(211)
     ax1.plot()
-    # ax1.hist(orb_all, bins=bins, histtype='step', lw=2, color='red', linestyle='--')
-    ax1.hist(period_allbutTuc, bins=bins_p, histtype='step', lw=2, linestyle='-', facecolor='grey',
-             hatch='/', edgecolor='k', fill=True,label='CVs in GCs (excluding 47 Tuc)')
-    ax1.hist(period_GC, bins=bins_p, histtype='step', lw=4, color='c', linestyle='-',label='CVs in GCs')
-    ax1.hist(period_LW, bins=bins_p, histtype='step', lw=3, color='blue', linestyle='-',label='CVs in Galactic Bulge')
-    ax1.hist(period_SDSS, bins=bins, histtype='step', lw=2, color='red', linestyle='--',
-             label='CVs in Solar Neighborhood')
+    ax1.hist(orb_all, bins=bins, histtype='step', lw=2, color='red', linestyle='--',label='CVs in Solar Neighborhood')
+    # ax1.hist(period_allbutTuc, bins=bins_p, histtype='step', lw=2, linestyle='-', facecolor='grey',
+    #          hatch='/', edgecolor='k', fill=True,label='CVs in GCs (excluding 47 Tuc)')
+    ax1.hist(period_NSC_CV, bins=bins_NSC1, histtype='step', lw=4, color='k', linestyle='-',label='CVs in the NSC')
+    ax1.hist(period_NSC_nCV, bins=bins_NSC2, histtype='step', lw=4, color='green', linestyle='-',label='LMXB candidates in the NSC')
+    ax1.hist(period_GC, bins=bins_p, histtype='step', lw=4, color='c', linestyle='-.',label='CVs in GCs')
+    ax1.hist(period_LW, bins=bins_p, histtype='step', lw=3, color='blue', linestyle='--',label='CVs in Galactic Bulge')
+    # ax1.hist(period_SDSS, bins=bins, histtype='step', lw=2, color='red', linestyle='--',
+    #          label='CVs in Solar Neighborhood')
     print('SDSS CVs',len(period_SDSS))
     print(len(np.where(period_SDSS>11448.0 / 3600)[0]))
     # ax1.hist(spin_IP, bins = bins_spin, histtype = 'step',lw=1.5, color = 'purple',linestyle='-')
@@ -194,11 +210,12 @@ def plot_Phist(save=0, show=1):
 
     # ax2=fig.add_subplot(212)
     ax2.hist(orb_all, bins=bins, histtype='step', lw=2, color='red', cumulative=1, density=1, linestyle='--')
-    ax2.hist(period_allbutTuc, bins=bins_p, histtype='step', lw=2, linestyle='-', cumulative=1, density=1,
-             facecolor='grey',
-             hatch='/', edgecolor='k', fill=True)
-    ax2.hist(period_GC, bins=bins_p, histtype='step', lw=4, color='c', cumulative=1, density=1, linestyle='-')
-    ax2.hist(period_LW, bins=bins_p, histtype='step', lw=3, color='blue', cumulative=1, density=1, linestyle='-')
+    # ax2.hist(period_allbutTuc, bins=bins_p, histtype='step', lw=2, linestyle='-', cumulative=1, density=1,
+    #          facecolor='grey',hatch='/', edgecolor='k', fill=True)
+    ax2.hist(period_NSC_CV, bins=bins_NSC1, histtype='step', lw=3, color='k', cumulative=1, density=1, linestyle='-')
+    ax2.hist(period_NSC_nCV, bins=bins_NSC2, histtype='step', lw=3, color='green', cumulative=1, density=1, linestyle='-')
+    ax2.hist(period_GC, bins=bins_p, histtype='step', lw=4, color='c', cumulative=1, density=1, linestyle='-.')
+    ax2.hist(period_LW, bins=bins_p, histtype='step', lw=3, color='blue', cumulative=1, density=1, linestyle='--')
     # ax2.hist(spin_IP, bins = bins_spin, histtype = 'step',lw=1.5, color = 'purple',cumulative=1,density=1,linestyle='-')
 
     ax2.plot([P_min, P_min], [0, 1], '--', color='grey')
@@ -940,7 +957,7 @@ def plot_P_L_scatter(save=0,show=1):
             #     ax1.plot(Porb*24,Xlum1,'-',alpha=0.5,lw=2,color=cmap3(namef['MASS2']-0.2),label=text)
             # ax1.plot(Porb * 24, 0.1*Xlum3, '--', alpha=0.5, lw=1, color=cmap3(namef['MASS2'] - 0.2), label=text)
 
-    read_dat_files(folder_path)
+    # read_dat_files(folder_path)
 
     # ax1.set_ylim(1e29, 1e34)
     # ax3.set_ylim(1e29, 1e34)
@@ -970,16 +987,112 @@ def plot_P_L_scatter(save=0,show=1):
     if save:plt.savefig('/Users/baotong/Desktop/aas/GCall/figure/'+'CVall_scatter.pdf',bbox_inches='tight', pad_inches=0.05)
     if show:plt.show()
     else:plt.close()
+
+def plot_P_L_scatter_rh(save=0,show=1):
+    label = ['.', '^', 'v', 'o', 'D', '*', 's']
+    color_list = ['grey', 'g', 'b', 'k', 'orange', 'purple', 'magenta']
+    result_all = pd.read_excel('/Users/baotong/Desktop/period_terzan5/candidate_allGC.xlsx', 'all')
+    idex = np.where((result_all['judge'] == 'CV')|(result_all['judge'] == 'outCV'))[0]
+    period = np.array(result_all['period_all'])[idex]
+    type = np.array(result_all['GC'])[idex]
+    dist = np.array(result_all['proj_dist'])[idex]
+    L = np.array(result_all['L'])[idex]
+    fig, f1_axes = plt.subplots(ncols=2, nrows=2, sharey='row', sharex='col',
+                                gridspec_kw={'height_ratios': [2,3], 'width_ratios': [4, 1]},
+                                figsize=(12, 12))
+    ax1 = f1_axes[0, 0];ax2 = f1_axes[1, 0];ax3 = f1_axes[0, 1];ax4 = f1_axes[1, 1]
+    label_gc = ['47 Tuc', 'Terzan 5', r'$\omega~cen$', 'M 28', 'NGC 6397', 'NGC 6752', 'NGC 6266', 'M 30']
+    dist_rh = []
+    for i in range(len(gcname) - 1):
+        gc_srcid = np.where(type == gcname[i])[0]
+        dist_rh = np.concatenate((dist_rh, dist[gc_srcid] / pos_all[gcname[i]][2]))
+    bins_lx = np.logspace(np.log10(1e31), np.log10(1e33), 11)
+    bins_rh = np.logspace(np.log10(0.01), np.log10(10), 11)
+    period_GC=period
+    L_GC=L
+    IPlowpars = np.array(list(localCVs.IPlow.values()))
+    IPhighpars = np.array(list(localCVs.IPhigh.values()))
+    Polarhighpars = np.array(list(localCVs.Polarhigh.values()))
+    Polarlowpars = np.array(list(localCVs.Polarlow.values()))
+    periodbouncerpars = np.array(list(localCVs.periodbouncer.values()))
+    nonmCVs_2015pars = np.array(list(localCVs.nonmCVs_2015.values()))
+    (ra_LW, dec_LW, seq_LW, period_LW, L_LW, Lmin, Lmax, type_LW) = plot_pXS.load_LW('result_LW')
+
+    LW_index = np.where((period_LW > 3900) & (period_LW < 40000))[0]
+    period_LW = period_LW[LW_index]
+    period_LW /= 3600.
+    L_LW = L_LW[LW_index]
+    L_LW *= 1.11423 * 1e31
+    P_min = 7. / 6.
+    P_gap = [7740.0 / 3600., 11448.0 / 3600.]
+    ax2.plot([P_min, P_min], [0, 1e35], '--', color='grey')
+    ax2.plot([P_gap[0], P_gap[0]], [0, 1e35], '-', lw=2., color='orange')
+    ax2.plot([P_gap[1], P_gap[1]], [0, 1e35], '-', lw=2., color='orange')
+    ax2.scatter(period_GC/3600,L_GC,s=200,marker='+',color='red',label='GC')
+    ax2.scatter(period_LW, L_LW,s=200,marker='+',color='cyan',label='LW')
+    ax2.scatter(IPlowpars[:, 0], 10 ** IPlowpars[:, 1], s=100,marker='v',color='blue',label='IPs (low state)')
+    ax2.scatter(IPhighpars[:, 0], 10 ** IPhighpars[:, 1], s=100,marker='v',facecolor='none',edgecolor='blue',label='IPs (high state)')
+    ax2.scatter(Polarlowpars[:, 0], 10 ** Polarlowpars[:, 1], s=90,marker='s',color='green',label='polars (low/intermediate state)')
+    ax2.scatter(Polarhighpars[:, 0], 10 ** Polarhighpars[:, 1], s=100,marker='s',facecolor='none',edgecolor='green',
+                label='polars (high state)')
+    ax2.scatter(nonmCVs_2015pars[:, 0], 10 ** nonmCVs_2015pars[:, 1], s=100,marker='x',color='grey',label='non-mCVs')
+    ax2.scatter(periodbouncerpars[:, 0], 10 ** periodbouncerpars[:, 1], s=200,marker='o',facecolor='none',edgecolor='green',label='period bouncers')
+    ax2.loglog()
+    ax2.set_xlim(0.8,40)
+    ax2.set_ylabel(r'0.5-8 keV X-ray luminosity ($\rm erg~s^{-1}$)', hawk.font1)
+    for i in range(len(gcname) - 1):
+        gc_srcid = np.where(type == gcname[i])[0]
+        ax1.scatter(period[gc_srcid] / 3600, dist[gc_srcid] / pos_all[gcname[i]][2], marker=label[i],
+                    color=color_list[i], label=label_gc[i], s=70)
+    counts_lx, bins_lx = np.histogram(L, bins_lx)
+    lx_drc = ax4.hist(bins_lx[:-1], bins=bins_lx, weights=counts_lx / np.sum(counts_lx), histtype='step',
+                      orientation='horizontal', lw=1.5, color='k',
+                      linestyle='--')
+    counts_dist, bins_rc = np.histogram(dist_rh, bins_rh)
+    print(counts_dist,bins_rc)
+    dist_drh = ax3.hist(bins_rh[:-1], bins=bins_rh, weights=counts_dist / np.sum(counts_dist), histtype='step',
+                        orientation='horizontal',
+                        lw=1.5, color='k', linestyle='--')
+    ax1.loglog()
+    ax2.set_ylim(5e28,7e34)
+    ax3.set_yscale('log')
+    ax4.set_yscale('log')
+    ax2.tick_params(labelsize=18)
+    ax1.plot([P_min, P_min], [0, 150], '--', color='grey')
+    ax1.plot([P_gap[0], P_gap[0]], [0, 150], '-', lw=2., color='orange')
+    ax1.plot([P_gap[1], P_gap[1]], [0, 150], '-', lw=2., color='orange')
+    # ax1.plot([1, 26], [4, 4], '-', lw=1., color='c')
+    ax1.plot([1, 26], [1, 1], '--', lw=4., color='c')
+    # ax1.fill_between([1, 26], [4, 4], [10, 10], facecolor='yellow', alpha=0.2)
+    ax2.set_xlabel('Orbital Period (h)', hawk.font1)
+    ax1.set_ylabel(r'R/$r_{h}$', hawk.font1)
+    ax2.set_xlim(1, 28);ax1.set_ylim(1e-2, 50)
+    ax4.set_xlim(0, 0.35);ax4.set_xlim(0, 0.35)
+    ax1.tick_params(labelsize=18)
+    ax4.tick_params(labelsize=18)
+    ax2.legend(loc='lower right', ncol=2, handletextpad=0.001, columnspacing=0.001, facecolor='none', edgecolor='grey',
+               fontsize=11)
+    ax1.legend(loc='upper center', ncol=7, handletextpad=0.001, columnspacing=0.0001, facecolor='none',
+               edgecolor='grey', fontsize=11)
+    ax4.xaxis.set_major_formatter(ticker.PercentFormatter(xmax=1, decimals=0))
+    plt.subplots_adjust(wspace=0, hspace=0.0)
+    if save:plt.savefig('/Users/baotong/Desktop/aas/GCall/figure/'+'CVall_scatter.pdf',bbox_inches='tight', pad_inches=0.05)
+    if show:plt.show()
+    else:plt.close()
+
 if __name__ == '__main__':
     # plot_profile()
     # plot_P_L_profile(save=1, show=1)
     # plot_P_L(save=0,show=1)
-    plot_P_L_threereg(save=0,show=1)
+    # plot_P_L_threereg(save=0,show=1)
     # plot_P_L_4reg_scatter(save=0,show=1)
     # plot_P_L_profile(save=0,show=1)
-    # plot_Phist(save=1,show=1)
+    plot_Phist(save=0,show=1)
     # plot_src_info(show=1)
     # plot_P_L_threereg()
     # plot_surface_density(save=0,show=1)
     # read_GLres_src(save=1,show=1)
     # plot_P_L_scatter(save=0, show=1)
+    # plot_P_L_scatter_rh(save=1, show=1)
+
+    

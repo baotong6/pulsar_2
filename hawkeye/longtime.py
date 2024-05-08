@@ -1,3 +1,13 @@
+'''
+Author: baotong && baotong@smail.nju.edu.cn
+Date: 2021-12-05 18:07:16
+LastEditors: baotong && baotong@smail.nju.edu.cn
+LastEditTime: 2024-04-11 12:37:09
+FilePath: /pulsar/hawkeye/longtime.py
+Description: 
+
+Copyright (c) 2024 by baotong, All Rights Reserved. 
+'''
 #!/bin/bash
 # -*- coding: utf-8 -*-
 import numpy as np
@@ -18,13 +28,13 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
     t_end = epoch_info[:, 1]
     t_mid=(t_start+t_end)/2
     obsID = epoch_info[:, 2]
-    expT = epoch_info[:, 3]
-    # expT=t_end-t_start
+    # expT = epoch_info[:, 3]
+    expT=t_end-t_start
     cts=[];bkg_cts=[]
     # print('evt=',src_evt)
     if not bkg_file:
         for i in range(len(obsID)):
-            cts.append(len(np.where(src_evt[:, 2] == obsID[i])[0]))
+            cts.append(len(np.where(src_evt[:, 2] == int(obsID[i]))[0]))
         cts = np.array(cts)
         CR = cts / expT
         CR_ERR = np.sqrt(CR * expT) / expT
@@ -32,12 +42,12 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
     else:
         time_bkg = np.loadtxt(bkg_file)
         for i in range(len(obsID)):
-            cts.append(len(np.where(src_evt[:,2]==obsID[i])[0]))
-            bkg_cts.append(len(np.where(time_bkg[:, 2] == obsID[i])[0]))
+            cts.append(len(np.where(src_evt[:,2]==int(obsID[i]))[0]))
+            bkg_cts.append(len(np.where(time_bkg[:, 2] == int(obsID[i]))[0]))
         cts=np.array(cts);bkg_cts=np.array(bkg_cts)
         CR=(cts-bkg_cts/backscale)/expT
         CR_ERR=np.sqrt(CR*expT)/expT
-    plt.figure(1)
+    plt.figure()
     plt.semilogy()
     plt.errorbar(t_mid,CR,CR_ERR,fmt='o',capsize=3, elinewidth=1, ecolor='red')
     for i in range(len(t_mid)):
@@ -51,7 +61,9 @@ def plot_longT_V(src_evt,bkg_file,epoch_info,backscale=12.,iffold=False,p_test=N
         turns=pfold.trans(t_mid,p_test=p_test,shift=shift)
         plt.errorbar(turns, CR, CR_ERR, fmt='o', capsize=3, elinewidth=1, ecolor='red')
         plt.errorbar(turns+1, CR, CR_ERR, fmt='o', capsize=3, elinewidth=1, ecolor='red')
-        plt.show()
+        if show:
+            plt.show()
+        else:plt.close()
 
     return CR
 

@@ -12,6 +12,7 @@ import esass.funcs_fits2txt as funcs
 import latex.poisson_error as pos_err
 ra_center=6.022318
 dec_center=-72.081443
+
 def load_data():
     ## for LW x-ray and IR
     path='/Users/baotong/Desktop/period_Tuc/'

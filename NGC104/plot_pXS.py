@@ -14,7 +14,7 @@ from stingray.lightcurve import Lightcurve
 import hawkeye as hawk
 import rocket as rocket
 from scipy import optimize as op
-from timing_comb import load_data,get_lc_frombkgimg
+from NGC104.timing_comb import load_data,get_lc_frombkgimg
 font1 = {'family': 'Normal',
          'weight': 'normal',
          'size': 18, }

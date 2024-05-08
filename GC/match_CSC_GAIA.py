@@ -2,7 +2,7 @@
 Author: baotong && baotong@smail.nju.edu.cn
 Date: 2023-10-09 08:55:32
 LastEditors: baotong && baotong@smail.nju.edu.cn
-LastEditTime: 2023-10-09 19:28:28
+LastEditTime: 2023-11-02 09:39:19
 FilePath: /pulsar/GC/match_CSC_GAIA.py
 Description: 
 
@@ -62,7 +62,7 @@ header = ['seq', 'GCname', 'period','ra','dec','ra_CSC','dec_CSC','sep_GC_CSC','
 # 将数据转换为 DataFrame
 data_list = []
 # for i in [1,2]:
-for i in range(len(ra_GAIA)):
+for i in range(len(ra_GC)):
     # if np.isnan(ra_GAIA[i]):
     #     row=[seq_GC[i],type[i],period[i],ra_GC[i],dec_GC[i],ra_CSC[i],dec_CSC[i],dis_GC_CSC[i],
     #          0,0,0,0,0,0,0,0]
@@ -86,8 +86,13 @@ for i in range(len(ra_GAIA)):
         dist2 = c1.separation(cc);dist2=dist2.arcsec
 
         row=[seq_GC[i],type[i],period[i],ra_GC[i],dec_GC[i],ra_CSC[i],dec_CSC[i],dis_GC_CSC[i],
-             ra_GAIA[i],dec_GAIA[i],dist1,dist2,r[0]['pmra'],r[0]['pmdec'],0,0]
+             r[0]['ra'],r[0]['dec'],dist1,dist2,r[0]['pmra'],r[0]['pmdec'],0,0]
         data_list.append(row)
         # r.pprint(max_lines=12, max_width=130)
 df = pd.DataFrame(data_list, columns=header)
-# df.to_csv(path+'match_GCpos_GAIA.csv', index=False)
+df.to_csv(path+'match_GC_GAIA_3arcsec_new.csv', index=False)
+
+
+
+
+

@@ -251,8 +251,9 @@ def apply_Vaughan(lc,epoch_info,model,maskfreq=0,show=0):
         print('expT=',expT)
     else:expT = np.sum(epoch_info[:, 3])
     CR = np.mean(lc.counts) / lc.dt
-    print(CR)
+    # print(CR)
     psd = rednoise.plot_psd(lc, norm='frac', show=1, ifexpTfilter=expT)
+    print(psd.df)
     xdata=np.array(psd.freq);ydata=np.array(psd.power)
     if maskfreq:
         mask_index = np.argmin(np.abs(xdata - maskfreq))

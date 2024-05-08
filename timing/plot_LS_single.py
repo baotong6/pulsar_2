@@ -130,9 +130,17 @@ def read_txt():
     freq=np.arange(1/T_TOT,1/200,1/(5*T_TOT))
     freq=freq[np.where(freq>1/50000.)]
     print(np.sum(lc_all.counts))
-
     # ps = Powerspectrum(lc_all,norm='leahy')
-
     get_LS(lc_all.time,lc_all.counts,freq)
+
+def read_FRB():
+    file='/Users/baotong/Desktop/FRBtime/FRB240114A_0306.txt'
+    a=np.loadtxt(file)
+    time=a*86400
+    print(time)
+    lc=get_hist(time, 0.1,tstart=0,tstop=0)
+    freq=np.arange(1/10,1/1,1/(5*100))
+    get_LS(lc.time,lc.counts,freq)
+
 if __name__ == '__main__':
-    read_txt()
+    read_FRB()

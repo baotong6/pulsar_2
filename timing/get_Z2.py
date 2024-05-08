@@ -1,3 +1,13 @@
+'''
+Author: baotong && baotong@smail.nju.edu.cn
+Date: 2020-06-03 16:04:59
+LastEditors: baotong && baotong@smail.nju.edu.cn
+LastEditTime: 2024-03-06 22:51:42
+FilePath: /pulsar/timing/get_Z2.py
+Description: 
+
+Copyright (c) 2024 by baotong, All Rights Reserved. 
+'''
 #!/bin/bash
 # -*- coding: utf-8 -*-
 import numpy as np
@@ -21,7 +31,7 @@ def get_Z2_threshold(v=1e5):
     p90=1-0.99**(1/v)
 
 #采样频率数
-v=3e7
+v=495000
 ##(1-p)**N=0.99
 #置信度99%
 p99=1-0.99**(1.0/v)

@@ -1,0 +1,61 @@
+'''
+Author: baotong && baotong@smail.nju.edu.cn
+Date: 2024-04-23 14:11:52
+LastEditors: baotong && baotong@smail.nju.edu.cn
+LastEditTime: 2024-04-24 10:24:28
+FilePath: /pulsar/NSC/read_xspeclog
+Description: 
+
+Copyright (c) 2024 by baotong, All Rights Reserved. 
+'''
+
+# -*- coding: utf-8 -*-
+#必须在csh中运行
+import numpy as np
+import subprocess
+import matplotlib.pyplot as plt
+from astropy.io import fits
+import sys
+import os
+import string
+from astropy.wcs import WCS
+
+def extract_values(filename):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+    additive_width = None
+    error_range_min = None
+    error_range_max = None
+
+    for line in lines:
+        if "Additive group equiv width for Component 3" in line:
+            additive_width = float(line.split(":")[-1].strip().split()[0])
+        elif "Equiv width error range" in line:
+            parts = line.split(":")[-1].strip().split()
+            error_range_min = float(parts[0])
+            error_range_max = float(parts[-2])
+
+    return additive_width, error_range_min, error_range_max
+
+path='/Users/baotong/Desktop/period/spectra_stack_src/fakeit_noline/'
+additive_width_list=[];error_range_list=[]
+for i in range(1,1001):
+    filename = f"mylog_n{i}"
+    # 提取数字
+    additive_width, error_range_min, error_range_max = extract_values(path+filename)
+    additive_width_list.append(additive_width)
+    error_range_list.append([error_range_min,error_range_max])
+bins=np.logspace(-3,0,50)
+error_range_list=np.array(error_range_list)
+print(len(np.where(np.array(additive_width_list)>0.18)[0]))
+plt.hist(additive_width_list,bins=bins,histtype='step')
+plt.hist(error_range_list[:,1],bins=bins,histtype='step')
+plt.plot([0.19,0.19],[0,50],'--')
+plt.plot([0.3,0.3],[0,50],'--')
+plt.semilogx()
+plt.show()
+
+
+
+

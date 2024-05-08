@@ -39,8 +39,11 @@ def choose_obs(epoch_info,flux_info=None,flux_filter=0,expT_filter=0,if_flux_hig
     if len(obsID)>0:
         filter=[]
         for i in range(len(obsID)):
-            index=np.where(epoch_info[:,2].astype('int')==obsID[i])[0][0]
-            filter.append(index)
+            index=np.where(epoch_info[:,2].astype('int')==obsID[i])
+            if list(index[0])==[]:
+                return ([],[])
+            else:
+                filter.append(index[0][0])
         epoch_info_use = epoch_info[filter]
         useid = epoch_info_use[:, 2]
         return (useid,epoch_info_use)

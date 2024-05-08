@@ -113,39 +113,43 @@ def plot_mcmc(x,y,CR,filename=None,path=None):
 
 
 if __name__=='__main__':
-    path='/Users/baotong/Desktop/XMMcentral/all_lc/'
+    path='/Users/baotong/Desktop/XMMcentral/nustar_xmm/'
     # 列出当前目录下的所有文件和文件夹
     file_names = os.listdir(path)
-    ###打印所有文件名
-    # for file_name in file_names:
-    #     if file_name.endswith(".lc"):
-    #         print(file_name)
-    #         a=fits.open(path+file_name)
-    #         rate=a[1].data['RATE']
-    #         time=a[1].data['TIME']
-    #         T=time[-1]-time[0]
-    #         lc=Lightcurve(time=time,counts=rate*(time[1]-time[0]))
-    #         freq=np.arange(1/T,1/1,1e-5)
-    #         # hawk.get_LS(lc.time,lc.counts,freq,show=1)
-    #         CR = np.mean(lc.counts) / lc.dt
-    #         epoch=np.array([time[0],time[-1],'11111',T])
-    #         hawk.get_LS(time,rate,freq=np.arange(1/T,1/1,1e-6),outpath=None,outname=None,save=0,show=1)
-            # rednoise.plot_psd(lc, show=1)
-            # psd = rednoise.plot_psd(lc, norm='frac', show=0, ifexpTfilter=T)
-            # x= np.array(psd.freq);
-            # y= np.array(psd.power)
-            # plot_mcmc(x,y,CR,file_name,path)
-    file_name='0510010401_267.28_27.54_12904_pnsrc_2_10keV.lc'
-    a = fits.open(path + file_name)
-    rate = a[1].data['RATE']
-    time = a[1].data['TIME']
-    T = time[-1] - time[0]
-    lc = Lightcurve(time=time, counts=rate * (time[1] - time[0]))
-    CR = np.mean(lc.counts) / lc.dt
-    epoch=np.array([time[0],time[-1],'11111',T])
-    # hawk.get_LS(time,rate,freq=np.arange(1/T,1/1,1e-6),outpath=None,outname=None,save=0,show=1)
-    # rednoise.plot_psd(lc, show=1)
-    psd = rednoise.plot_psd(lc, norm='frac', show=0, ifexpTfilter=T)
-    x= np.array(psd.freq);
-    y= np.array(psd.power)
-    plot_mcmc(x,y,CR,file_name,path)
+    ##打印所有文件名
+    file_names=['nu80801332002A01_sr_3_10keV.lc']
+    for file_name in file_names:
+        if file_name.endswith(".lc"):
+            print(file_name)
+            a=fits.open(path+file_name)
+            rate=a[1].data['RATE']
+            time=a[1].data['TIME']
+            T=time[-1]-time[0]
+            print(T)
+            lc=Lightcurve(time=time,counts=rate*(time[1]-time[0]))
+            freq=np.arange(1/T,1/20,1e-6)
+            # hawk.get_LS(lc.time,lc.counts,freq,show=1)
+            CR = np.mean(lc.counts) / lc.dt
+            epoch=np.array([time[0],time[-1],'11111',T])
+            hawk.get_LS(time,rate,freq=np.arange(1/T,1/20,1e-6),outpath=None,outname=None,save=0,show=1)
+            rednoise.plot_psd(lc, show=0)
+            psd = rednoise.plot_psd(lc, norm='frac', show=0, ifexpTfilter=T)
+            x= np.array(psd.freq);
+            y= np.array(psd.power)
+            plot_mcmc(x,y,CR,file_name,path)
+    # file_name='0886110501_270.42_23.71_901_m2src_0.2_10keV.lc'
+    # a = fits.open(path + file_name)
+    # rate = a[1].data['RATE']
+    # time = a[1].data['TIME']
+    # T = time[-1] - time[0]
+    # lc = Lightcurve(time=time, counts=rate * (time[1] - time[0]))
+    # CR = np.mean(lc.counts) / lc.dt
+    # epoch=np.array([time[0],time[-1],'11111',T])
+    # # hawk.get_LS(time,rate,freq=np.arange(1/T,1/1,1e-6),outpath=None,outname=None,save=0,show=1)
+    # # rednoise.plot_psd(lc, show=1)
+    # psd = rednoise.plot_psd(lc, norm='frac', show=0, ifexpTfilter=T)
+    # x= np.array(psd.freq);
+    # y= np.array(psd.power)
+    # plot_mcmc(x,y,CR,file_name,path)
+
+    

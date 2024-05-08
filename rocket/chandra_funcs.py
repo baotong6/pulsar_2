@@ -8,6 +8,10 @@ from tkinter import _flatten
 from astropy.wcs import WCS
 import rocket.make_region as reg_func
 import rocket.position as pos
+import warnings
+# 禁止所有UserWarning
+warnings.filterwarnings("ignore", category=UserWarning)
+
 def delete_photon_ID(time, energy, ID,e_low,e_high):
     i = 0
     while i < len(energy):
@@ -59,7 +63,7 @@ def make_region_each_obs(path_in,path_out,ra,dec,wcsimage,obs_ID_all,bkg=1,ecf=9
         os.chdir(path_out)
         if not os.path.exists('region_{0}'.format(obs_ID_all[i])):
             os.system('mkdir region_{0}'.format(obs_ID_all[i]))
-        p90_list='reproj_psf{0}_{1}_b5.fits'.format(ecf,obs_ID_all[i])
+        p90_list='reproj_psf{0}_{1}_e2000:8000.fits'.format(ecf,obs_ID_all[i])
         hdul_p90 = fits.open(path_in + p90_list)
 
         p90_data = hdul_p90[0].data

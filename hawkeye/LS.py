@@ -26,12 +26,14 @@ def get_LS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
     y = flux
     LS = LombScargle(x, y,normalization = 'standard')
     power = LS.power(freq)
+    # print(power)
     max_NormLSP=np.max(power)
     period_peak=1./freq[np.where(power==np.max(power))][0]
     FP=LS.false_alarm_probability(power.max(),minimum_frequency = freq[0],maximum_frequency = freq[-1],method='baluev')
     Np=1000
     FAP_N=1-(1-FP)**Np
-    print(FAP_N)
+    # print(FAP_N)
+    # print(FP)
     FP_99 = LS.false_alarm_level(0.0027,minimum_frequency = freq[0], maximum_frequency = freq[-1],method='baluev')
     FP_95 = LS.false_alarm_level(0.05, minimum_frequency=freq[0],
                                  maximum_frequency=freq[-1], method='baluev')
@@ -54,6 +56,7 @@ def get_LS(time, flux,freq,outpath=None,outname=None,save=False,show=True):
     plt.ylabel('Normalized LS Periodogram',font1)
     plt.tick_params(labelsize=16)
     if save:
+        if FP<0.05:outname='cand_'+outname
         plt.savefig(outpath + outname + '_LS.pdf',bbox_inches='tight', pad_inches=0.01)
     if show:plt.show()
     else:plt.close()

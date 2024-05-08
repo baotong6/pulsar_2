@@ -262,13 +262,15 @@ def get_T_in_mbins(epoch_file,w,m,fi):
         else:
             T_in_perbin[np.mod(intN_bin_t_start[i],m)-1]+=(N_bin_t_end[i]-N_bin_t_start[i])*tbin
     return T_in_perbin
-path_out='./period_NSC_merge_IG/'
-path='./period_NSC_merge_IG/txt_all_obs_IG/'
+path_out='/Users/baotong/nustar/simulation/'
+path='/Users/baotong/nustar/simulation/evt_1/'
 # print(sum(get_T_in_mbins(epoch_file,2*np.pi/55000.,10,0.6)))
 def write_result(dataname):
-    time=np.loadtxt(path+ str(dataname)+'.txt')[:,0]
-    epoch_file = path + 'epoch_src_' + str(dataname) + '.txt'
-    w_range = 2 * np.pi * np.arange(1. / 10000, 1. /3000., 1.e-8)
+    # time=np.loadtxt(path+ str(dataname)+'.txt')[:,0]
+    # epoch_file = path + 'epoch_src_' + str(dataname) + '.txt'
+    time=np.loadtxt(path+ 'src1_'+str(dataname)+'.txt')[:,0]
+    epoch_file = path + 'epoch_src_1' + '.txt'
+    w_range = 2 * np.pi * np.arange(1. / 500, 1. /300., 1.e-6)
     starttime = datetime.datetime.now()
     GL_R = compute_GL(time, epoch_file,w_range=w_range, m_max=12, parallel=True)
     endtime = datetime.datetime.now()
@@ -287,8 +289,8 @@ def write_result(dataname):
 
 def get_result_fromid(dataname):
     dataname = int(dataname)
-    cts_num = float(cts_num)
-    amp_num = float(amp_num)
+    # cts_num = float(cts_num)
+    # amp_num = float(amp_num)
     res = write_result(dataname = dataname)
     result_srcid=res[0]
     result_runtime=res[1]
@@ -305,12 +307,12 @@ def get_result_fromid(dataname):
                               result_wconf_lo, result_wconf_hi,result_N_cts))
     #print(result)
     #np.savetxt('result_1h-3h_{0}.txt'.format(id_range[0]), result, fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f %10.5f %10.5f')
-    np.savetxt(path_out+'result_NSC_cand/result_1h_3h_{0}.txt'.format(str(dataname)), result,
+    np.savetxt(path_out+'res_src1/result_src1_{0}.txt'.format(str(dataname)), result,
                fmt='%10d %10.2f %10.5f %10.10f %10.5f %10d %10.10f %10.10f %10d')
 
-import sys
 if __name__ == '__main__':
-    get_result_fromid(sys.argv[1])
+    for i in range(11,20):
+        get_result_fromid(i)
 
 #cand_id=np.linspace(1,518,518)
 # cand_id=np.loadtxt('cand_id.txt')

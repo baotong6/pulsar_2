@@ -19,6 +19,7 @@ c_M28 = SkyCoord(ra=276.136708 * u.degree, dec=	-24.869778 * u.degree)
 c_M28_icrs = SkyCoord('18h24m33s', '-24d52m12s', frame='icrs')
 dist_terzan5=c_LW.separation(c_terzan5).degree
 dist_M28=c_LW.separation(c_M28).degree
+
 def pnd(d,z):
     if d>220:
         return 300*d**(-10)*np.exp(-z/0.045)
@@ -32,14 +33,12 @@ def pho(d):
     pdisk=2.5*np.exp(-(3/d)**3-d/2.5-np.abs(z/130))
     ptot=pbulge+pdisk+pnd(1000*d,z)
     return ptot*1e9
-
 def func_LW(r):
     h0=8*np.sin(1.4/180*3.14)
     d=np.sqrt((8-r)**2+h0**2)
     A0=15*15*(60*0.03867)**2/1e6
     Mtot=A0*pho(d)*r**2/8**2
     return Mtot
-
 def func_terzan(r):
     h0=8*np.sin(dist_terzan5/180*3.14)
     d=np.sqrt((8-r)**2+h0**2)
@@ -52,7 +51,6 @@ def func_M28(r):
     A0=3.14*(60*0.03867)**2/1e6
     Mtot=A0*pho(d)*r**2/8**2
     return Mtot
-# plot_aaa()
 def plot_cum_density(save=0,show=1):
     A_LW=15*15
     a = quad(func_LW, 0, 8)
@@ -72,7 +70,7 @@ def plot_cum_density(save=0,show=1):
     normalized_areas2 = areas2/ areas2[-1]*22
     d_areas2 = normalized_areas2[1:] - normalized_areas2[:-1]
     cumulative_areas2 = np.cumsum(d_areas2)
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(12, 8))
     bins=np.linspace(0,10,1000)
     srcdist_terzan=np.sort(np.array([10.42802,50.94517,8.1156,20.74795,293.964,185.54723,171.48937])/60)
     srcdist_M28=np.sort(np.array([153.76256,491.98014,183.42538,213.151])/60)
@@ -84,14 +82,18 @@ def plot_cum_density(save=0,show=1):
     #                                      cumulative=1,  linestyle='solid')
     ax.plot(srcdist_terzan,np.arange(1,len(srcdist_terzan)+1,1),'o-',lw=2, color='green',label='Deteced periodic CVs in Terzan 5')
     ax.plot(srcdist_M28,np.arange(1,len(srcdist_M28)+1,1), 'o-',lw=2,color='black',label='Deteced periodic CVs in M 28')
+    ax.plot([0.72,0.72],[0,10],'--',color='g',lw=2,label=r'$r_h$ of Terzan 5')
+    ax.plot([1.97,1.97],[0,10],'--',color='k',lw=2,label=r'$r_h$ of M 28')
+    ax.set_xlim(-2,10)
+    ax.set_ylim(0,10)
     # 标注数字
-    terzanidlist=['Seq.2','Seq.3','Seq.7','Seq.8','Seq.1','Seq.4','Seq.5']
-    m28idlist=['Seq.1/4','Seq.3','Seq.7','Seq.2']
+    terzanidlist=['Seq.5','Seq.4','Seq.7','Seq.8','Seq.3','Seq.2','Seq.1']
+    m28idlist=['Seq.1/4','Seq.3','Seq.2','Seq.7']
     for i, value in enumerate(srcdist_terzan):
-        plt.text(0.7*value, 1.4*(i + 1), terzanidlist[i],color='green',fontsize=15)
+        plt.text(value-0.8, 1.08*(i + 1), terzanidlist[i],color='green',fontsize=15)
 
     for i, value in enumerate(srcdist_M28):
-        plt.text(0.7*value, 1.4*(i + 1),m28idlist[i],color='k',fontsize=15)
+        plt.text(value-0.8, 1.1*(i + 1),m28idlist[i],color='k',fontsize=15)
     # num1 = 0;
     # num2 = 0
     # for i in range(len(bins)-2):
@@ -110,14 +112,86 @@ def plot_cum_density(save=0,show=1):
     plt.ylabel('Number of periodic CVs',hawk.font1)
     plt.tick_params(labelsize=16)
     ax.axhline(y=1, color='gray', linestyle='--')
-    plt.semilogy()
-    plt.semilogx()
+    # plt.semilogy()
+    # plt.semilogx()
     path_out='/Users/baotong/Desktop/aas/GCall/figure/'
     if save:
         plt.savefig(path_out+'CV_bkg.pdf', bbox_inches='tight', pad_inches=0.05)
     if show:
         plt.show()
 
+def plot_cum_density_enclosed(save=0,show=1):
+    A_LW=15*15
+    a = quad(func_LW, 0, 8)
+    pho_LW=a[0]/(15*15)*3.14
+    b = quad(func_terzan, 0, 8)
+    c = quad(func_M28, 0, 8)
+    pho_terzan=b[0];pho_M28=c[0]
+    r_terzan=np.sqrt(15*15/3.14*pho_LW/pho_terzan)
+    r_M28=np.sqrt(15*15/3.14*pho_LW/pho_M28)
+    r1 = np.arange(0, r_terzan, 0.1)
+    r2 = np.arange(0, r_M28, 0.1)
+    # 根据半径计算每个圆的面积
+    areas1 = np.pi * r1 ** 2;areas2 = np.pi * r2 ** 2
+    normalized_areas1 = areas1 / areas1[-1]*22  ## 22是LW中pCV的数目
+    d_areas1 = normalized_areas1[1:] - normalized_areas1[:-1]
+    cumulative_areas1 = np.cumsum(d_areas1)
+    normalized_areas2 = areas2/ areas2[-1]*22
+    d_areas2 = normalized_areas2[1:] - normalized_areas2[:-1]
+    cumulative_areas2 = np.cumsum(d_areas2)
+    print(cumulative_areas1)
+    bins=np.linspace(0,10,1000)
+    
+    density1=cumulative_areas1/areas1[1:]
+    density2=cumulative_areas2/areas2[1:]
+    fig, ax = plt.subplots(figsize=(12, 8))
+    srcdist_terzan=np.sort(np.array([10.42802,50.94517,8.1156,20.74795,293.964,185.54723,171.48937])/60)
+    srcdist_M28=np.sort(np.array([153.76256,491.98014,183.42538,213.151])/60)
+    n_terzan, bins_terzan, patches_terzan=plt.hist(srcdist_terzan, bins=bins,
+                                                  histtype='step', lw=2, color='green',
+                                                  cumulative=1, linestyle='solid')
+    n_M28, bins_M28, patches_M28=plt.hist(srcdist_M28, bins=bins, histtype='step', lw=2, color='k',
+                                         cumulative=1,  linestyle='solid')
+    plt.close()
+    fig, ax = plt.subplots(figsize=(12, 8))
+    density_terzan=n_terzan/(3.14*bins_terzan[1:]**2)
+    density_M28=n_M28/(3.14*bins_M28[1:]**2)
+    # ax.plot(r1[:-1], cumulative_areas1, color='green',label='Bulge/disk contribution for Terzan 5',linestyle='dotted',linewidth=4)
+    # ax.plot(r2[:-1], cumulative_areas2, color='k',label='Bulge/disk contribution for M 28',linestyle='dotted',linewidth=4)
+    ax.plot(r1[:-1], density1, color='green',label='Bulge/disk contribution for Terzan 5',linestyle='dotted',linewidth=3)
+    ax.plot(r2[:-1], density2, color='k',label='Bulge/disk contribution for M 28',linestyle='dotted',linewidth=3)
+
+    ax.plot(bins[1:], density_terzan, color='green',label='Detected CVs for Terzan 5',linestyle='-',linewidth=5)
+    ax.plot(bins[1:], density_M28, color='black',label='Detected CVs for M 28',linestyle='-',linewidth=5)
+    # ax.plot(r2[:-1], density2, color='k',label='Bulge/disk contribution for M 28',linestyle='dotted',linewidth=4)
+    # n_terzan, bins_terzan, patches_terzan=ax.hist(srcdist_terzan, bins=bins, histtype='step', lw=2, color='green',
+    #                                               cumulative=1, linestyle='solid')
+    # n_M28, bins_M28, patches_M28=ax.hist(srcdist_M28, bins=bins, histtype='step', lw=2, color='k',
+    #                                      cumulative=1,  linestyle='solid')
+    # ax.plot(srcdist_terzan,np.arange(1,len(srcdist_terzan)+1,1),'o-',lw=2, color='green',label='Deteced periodic CVs in Terzan 5')
+    # ax.plot(srcdist_M28,np.arange(1,len(srcdist_M28)+1,1), 'o-',lw=2,color='black',label='Deteced periodic CVs in M 28')
+    ax.plot([0.72,0.72],[1e-5,1],'--',color='g',lw=2,label=r'$r_h$ of Terzan 5')
+    ax.plot([1.97,1.97],[1e-5,1],'--',color='k',lw=2,label=r'$r_h$ of M 28')
+    ax.set_xlim(-2,10)
+    ax.set_ylim(0,10)
+    # terzanidlist=['Seq.5','Seq.4','Seq.7','Seq.8','Seq.3','Seq.2','Seq.1']
+    # m28idlist=['Seq.1/4','Seq.3','Seq.2','Seq.7']
+    # for i, value in enumerate(srcdist_terzan):
+    #     plt.text(value-0.8, 1.08*(i + 1), terzanidlist[i],color='green',fontsize=15)
+    # for i, value in enumerate(srcdist_M28):
+    #     plt.text(value-0.8, 1.1*(i + 1),m28idlist[i],color='k',fontsize=15)
+    plt.legend()
+    plt.xlabel('Radius (arcmin)',hawk.font1)
+    plt.ylabel('Number of periodic CVs',hawk.font1)
+    plt.tick_params(labelsize=16)
+    ax.axhline(y=1, color='gray', linestyle='--')
+    plt.semilogy()
+    # plt.semilogx()
+    path_out='/Users/baotong/Desktop/aas/GCall/figure/'
+    if save:
+        plt.savefig(path_out+'CV_bkg.pdf', bbox_inches='tight', pad_inches=0.05)
+    if show:
+        plt.show()
 
 def plot_aaa():
     z=0.19815
@@ -134,4 +208,6 @@ def plot_aaa():
     plt.semilogy()
     plt.ylim(0.01,8.2)
     plt.show()
-plot_cum_density(save=1,show=1)
+
+if __name__=='__main__':
+    plot_cum_density_enclosed(save=0,show=1)
